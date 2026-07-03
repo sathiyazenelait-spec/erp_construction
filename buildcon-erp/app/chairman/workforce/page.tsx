@@ -1,7 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
-import { Users, AlertCircle, Heart, Zap, GraduationCap, CheckCircle2, Plus, Sparkles, FolderPlus, UserPlus, ShieldAlert } from "lucide-react";
+import { Users, AlertCircle, Heart, Zap, GraduationCap, CheckCircle2, Plus, Sparkles, FolderPlus, UserPlus, ShieldAlert, Calendar } from "lucide-react";
 import AIAssistantBar from "@/components/AIAssistantBar";
 
 interface Department {
@@ -35,6 +35,66 @@ const INITIAL_EMPLOYEES: Employee[] = [
 export default function WorkforceAnalysis() {
   const [depts, setDepts] = useState<Department[]>(INITIAL_DEPARTMENTS);
   const [employees, setEmployees] = useState<Employee[]>(INITIAL_EMPLOYEES);
+  const [workforceOverview, setWorkforceOverview] = useState<any>(null);
+
+  const [attendanceRecords, setAttendanceRecords] = useState<any[]>([]);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const d = new Date();
+    const offset = d.getTimezoneOffset();
+    const localDate = new Date(d.getTime() - (offset*60*1000));
+    return localDate.toISOString().split('T')[0];
+  });
+
+  useEffect(() => {
+    const sessionStr = localStorage.getItem("buildcon_session");
+    const token = localStorage.getItem("buildcon_token");
+    if (sessionStr && token) {
+      const session = JSON.parse(sessionStr);
+      const orgId = session.organizationId || 1;
+
+      // 1. Fetch Subcontractor Attendance
+      fetch(`http://localhost:8081/api/hr-manager/labour-attendance/org/${orgId}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setAttendanceRecords(data);
+        }
+      })
+      .catch(err => console.error("Error loading subcontractor attendance:", err));
+
+      // 2. Fetch Employees Registry
+      fetch(`http://localhost:8081/api/hr-manager/employees/org/${orgId}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.map((item: any) => ({
+            name: item.name || "Unknown",
+            role: item.role || "Staff",
+            dept: item.dept || "Management",
+            status: item.status || "Active"
+          }));
+          setEmployees(mapped);
+        }
+      })
+      .catch(err => console.error("Error loading employees registry:", err));
+
+      // 3. Fetch Workforce Summary Overview
+      fetch(`http://localhost:8081/api/hr-manager/workforce/org/${orgId}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data === "object") {
+          setWorkforceOverview(data);
+        }
+      })
+      .catch(err => console.error("Error loading workforce overview:", err));
+    }
+  }, []);
 
   // Modals visibility
   const [showDeptModal, setShowDeptModal] = useState(false);
@@ -92,13 +152,31 @@ export default function WorkforceAnalysis() {
     setShowManagerModal(false);
   };
 
-  const employeeDistribution = [
-    { name: "Management", value: 15, color: "#8B5CF6" },
-    { name: "Engineers", value: 40 + employees.filter(e => e.role.includes("Engineer")).length, color: "#3B82F6" },
-    { name: "Site Supervisors", value: 30 + employees.filter(e => e.role.includes("Supervisor") || e.role.includes("Manager")).length, color: "#EC4899" },
-    { name: "Skilled Workers", value: 100, color: "#10B981" },
-    { name: "Others", value: 30 + employees.filter(e => !e.role.includes("Engineer") && !e.role.includes("Supervisor") && !e.role.includes("Manager")).length, color: "#64748B" },
-  ];
+  const getEmployeeDistribution = () => {
+    if (workforceOverview && Array.isArray(workforceOverview.headcountData)) {
+      const colorsMap: Record<string, string> = {
+        "Engineers": "#3B82F6",
+        "Supervisors": "#EC4899",
+        "HR Staff": "#8B5CF6",
+        "Finance Staff": "#eab308",
+        "Workers": "#10B981"
+      };
+      return workforceOverview.headcountData.map((item: any) => ({
+        name: item.group,
+        value: item.count,
+        color: colorsMap[item.group] || "#64748B"
+      }));
+    }
+    return [
+      { name: "Management", value: 15, color: "#8B5CF6" },
+      { name: "Engineers", value: 40 + employees.filter(e => e.role.includes("Engineer")).length, color: "#3B82F6" },
+      { name: "Site Supervisors", value: 30 + employees.filter(e => e.role.includes("Supervisor") || e.role.includes("Manager")).length, color: "#EC4899" },
+      { name: "Skilled Workers", value: 100, color: "#10B981" },
+      { name: "Others", value: 32 + employees.filter(e => !e.role.includes("Engineer") && !e.role.includes("Supervisor") && !e.role.includes("Manager")).length, color: "#64748B" },
+    ];
+  };
+
+  const employeeDistribution = getEmployeeDistribution();
 
   return (
     <div className="space-y-6">
@@ -137,13 +215,21 @@ export default function WorkforceAnalysis() {
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-[#111A2E] border border-slate-800 rounded-xl p-4">
           <div className="text-xs text-slate-400">Total Employees</div>
-          <div className="text-2xl font-bold text-white mt-1">{totalEmployees}</div>
-          <div className="text-[10px] text-slate-500 mt-1">Full-time payroll</div>
+          <div className="text-2xl font-bold text-white mt-1">
+            {workforceOverview ? workforceOverview.totalWorkforce : totalEmployees}
+          </div>
+          <div className="text-[10px] text-slate-500 mt-1">
+            {workforceOverview ? `${workforceOverview.staffHeadcount} staff payroll` : "Full-time payroll"}
+          </div>
         </div>
         <div className="bg-[#111A2E] border border-slate-800 rounded-xl p-4">
           <div className="text-xs text-slate-400">Labour Strength</div>
-          <div className="text-2xl font-bold text-blue-400 mt-1">420 / 460</div>
-          <div className="text-[10px] text-slate-500 mt-1">91.3% capacity utilized</div>
+          <div className="text-2xl font-bold text-blue-400 mt-1">
+            {workforceOverview ? `${workforceOverview.siteWorkers} / 460` : "420 / 460"}
+          </div>
+          <div className="text-[10px] text-slate-500 mt-1">
+            {workforceOverview ? `${(workforceOverview.siteWorkers / 460 * 100).toFixed(1)}%` : "91.3%"} capacity utilized
+          </div>
         </div>
         <div className="bg-[#111A2E] border border-slate-800 rounded-xl p-4">
           <div className="text-xs text-slate-400">Attrition Rate</div>
@@ -226,6 +312,59 @@ export default function WorkforceAnalysis() {
             </table>
           </div>
         </div>
+      </div>
+
+      {/* Labour Attendance Calendar Row */}
+      <div className="bg-[#111A2E] border border-slate-800 rounded-xl p-5 space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-blue-400" />
+            <div>
+              <h3 className="text-sm font-semibold text-slate-200">Labour Attendance History</h3>
+              <p className="text-[10px] text-slate-400">Select a date from the calendar to inspect historical site attendance</p>
+            </div>
+          </div>
+          <input 
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="bg-[#0E1726] border border-slate-800 rounded-lg px-3.5 py-1.5 text-xs text-white outline-none focus:border-blue-500 cursor-pointer"
+          />
+        </div>
+
+        {(() => {
+          const record = attendanceRecords.find(r => r.date === selectedDate);
+          if (record) {
+            const total = (record.skilledMasons || 0) + (record.carpenters || 0) + (record.generalLabor || 0);
+            return (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+                <div className="p-3 bg-[#0E1726]/60 border border-slate-800/80 rounded-lg">
+                  <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Skilled Masons</div>
+                  <div className="text-xl font-bold text-white mt-1">{record.skilledMasons}</div>
+                </div>
+                <div className="p-3 bg-[#0E1726]/60 border border-slate-800/80 rounded-lg">
+                  <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Carpenters</div>
+                  <div className="text-xl font-bold text-white mt-1">{record.carpenters}</div>
+                </div>
+                <div className="p-3 bg-[#0E1726]/60 border border-slate-800/80 rounded-lg">
+                  <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">General Labour</div>
+                  <div className="text-xl font-bold text-white mt-1">{record.generalLabor}</div>
+                </div>
+                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                  <div className="text-[10px] text-blue-400 uppercase font-bold tracking-wider">Total Deployed</div>
+                  <div className="text-xl font-bold text-blue-400 mt-1">{total}</div>
+                </div>
+              </div>
+            );
+          } else {
+            return (
+              <div className="p-6 bg-[#0E1726]/30 border border-dashed border-slate-800 rounded-lg text-center space-y-2">
+                <p className="text-xs text-slate-400">No subcontractor attendance check-in found for <span className="text-blue-400 font-bold">{selectedDate}</span>.</p>
+                <p className="text-[10px] text-slate-500">Normal operations base load estimate: Masons: 120, Carpenters: 95, General Labor: 177 (Total Deployed: 392)</p>
+              </div>
+            );
+          }
+        })()}
       </div>
 
       {/* Row 3: Employee Register & Alerts */}

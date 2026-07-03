@@ -25,6 +25,12 @@ public class Organization {
 
     private String subscriptionTier = "Basic";
 
+    @Column(name = "org_username")
+    private String orgUsername;
+
+    @Column(name = "org_password")
+    private String orgPassword;
+
     public Organization() {
     }
 
@@ -100,5 +106,21 @@ public class Organization {
 
     public void setSubscriptionTier(String subscriptionTier) {
         this.subscriptionTier = subscriptionTier;
+    }
+
+    public String getOrgUsername() {
+        return orgUsername;
+    }
+
+    public void setOrgUsername(String orgUsername) {
+        this.orgUsername = orgUsername;
+    }
+
+    public String getOrgPassword() {
+        return orgPassword;
+    }
+
+    public void setOrgPassword(String orgPassword) {
+        this.orgPassword = orgPassword;
     }
 }

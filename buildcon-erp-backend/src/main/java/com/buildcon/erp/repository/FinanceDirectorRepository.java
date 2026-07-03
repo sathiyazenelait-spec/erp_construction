@@ -12,4 +12,5 @@ public interface FinanceDirectorRepository extends JpaRepository<FinanceDirector
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
     void deleteByOrganizationId(Long organizationId);
+    java.util.List<FinanceDirector> findByOrganizationId(Long organizationId);
 }

@@ -9,5 +9,6 @@ public interface ProjectService {
     List<Project> getProjectsByOrganization(Long organizationId);
     Project getProjectById(Long id);
     void deleteProject(Long id);
+    Project updateProject(Long id, Project projectDetails);
     Project approveProject(Long id);
 }

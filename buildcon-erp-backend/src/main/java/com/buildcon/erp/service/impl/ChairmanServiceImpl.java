@@ -35,12 +35,29 @@ public class ChairmanServiceImpl implements ChairmanService {
             throw new CustomValidationException("Error: Email is already in use!");
         }
 
+        if (request.getOrganizationId() != null) {
+            java.util.List<Chairman> existingChairmen = chairmanRepository.findByOrganizationId(request.getOrganizationId());
+            if (!existingChairmen.isEmpty()) {
+                throw new CustomValidationException("Error: An organization cannot have more than one Chairman!");
+            }
+        }
+
         Chairman chairman = new Chairman(
                 request.getUsername(),
                 request.getEmail(),
                 encoder.encode(request.getPassword())
         );
         chairman.setOrganizationId(request.getOrganizationId());
+
+        String initials = java.util.Arrays.stream(request.getUsername().split(" "))
+            .filter(n -> !n.isEmpty())
+            .map(n -> String.valueOf(n.charAt(0)))
+            .collect(java.util.stream.Collectors.joining(""))
+            .toUpperCase();
+        if (initials.length() > 2) {
+            initials = initials.substring(0, 2);
+        }
+        chairman.setAvatarInitials(initials.isEmpty() ? "CH" : initials);
 
         return chairmanRepository.save(chairman);
     }

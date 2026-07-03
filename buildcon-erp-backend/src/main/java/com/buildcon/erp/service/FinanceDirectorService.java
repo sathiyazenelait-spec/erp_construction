@@ -5,4 +5,5 @@ import com.buildcon.erp.payload.request.GenericSignupRequest;
 
 public interface FinanceDirectorService {
     FinanceDirector register(GenericSignupRequest request);
+    void seedFDData(Long orgId);
 }

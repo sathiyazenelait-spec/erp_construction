@@ -11,5 +11,6 @@ public interface SiteManagementRepository extends JpaRepository<SiteManagement, 
     Optional<SiteManagement> findByEmail(String email);
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
+    java.util.List<SiteManagement> findByOrganizationId(Long organizationId);
     void deleteByOrganizationId(Long organizationId);
 }

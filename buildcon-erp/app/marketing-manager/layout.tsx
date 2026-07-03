@@ -23,12 +23,14 @@ export default function MarketingManagerLayout({ children }: { children: React.R
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
 
+  const [tier, setTier] = useState<string>("");
   useEffect(() => {
     const s = getSession();
     if (s) {
       setName(s.name);
       setRole(s.role);
     }
+    setTier((localStorage.getItem("selected_login_tier") || "Enterprise").toLowerCase());
   }, []);
 
   const nav: NavItem[] = [
@@ -47,6 +49,11 @@ export default function MarketingManagerLayout({ children }: { children: React.R
     { href: "/marketing-manager/ai", label: "AI Marketing Assistant", icon: <Bot className="h-4 w-4" /> },
     { href: "/marketing-manager/settings", label: "Settings", icon: <Settings className="h-4 w-4" /> },
   ];
+
+  const visibleNav = nav.filter(it => {
+    const isAi = it.href.endsWith("/ai") || it.label.toLowerCase().includes("ai");
+    return !(isAi && tier === "growth");
+  });
 
   const isLinkActive = (href: string) => {
     if (href === "/marketing-manager") {
@@ -72,7 +79,7 @@ export default function MarketingManagerLayout({ children }: { children: React.R
             </div>
 
             <nav className="p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-140px)]">
-              {nav.map((it) => {
+              {visibleNav.map((it) => {
                 const active = isLinkActive(it.href);
                 return (
                   <LinkComponent
@@ -104,7 +111,7 @@ export default function MarketingManagerLayout({ children }: { children: React.R
             <button
               onClick={() => {
                 logout();
-                router.push("/");
+                router.push("/login/manager");
               }}
               className="p-1.5 rounded-md text-slate-400 hover:bg-white/5 hover:text-white transition-colors"
               title="Sign out"

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Sparkles } from "lucide-react";
+import { getSession } from "@/lib/auth";
 
 interface Message {
   sender: "ai" | "user";
@@ -8,46 +9,96 @@ interface Message {
   time: string;
 }
 
-const autoReplies: Record<string, string> = {
-  "which project is at risk?": "Phoenix Commercial currently reports an 82% delay risk due to structural steel material shortage at the site. Expediting delivery of PO-5287 is recommended.",
-  "show material over-consumption": "Material audits indicate that Cement consumption is 8% higher than planned estimates for Skyline Residences due to slab recasting requirements.",
-  "what is the reason for delay in phoenix commercial?": "The delay in Phoenix Commercial is primarily driven by material shortage (structural steel reinforcement rods) at the site yard. The PO was delayed at the vendor level.",
-  "predict completion date for all projects": "Based on current progress rates, Skyline Residences is expected to complete by 12 Aug 2026, Greenfield Apartments by 10 Nov 2026, and Phoenix Commercial is facing a 45-day delay risk pushing its date to late Jan 2027.",
-};
-
 export default function AIConstructionAssistant() {
+  const [session, setSession] = useState<any>(null);
   const [messages, setMessages] = useState<Message[]>([
-    { sender: "ai", text: "Good day, Karthik. I am your AI Construction Assistant. Ask me anything about project progress, material shortages, machinery diagnostics, safety scores, or delay mitigations.", time: "10:30 AM" }
+    { sender: "ai", text: "Good day. I am your AI Construction Assistant. Ask me anything about project progress, material shortages, machinery diagnostics, safety scores, or delay mitigations.", time: "10:30 AM" }
   ]);
   const [input, setInput] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const s = getSession();
+    setSession(s);
+    const orgId = s?.organizationId || 1;
+    const token = localStorage.getItem("buildcon_token");
+    fetch(`http://localhost:8081/api/construction-manager/dashboard/org/${orgId}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+      .then((res) => res.json())
+      .then((d) => {
+        if (d.ai_suggestions) {
+          setSuggestions(d.ai_suggestions.split("|").map((item: string) => item.trim()));
+        }
+        if (d.profileName) {
+          setMessages([
+            { sender: "ai", text: `Good day, ${d.profileName}. I am your AI Construction Assistant. Ask me anything about project progress, material shortages, machinery diagnostics, safety scores, or delay mitigations.`, time: "10:30 AM" }
+          ]);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching AI suggestions for CM:", err);
+        setSuggestions([
+          "Which project is at risk?",
+          "Show material over-consumption",
+          "What is the reason for delay in Phoenix Commercial?",
+          "Predict completion date for all projects"
+        ]);
+      });
+  }, []);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = (textToSend?: string) => {
+  const handleSend = async (textToSend?: string) => {
     const text = textToSend || input;
     if (!text.trim()) return;
 
-    const userMsg: Message = { sender: "user", text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+    const userMsg: Message = { 
+      sender: "user", 
+      text, 
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    };
     setMessages((prev) => [...prev, userMsg]);
     if (!textToSend) setInput("");
 
-    setTimeout(() => {
-      const lower = text.toLowerCase().trim();
-      let replyText = "I will check the site sensors and logistics log. Could you specify if you need the diagnostics for a specific equipment ID?";
-      
-      for (const key of Object.keys(autoReplies)) {
-        if (lower.includes(key) || key.includes(lower)) {
-          replyText = autoReplies[key];
-          break;
-        }
+    try {
+      const orgId = session?.organizationId || 1;
+      const token = localStorage.getItem("buildcon_token");
+      const res = await fetch("http://localhost:8081/api/construction-manager/ai-chat", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ message: text, organizationId: String(orgId) }),
+      });
+      if (res.ok) {
+        const d = await res.json();
+        const aiMsg: Message = { 
+          sender: "ai", 
+          text: d.response, 
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+        };
+        setMessages((prev) => [...prev, aiMsg]);
+      } else {
+        const aiMsg: Message = { 
+          sender: "ai", 
+          text: "Error calling AI Assistant backend.", 
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+        };
+        setMessages((prev) => [...prev, aiMsg]);
       }
-
-      const aiMsg: Message = { sender: "ai", text: replyText, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+    } catch {
+      const aiMsg: Message = { 
+        sender: "ai", 
+        text: "AI service is currently offline. Please check connection.", 
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+      };
       setMessages((prev) => [...prev, aiMsg]);
-    }, 800);
+    }
   };
 
   return (
@@ -94,13 +145,13 @@ export default function AIConstructionAssistant() {
 
       {/* Suggestions List */}
       <div className="p-3 border-t border-slate-855 bg-[#0e1628] flex flex-wrap gap-2">
-        {Object.keys(autoReplies).map((suggestion) => (
+        {suggestions.map((suggestion) => (
           <button
             key={suggestion}
             onClick={() => handleSend(suggestion)}
             className="text-[10px] bg-[#111C30] hover:bg-slate-800 text-slate-300 hover:text-white px-2.5 py-1 rounded-full border border-slate-800 transition"
           >
-            {suggestion.charAt(0).toUpperCase() + suggestion.slice(1)}
+            {suggestion}
           </button>
         ))}
       </div>

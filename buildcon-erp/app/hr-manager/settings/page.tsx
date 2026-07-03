@@ -1,29 +1,110 @@
 "use client";
-import React, { useState } from "react";
-import { 
-  User, Bell, Shield, Key, Check, AlertCircle, Save 
-} from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { User, Bell, Check, AlertCircle, Save } from "lucide-react";
 import { getSession } from "@/lib/auth";
 
 export default function HrSettingsPage() {
-  const [name, setName] = useState(() => getSession()?.name || "Meenakshi Iyer");
-  const [email, setEmail] = useState("meenakshi.iyer@buildcon.com");
-  const [phone, setPhone] = useState("+91 98765 43210");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [notifications, setNotifications] = useState({
     complianceAlerts: true,
     leaveRequests: true,
     payrollCycle: true,
-    newApplications: false,
     whatsappAlerts: true
   });
 
-  const handleSave = (e: React.FormEvent) => {
+  async function loadSettings() {
+    try {
+      setLoading(true);
+      setErrorMsg(null);
+      const session = getSession();
+      const token = localStorage.getItem("buildcon_token");
+      if (!session || !token) {
+        setErrorMsg("Session expired or missing authentication.");
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch(`http://localhost:8081/api/hr-manager/settings/user/${session.name}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setName(data.name || session.name);
+        setEmail(data.email || "");
+        setPhone(data.phone || "");
+        setNotifications({
+          complianceAlerts: data.complianceAlerts !== false,
+          leaveRequests: data.leaveRequests !== false,
+          payrollCycle: data.payrollCycle !== false,
+          whatsappAlerts: data.whatsappAlerts !== false
+        });
+      } else {
+        setErrorMsg("Failed to retrieve settings profiles.");
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Failed to connect to the backend server.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setSaved(false);
+
+    try {
+      const session = getSession();
+      const token = localStorage.getItem("buildcon_token");
+      if (!session || !token) return;
+
+      const res = await fetch(`http://localhost:8081/api/hr-manager/settings/user/${session.name}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          email,
+          phone,
+          complianceAlerts: notifications.complianceAlerts,
+          leaveRequests: notifications.leaveRequests,
+          payrollCycle: notifications.payrollCycle,
+          whatsappAlerts: notifications.whatsappAlerts
+        })
+      });
+
+      if (res.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      } else {
+        alert("Failed to save configuration.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error saving settings.");
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="bg-[#111C30]/50 border border-slate-800 rounded-xl p-12 text-center text-slate-400 text-xs italic flex flex-col items-center justify-center space-y-3">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+        <span>Retrieving profile configurations...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -40,13 +121,20 @@ export default function HrSettingsPage() {
         </div>
       )}
 
+      {errorMsg && (
+        <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-455 text-rose-400 text-xs rounded-lg flex items-center gap-2">
+          <AlertCircle className="h-4 w-4" />
+          {errorMsg}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Navigation Sidebar inside Settings page */}
         <div className="space-y-2">
           <div className="p-4 bg-[#0F182A] border border-slate-800 rounded-xl">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold text-lg">
-                {name[0]}
+                {name ? name[0] : "H"}
               </div>
               <div>
                 <h4 className="text-xs font-bold text-white">{name}</h4>
@@ -73,8 +161,8 @@ export default function HrSettingsPage() {
                 <input 
                   type="text" 
                   value={name} 
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-[#111C30] border border-slate-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-slate-700"
+                  disabled
+                  className="w-full bg-[#111C30]/50 border border-slate-800 rounded px-3 py-2 text-xs text-slate-500 focus:outline-none cursor-not-allowed"
                 />
               </div>
               <div className="space-y-1">

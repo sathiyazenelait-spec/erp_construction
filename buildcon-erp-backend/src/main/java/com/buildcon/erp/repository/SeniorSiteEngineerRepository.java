@@ -12,4 +12,5 @@ public interface SeniorSiteEngineerRepository extends JpaRepository<SeniorSiteEn
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
     void deleteByOrganizationId(Long organizationId);
+    java.util.List<SeniorSiteEngineer> findByOrganizationId(Long organizationId);
 }

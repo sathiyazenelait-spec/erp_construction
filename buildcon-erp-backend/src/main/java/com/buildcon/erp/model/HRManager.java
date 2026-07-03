@@ -14,6 +14,12 @@ public class HRManager extends BaseUserEntity {
 
     private String roleName = "ROLE_HR_MANAGER";
 
+    private String phone = "+91 98765 43210";
+    private Boolean complianceAlerts = true;
+    private Boolean leaveRequests = true;
+    private Boolean payrollCycle = true;
+    private Boolean whatsappAlerts = true;
+
     public HRManager(String username, String email, String password) {
         super(username, email, password);
     }

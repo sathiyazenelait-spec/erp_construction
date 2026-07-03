@@ -1,9 +1,10 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
 import { Target, FileText, TrendingUp, Trophy, Building2, Star, MessageSquare } from "lucide-react";
 import AIAssistantBar from "@/components/AIAssistantBar";
 import { funnel, revenueTrend } from "@/lib/data";
+import { getSession } from "@/lib/auth";
 
 const leadsBySource = [
   { name: "Google Ads", value: 40, color: "#10B981" },
@@ -13,13 +14,56 @@ const leadsBySource = [
 ];
 
 export default function BusinessDirectorDashboard() {
+  const [loading, setLoading] = useState(true);
+  const [profileName, setProfileName] = useState("Rajesh Verma");
+  const [totalLeads, setTotalLeads] = useState("1,250");
+  const [qualifiedLeads, setQualifiedLeads] = useState("520");
+  const [proposalsSent, setProposalsSent] = useState("180");
+  const [projectsWon, setProjectsWon] = useState("42");
+  const [pipelineValue, setPipelineValue] = useState("₹ 124.8 Cr");
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    const s = getSession();
+    const orgId = s?.organizationId || 1;
+    const token = localStorage.getItem("buildcon_token");
+    fetch(`http://localhost:8081/api/business-director/dashboard/org/${orgId}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+      .then((res) => res.json())
+      .then((d) => {
+        setProfileName(d.profileName || "Rajesh Verma");
+        setTotalLeads(d.total_leads || "1,250");
+        setQualifiedLeads(d.qualified_leads || "520");
+        setProposalsSent(d.proposals_sent || "180");
+        setProjectsWon(d.projects_won || "42");
+        setPipelineValue(d.pipeline_value || "₹ 124.8 Cr");
+        if (d.ai_suggestions) {
+          setAiSuggestions(d.ai_suggestions.split("|").map((item: string) => item.trim()));
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error loading BD dashboard metrics:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-40 items-center justify-center text-slate-350 text-xs font-semibold">
+        Loading Business Development Metrics...
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Title */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white tracking-wide">BUSINESS DEVELOPMENT OVERVIEW</h2>
-          <p className="text-xs text-slate-400">Welcome, Rajesh Verma — real-time sales pipeline, tenders, and conversion analytics</p>
+          <p className="text-xs text-slate-400">Welcome, {profileName} — real-time sales pipeline, tenders, and conversion analytics</p>
         </div>
       </div>
 
@@ -32,7 +76,7 @@ export default function BusinessDirectorDashboard() {
             <Target className="h-4 w-4 text-blue-400" />
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">1,250</div>
+            <div className="text-2xl font-bold text-white">{totalLeads}</div>
             <div className="text-[10px] text-emerald-400 font-semibold mt-1">↑ 10% vs Apr 2025</div>
           </div>
         </div>
@@ -44,7 +88,7 @@ export default function BusinessDirectorDashboard() {
             <Trophy className="h-4 w-4 text-emerald-400" />
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-emerald-400">520</div>
+            <div className="text-2xl font-bold text-emerald-400">{qualifiedLeads}</div>
             <div className="text-[10px] text-slate-500 mt-1">41.6% Qualification rate</div>
           </div>
         </div>
@@ -56,7 +100,7 @@ export default function BusinessDirectorDashboard() {
             <FileText className="h-4 w-4 text-blue-400" />
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">180</div>
+            <div className="text-2xl font-bold text-white">{proposalsSent}</div>
             <div className="text-[10px] text-slate-500 mt-1">34.6% Proposal conversion</div>
           </div>
         </div>
@@ -68,7 +112,7 @@ export default function BusinessDirectorDashboard() {
             <Star className="h-4 w-4 text-yellow-400" />
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">42</div>
+            <div className="text-2xl font-bold text-white">{projectsWon}</div>
             <div className="text-[10px] text-emerald-400 font-semibold mt-1">23.3% Win Ratio</div>
           </div>
         </div>
@@ -80,7 +124,7 @@ export default function BusinessDirectorDashboard() {
             <TrendingUp className="h-4 w-4 text-violet-400" />
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">₹ 124.8 Cr</div>
+            <div className="text-2xl font-bold text-white">{pipelineValue}</div>
             <div className="text-[10px] text-emerald-400 font-semibold mt-1">↑ 22.6% YOY</div>
           </div>
         </div>
@@ -178,7 +222,7 @@ export default function BusinessDirectorDashboard() {
         </div>
       </div>
 
-      <AIAssistantBar suggestions={["Best converting channel?", "Leads likely to close", "Forecast next month sales"]} />
+      <AIAssistantBar suggestions={aiSuggestions.length > 0 ? aiSuggestions : ["Best converting channel?", "Leads likely to close", "Forecast next month sales"]} />
     </div>
   );
 }

@@ -1,9 +1,19 @@
 "use client";
 import { Sparkles, Send } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AIAssistantBar({ suggestions }: { suggestions: string[] }) {
   const [q, setQ] = useState("");
+  const [tier, setTier] = useState<string>("");
+
+  useEffect(() => {
+    setTier((localStorage.getItem("selected_login_tier") || "Enterprise").toLowerCase());
+  }, []);
+
+  if (!tier || tier !== "enterprise") {
+    return null;
+  }
+
   return (
     <div className="card p-3 flex items-center gap-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white border-0">
       <div className="flex items-center gap-2 pl-2">

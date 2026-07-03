@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Wrench, Building2, Megaphone, Users, User, ShieldAlert } from "lucide-react";
+import { Wrench, Building2, Megaphone, Users, User, ShieldAlert, ArrowLeft } from "lucide-react";
 import { login, homeForRole, Role } from "@/lib/auth";
 
 interface RoleOption {
@@ -14,16 +14,16 @@ interface RoleOption {
 const ALL_ROLE_OPTIONS: RoleOption[] = [
   { value: "project-manager", label: "Project Manager", group: "Post-Sales Operations" },
   { value: "senior-site-engineer", label: "Senior Site Engineer", group: "Post-Sales Operations" },
-  { value: "site-management", label: "Site Engineer", group: "Post-Sales Operations" },
-  { value: "construction-manager", label: "Contractor", group: "Post-Sales Operations" },
-  { value: "subcontractor", label: "Subcontractor / Labour", group: "Post-Sales Operations" },
-  { value: "workforce-manager", label: "Workforce Supervisor", group: "Post-Sales Operations" },
+  { value: "site-management", label: "Site Management", group: "Post-Sales Operations" },
+  { value: "construction-manager", label: "Construction Manager", group: "Post-Sales Operations" },
+  { value: "subcontractor", label: "Subcontractor", group: "Post-Sales Operations" },
+  { value: "workforce-manager", label: "Workforce & Labour", group: "Post-Sales Operations" },
   { value: "quantity-surveyor", label: "Quantity Surveyor", group: "Post-Sales Operations" },
   { value: "procurement-manager", label: "Procurement Manager", group: "Post-Sales Operations" },
-  { value: "finance-accounts", label: "Finance Manager", group: "Post-Sales Operations" },
+  { value: "finance-accounts", label: "Finance & Accounts", group: "Post-Sales Operations" },
   { value: "digital-marketing-tl", label: "Digital Marketing TL", group: "Sales & Marketing" },
   { value: "digital-marketing-executive", label: "Digital Marketing Executive", group: "Sales & Marketing" },
-  { value: "sales-executive", label: "Business Development Manager", group: "Sales & Marketing" },
+  { value: "sales-executive", label: "Sales Executive", group: "Sales & Marketing" },
   { value: "marketing-manager", label: "Marketing Manager", group: "Sales & Marketing" },
   { value: "hr-manager", label: "HR Manager", group: "Corporate & HR Support" }
 ];
@@ -127,8 +127,8 @@ export default function CentralizedManagerLogin() {
               <li>• sub@buildcon.com / sub123 (Subcontractor)</li>
               <li>• senior-eng@buildcon.com / eng123 (Senior Site Engineer)</li>
               <li>• site@buildcon.com / site123 (Site Management)</li>
-              <li>• workforce@buildcon.com / workforce123 (Workforce Supervisor)</li>
-              <li>• cm@buildcon.com / cm123 (Contractor)</li>
+              <li>• workforce@buildcon.com / workforce123 (Workforce & Labour)</li>
+              <li>• cm@buildcon.com / cm123 (Construction Manager)</li>
             </ul>
           </div>
         </div>
@@ -138,6 +138,11 @@ export default function CentralizedManagerLogin() {
       {/* LOGIN VIEW RIGHT BAR */}
       <div className="flex items-center justify-center p-8 bg-[#0A1120]">
         <div className="w-full max-w-sm bg-[#0F182A] border border-slate-800 rounded-2xl p-8 shadow-xl shadow-black/30">
+          <div className="mb-4">
+            <Link href="/" className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 hover:text-white transition-colors">
+              <ArrowLeft className="h-3.5 w-3.5" /> Back to Home
+            </Link>
+          </div>
           <h1 className="text-xl font-bold mb-1 tracking-wide text-white">Teams & Staff Sign in</h1>
           <p className="text-xs text-slate-400 mb-6">
             Logging in to: <span className="text-yellow-400 font-semibold">{orgName || "Zenelait Infotech"}</span> ({tier} Tier)

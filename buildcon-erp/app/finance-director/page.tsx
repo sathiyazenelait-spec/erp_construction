@@ -1,32 +1,100 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, Legend } from "recharts";
 import { TrendingUp, Banknote, Wallet, ArrowUpFromLine, ArrowDownToLine, CheckSquare } from "lucide-react";
 import AIAssistantBar from "@/components/AIAssistantBar";
-
-const revenueTrend = [
-  { m: "Jun 24", rev: 18.5, exp: 14.2 },
-  { m: "Jul 24", rev: 19.2, exp: 14.8 },
-  { m: "Aug 24", rev: 20.1, exp: 15.5 },
-  { m: "Sep 24", rev: 21.5, exp: 16.0 },
-  { m: "Oct 24", rev: 22.0, exp: 16.8 },
-  { m: "Nov 24", rev: 21.8, exp: 16.5 },
-  { m: "Dec 24", rev: 23.4, exp: 17.2 },
-  { m: "Jan 25", rev: 22.8, exp: 17.0 },
-  { m: "Feb 25", rev: 23.9, exp: 17.8 },
-  { m: "Mar 25", rev: 25.2, exp: 18.5 },
-  { m: "Apr 25", rev: 24.1, exp: 18.0 },
-  { m: "May 25", rev: 24.5, exp: 18.2 },
-];
+import { getSession } from "@/lib/auth";
 
 export default function FinanceDirectorDashboard() {
+  const [loading, setLoading] = useState(true);
+  const [profileName, setProfileName] = useState("Suresh Kumar");
+  const [revenueMtd, setRevenueMtd] = useState("₹24.5 Cr");
+  const [grossProfit, setGrossProfit] = useState("₹7.6 Cr");
+  const [netProfit, setNetProfit] = useState("₹5.8 Cr");
+  const [cashPosition, setCashPosition] = useState("₹12.1 Cr");
+  const [cash30Days, setCash30Days] = useState("₹14.3 Cr");
+  const [cash60Days, setCash60Days] = useState("₹16.8 Cr");
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [revenueTrend, setRevenueTrend] = useState<any[]>([]);
+  const [receivables, setReceivables] = useState<any[]>([]);
+  const [payables, setPayables] = useState<any[]>([]);
+
+  const formatAmount = (val: any) => {
+    const amount = Number(val);
+    if (isNaN(amount)) return val;
+    if (amount >= 10000000) {
+      return "₹" + (amount / 10000000).toFixed(1) + " Cr";
+    }
+    if (amount >= 100000) {
+      return "₹" + (amount / 100000).toFixed(0) + " L";
+    }
+    return "₹" + amount.toLocaleString();
+  };
+
+  useEffect(() => {
+    const s = getSession();
+    const orgId = s?.organizationId || 1;
+    const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
+    fetch(`http://localhost:8081/api/finance-director/dashboard/org/${orgId}`, {
+      headers: token ? { "Authorization": `Bearer ${token}` } : {}
+    })
+      .then((res) => res.json())
+      .then((d) => {
+        setProfileName(d.profileName || "Suresh Kumar");
+        setRevenueMtd(d.revenue_mtd || "₹24.5 Cr");
+        setGrossProfit(d.gross_profit || "₹7.6 Cr");
+        setNetProfit(d.net_profit || "₹5.8 Cr");
+        setCashPosition(d.cash_position || "₹12.1 Cr");
+        setCash30Days(d.cash_30_days || "₹14.3 Cr");
+        setCash60Days(d.cash_60_days || "₹16.8 Cr");
+        if (d.ai_suggestions) {
+          setAiSuggestions(d.ai_suggestions.split("|").map((item: string) => item.trim()));
+        }
+
+        if (d.forecasts) {
+          const mappedTrend = d.forecasts.map((f: any) => ({
+            m: f.month,
+            rev: f.inflow,
+            exp: f.outflow
+          }));
+          setRevenueTrend(mappedTrend);
+        } else {
+          setRevenueTrend([]);
+        }
+
+        if (d.transactions) {
+          const recs = d.transactions.filter((t: any) => t.type === "Receivable" && t.status !== "Paid");
+          const pays = d.transactions.filter((t: any) => t.type === "Payable" && t.status !== "Paid");
+          setReceivables(recs);
+          setPayables(pays);
+        } else {
+          setReceivables([]);
+          setPayables([]);
+        }
+
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error loading FD dashboard stats:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-40 items-center justify-center text-slate-350 text-xs font-semibold">
+        Loading Financial Metrics...
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Title */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white tracking-wide">FINANCIAL COMMAND CENTER</h2>
-          <p className="text-xs text-slate-400">Welcome Suresh Kumar — consolidated cash flow, profit margins, and statutory control.</p>
+          <p className="text-xs text-slate-400">Welcome {profileName} — consolidated cash flow, profit margins, and statutory control.</p>
         </div>
       </div>
 
@@ -38,7 +106,7 @@ export default function FinanceDirectorDashboard() {
             <TrendingUp className="h-4 w-4 text-emerald-400" />
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">₹24.5 Cr</div>
+            <div className="text-2xl font-bold text-white">{revenueMtd}</div>
             <div className="text-[10px] text-emerald-400 font-semibold mt-1">↑ 15.6% vs Last Month</div>
           </div>
         </div>
@@ -49,7 +117,7 @@ export default function FinanceDirectorDashboard() {
             <Banknote className="h-4 w-4 text-teal-400" />
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">₹7.6 Cr</div>
+            <div className="text-2xl font-bold text-white">{grossProfit}</div>
             <div className="text-[10px] text-emerald-400 font-semibold mt-1">31.02% Profit Margin</div>
           </div>
         </div>
@@ -60,7 +128,7 @@ export default function FinanceDirectorDashboard() {
             <Wallet className="h-4 w-4 text-violet-400" />
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">₹5.8 Cr</div>
+            <div className="text-2xl font-bold text-white">{netProfit}</div>
             <div className="text-[10px] text-slate-400 mt-1">Margin 23.6% (Consistent)</div>
           </div>
         </div>
@@ -71,7 +139,7 @@ export default function FinanceDirectorDashboard() {
             <Wallet className="h-4 w-4 text-amber-400" />
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-amber-400">₹12.1 Cr</div>
+            <div className="text-2xl font-bold text-amber-400">{cashPosition}</div>
             <div className="text-[10px] text-slate-400 mt-1">Liquid Cash Available</div>
           </div>
         </div>
@@ -115,15 +183,15 @@ export default function FinanceDirectorDashboard() {
             <div className="space-y-4">
               <div className="bg-[#0e1628] border border-slate-800 rounded-lg p-3">
                 <div className="text-xs text-slate-400">Current Balance</div>
-                <div className="text-xl font-bold text-white mt-1">₹12.1 Cr</div>
+                <div className="text-xl font-bold text-white mt-1">{cashPosition}</div>
               </div>
               <div className="bg-[#0e1628] border border-slate-800 rounded-lg p-3">
                 <div className="text-xs text-slate-400">Forecasted (30 Days)</div>
-                <div className="text-xl font-bold text-emerald-400 mt-1">₹14.3 Cr <span className="text-[10px] text-emerald-500 font-normal">↑ 18%</span></div>
+                <div className="text-xl font-bold text-emerald-400 mt-1">{cash30Days} <span className="text-[10px] text-emerald-500 font-normal">↑ 18%</span></div>
               </div>
               <div className="bg-[#0e1628] border border-slate-800 rounded-lg p-3">
                 <div className="text-xs text-slate-400">Forecasted (60 Days)</div>
-                <div className="text-xl font-bold text-emerald-400 mt-1">₹16.8 Cr <span className="text-[10px] text-emerald-500 font-normal">↑ 28%</span></div>
+                <div className="text-xl font-bold text-emerald-400 mt-1">{cash60Days} <span className="text-[10px] text-emerald-500 font-normal">↑ 28%</span></div>
               </div>
             </div>
           </div>
@@ -143,12 +211,12 @@ export default function FinanceDirectorDashboard() {
                 <tr className="text-slate-400 border-b border-slate-800"><th className="pb-2">Client</th><th className="pb-2">Outstanding</th><th className="pb-2">Days Overdue</th></tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50">
-                {[
-                  ["ABC Builders", "₹1.2 Cr", "45 Days"],
-                  ["XYZ Developers", "₹85 L", "30 Days"],
-                  ["Villa Client", "₹32 L", "15 Days"]
-                ].map((r) => (
-                  <tr key={r[0]}><td className="py-2.5 font-medium text-slate-200">{r[0]}</td><td className="text-emerald-400 font-bold">{r[1]}</td><td className="text-slate-450 text-slate-450 text-slate-450 text-amber-500">{r[2]}</td></tr>
+                {receivables.map((r, idx) => (
+                  <tr key={idx}>
+                    <td className="py-2.5 font-medium text-slate-200">{r.party}</td>
+                    <td className="text-emerald-400 font-bold">{formatAmount(r.amount)}</td>
+                    <td className="text-amber-500">{r.dueDate}</td>
+                  </tr>
                 ))}
               </tbody>
             </table>
@@ -158,7 +226,7 @@ export default function FinanceDirectorDashboard() {
         <div className="bg-[#111C30] border border-slate-800 rounded-xl p-5">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-sm font-semibold text-slate-200">Upcoming Payables</h3>
-            <ArrowDownToLine className="h-4 w-4 text-rose-450 text-rose-400" />
+            <ArrowDownToLine className="h-4 w-4 text-rose-400" />
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
@@ -166,12 +234,12 @@ export default function FinanceDirectorDashboard() {
                 <tr className="text-slate-400 border-b border-slate-800"><th className="pb-2">Vendor / Contractor</th><th className="pb-2">Amount Due</th><th className="pb-2">Due Date</th></tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50">
-                {[
-                  ["Cement Supplier Corp", "₹48 L", "In 7 Days"],
-                  ["Global Steel Inc", "₹62 L", "In 15 Days"],
-                  ["MEP Contracting Ltd", "₹22 L", "In 21 Days"]
-                ].map((r) => (
-                  <tr key={r[0]}><td className="py-2.5 font-medium text-slate-200">{r[0]}</td><td className="text-rose-450 text-rose-400 font-bold">{r[1]}</td><td className="text-slate-400">{r[2]}</td></tr>
+                {payables.map((r, idx) => (
+                  <tr key={idx}>
+                    <td className="py-2.5 font-medium text-slate-200">{r.party}</td>
+                    <td className="text-rose-400 font-bold">{formatAmount(r.amount)}</td>
+                    <td className="text-slate-400">{r.dueDate}</td>
+                  </tr>
                 ))}
               </tbody>
             </table>
@@ -179,7 +247,7 @@ export default function FinanceDirectorDashboard() {
         </div>
       </div>
 
-      <AIAssistantBar suggestions={["Why profit margin decreased?", "Least profitable project", "Year-end profit forecast"]} />
+      <AIAssistantBar suggestions={aiSuggestions.length > 0 ? aiSuggestions : ["Why profit margin decreased?", "Least profitable project", "Year-end profit forecast"]} />
     </div>
   );
 }

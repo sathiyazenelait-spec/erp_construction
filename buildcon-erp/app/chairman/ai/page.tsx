@@ -1,24 +1,7 @@
 "use client";
-import React, { useState } from "react";
-import { Sparkles, Send, Bot, User, Clock, CornerDownLeft, Volume2, ThumbsUp, RefreshCw } from "lucide-react";
-
-const initialSuggestions = [
-  "Why did Commercial Complex project delay?",
-  "Show me top 5 clients by revenue contribution.",
-  "Predict our next quarter revenue trend.",
-  "Who are the top performing Project Managers?",
-  "Show active safety alerts across Chennai.",
-  "What are my pending approvals today?",
-];
-
-const mockReplies: Record<string, string> = {
-  "Why did Commercial Complex project delay?": "The Commercial Complex project in Madurai is currently delayed due to a supply chain disruption in concrete procurement and minor labour shortages (40 below requirements). Material prices increased by 8% in Q2, affecting concrete delivery rates.",
-  "Show me top 5 clients by revenue contribution.": "Top 5 clients by revenue contribution are:\n1. ABC Developers: ₹78.5 Cr\n2. XYZ Constructions: ₹52.0 Cr\n3. PQR Builders: ₹38.2 Cr\n4. L&N Properties: ₹25.0 Cr\n5. Individual Homeowners: ₹18.5 Cr",
-  "Predict our next quarter revenue trend.": "Based on current order book value of ₹441.5 Cr and lead pipeline, Q3 Revenue is forecasted at ₹78.0 Cr (an estimated growth of 12% quarter-on-quarter). Key drivers are Chennai residential sales.",
-  "Who are the top performing Project Managers?": "Top performing Project Managers this quarter based on project margin retention & safety audit scores:\n1. Amit Kumar (Chennai site) - Margin: 18.2%, Audit: 98%\n2. Vijay Kumar (Skyline site) - Margin: 14.5%, Audit: 94%",
-  "Show active safety alerts across Chennai.": "Active Safety Alert: High-risk operations detected at Commercial Complex. Deep excavation work requires immediate safety auditor oversight. PPE compliance is currently at 98%.",
-  "What are my pending approvals today?": "You have 6 pending approvals total:\n- PO: Steel Procurement (₹75.0 Lakhs)\n- Investment: Coimbatore Branch (₹1.5 Cr)\n- Capex: Tower Crane (₹1.2 Cr)\n- Opex: Sub-Contractor Invoice (₹15.0 Lakhs)\n- Material: Cement Supply (₹45.0 Lakhs)\n- Project variation: Civil Work (₹8.5 Lakhs)",
-};
+import React, { useState, useRef, useEffect } from "react";
+import { Send, Bot, User, Sparkles } from "lucide-react";
+import { getSession } from "@/lib/auth";
 
 interface Message {
   sender: "bot" | "user";
@@ -27,27 +10,98 @@ interface Message {
 }
 
 export default function AIExecutiveAssistant() {
+  const [session, setSession] = useState<any>(null);
   const [messages, setMessages] = useState<Message[]>([
-    { sender: "bot", text: "Good Morning, Chairman! I'm your AI business assistant. How can I help you analyze your operations today?", time: "10:30 AM" },
+    { sender: "bot", text: "Good Morning, Chairman! I'm your AI business assistant. How can I help you analyze your operations today?", time: "10:30 AM" }
   ]);
   const [input, setInput] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [typing, setTyping] = useState(false);
+  const endRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = (textToSend: string) => {
-    if (!textToSend.trim()) return;
+  useEffect(() => {
+    const s = getSession();
+    setSession(s);
+    const token = localStorage.getItem("buildcon_token");
+    const orgId = s?.organizationId || 1;
+    fetch(`http://localhost:8081/api/chairman/dashboard/org/${orgId}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+      .then((res) => res.json())
+      .then((d) => {
+        if (d.ai_suggestions) {
+          setSuggestions(d.ai_suggestions.split("|").map((item: string) => item.trim()));
+        }
+        if (d.profileName) {
+          setMessages([
+            { sender: "bot", text: `Good Morning, ${d.profileName}! I'm your AI business assistant. How can I help you analyze your operations today?`, time: "10:30 AM" }
+          ]);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching AI suggestions for Chairman:", err);
+        setSuggestions([
+          "Why did Commercial Complex project delay?",
+          "Show me top 5 clients by revenue contribution.",
+          "Predict our next quarter revenue trend."
+        ]);
+      });
+  }, []);
 
-    const newMsgs = [...messages, { sender: "user" as const, text: textToSend, time: "Just now" }];
-    setMessages(newMsgs);
-    setInput("");
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSend = async (textToSend?: string) => {
+    const text = textToSend || input;
+    if (!text.trim()) return;
+
+    const userMsg: Message = { 
+      sender: "user", 
+      text, 
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    if (!textToSend) setInput("");
     setTyping(true);
 
-    setTimeout(() => {
-      const lower = textToSend.trim();
-      const reply = mockReplies[lower] || `I have analyzed the data database for "${textToSend}". Total contract value remains ₹441.5 Cr with an average safety score of 96%. Let me know if you would like me to compile a PDF summary report.`;
-
-      setMessages((prev) => [...prev, { sender: "bot", text: reply, time: "Just now" }]);
+    try {
+      const orgId = session?.organizationId || 1;
+      const token = localStorage.getItem("buildcon_token");
+      const res = await fetch("http://localhost:8081/api/chairman/ai-chat", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ message: text, organizationId: String(orgId) }),
+      });
+      if (res.ok) {
+        const d = await res.json();
+        const aiMsg: Message = { 
+          sender: "bot", 
+          text: d.response, 
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+        };
+        setMessages((prev) => [...prev, aiMsg]);
+      } else {
+        const aiMsg: Message = { 
+          sender: "bot", 
+          text: "Error calling AI Assistant backend.", 
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+        };
+        setMessages((prev) => [...prev, aiMsg]);
+      }
+    } catch {
+      const aiMsg: Message = { 
+        sender: "bot", 
+        text: "AI service is currently offline. Please check connection.", 
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+      };
+      setMessages((prev) => [...prev, aiMsg]);
+    } finally {
       setTyping(false);
-    }, 800);
+    }
   };
 
   return (
@@ -84,21 +138,27 @@ export default function AIExecutiveAssistant() {
                 </div>
               </div>
             )}
+            <div ref={endRef} />
           </div>
 
           {/* Form */}
-          <div className="mt-4 pt-3 border-t border-slate-850 flex gap-2 items-center">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSend();
+            }}
+            className="mt-4 pt-3 border-t border-slate-850 flex gap-2 items-center"
+          >
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSend(input); }}
               placeholder="Ask a question about your business operations, safety, or approvals..."
               className="flex-1 bg-[#0E1726] border border-slate-800 rounded-lg px-4 py-2.5 text-xs text-white outline-none focus:border-blue-500 placeholder:text-slate-500"
             />
-            <button onClick={() => handleSend(input)} className="h-9 w-9 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center shrink-0 transition-colors">
+            <button type="submit" className="h-9 w-9 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center shrink-0 transition-colors">
               <Send className="h-4 w-4" />
             </button>
-          </div>
+          </form>
         </div>
 
         {/* Suggestion Sidebar */}
@@ -107,9 +167,9 @@ export default function AIExecutiveAssistant() {
             <Sparkles className="h-4 w-4 text-blue-400" />
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200">Suggested Questions</h3>
           </div>
-          <p className="text-[10px] text-slate-400 mb-4 leading-relaxed">Select one of the preset prompts to test the AI assistant with real database insights.</p>
+          <p className="text-[10px] text-slate-400 mb-4 leading-relaxed font-sans">Select one of the preset prompts to test the AI assistant with real database insights.</p>
           <div className="space-y-2.5">
-            {initialSuggestions.map((prompt, idx) => (
+            {suggestions.map((prompt, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSend(prompt)}

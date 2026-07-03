@@ -36,6 +36,8 @@ export default function Signup() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [organizationId, setOrganizationId] = useState<number | null>(null);
+  const [tier, setTier] = useState<string>("Enterprise");
+  const [orgName, setOrgName] = useState<string>("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -43,8 +45,50 @@ export default function Signup() {
       if (savedId) {
         setOrganizationId(parseInt(savedId, 10));
       }
+      const savedTier = localStorage.getItem("selected_login_tier") || "Enterprise";
+      const savedOrg = localStorage.getItem("selected_login_org") || "";
+      setTier(savedTier);
+      setOrgName(savedOrg);
+
+      const filtered = getFilteredRoles(savedTier);
+      const keys = Object.keys(filtered);
+      if (keys.length > 0) {
+        setRole(keys[0]);
+      }
     }
   }, []);
+
+  function getFilteredRoles(currentTier: string) {
+    const t = (currentTier || "Enterprise").toLowerCase();
+    if (t === "growth") {
+      return {
+        "ROLE_CHAIRMAN": "Chairman",
+        "ROLE_PROJECT_MANAGER": "Project Manager",
+        "ROLE_SENIOR_SITE_ENGINEER": "Senior Site Engineer",
+        "ROLE_SITE_MANAGEMENT": "Site Management",
+        "ROLE_CONSTRUCTION_MANAGER": "Construction Manager",
+        "ROLE_SUBCONTRACTOR": "Subcontractor",
+        "ROLE_WORKFORCE_MANAGER": "Workforce & Labour"
+      };
+    }
+    if (t === "premium") {
+      return {
+        "ROLE_CHAIRMAN": "Chairman",
+        "ROLE_MD": "Managing Director",
+        "ROLE_PROJECT_DIRECTOR": "Project Director",
+        "ROLE_PROJECT_MANAGER": "Project Manager",
+        "ROLE_CONSTRUCTION_MANAGER": "Construction Manager",
+        "ROLE_QUANTITY_SURVEYOR": "Quantity Surveyor",
+        "ROLE_PROCUREMENT_MANAGER": "Procurement Manager",
+        "ROLE_FINANCE_ACCOUNTS": "Finance & Accounts",
+        "ROLE_HR_MANAGER": "HR Manager",
+        "ROLE_SALES_EXECUTIVE": "Sales Executive",
+        "ROLE_SITE_MANAGEMENT": "Site Management",
+        "ROLE_SUBCONTRACTOR": "Subcontractor"
+      };
+    }
+    return ROLES_MAP;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -54,7 +98,7 @@ export default function Signup() {
 
     try {
       // Map role name directly to REST endpoint path structure
-      let roleSegment = role.replace("ROLE_", "").toLowerCase().replace("_", "-");
+      let roleSegment = role.replace("ROLE_", "").toLowerCase().replace(/_/g, "-");
       if (roleSegment === "md") {
         roleSegment = "md";
       } else if (roleSegment === "admin-user" || roleSegment === "admin") {
@@ -122,7 +166,9 @@ export default function Signup() {
       <div className="flex items-center justify-center p-8 bg-[#0A1120]">
         <div className="w-full max-w-md bg-[#0F182A] border border-slate-800 rounded-2xl p-8 shadow-xl shadow-black/30">
           <h1 className="text-xl font-bold mb-1 tracking-wide text-white">Create Account</h1>
-          <p className="text-xs text-slate-400 mb-6">Select your organizational role to start setting up your workspace.</p>
+          <p className="text-xs text-slate-400 mb-6">
+            Signing up for: <span className="text-yellow-400 font-semibold">{orgName || "Zenelait Infotech"}</span> ({tier} Tier)
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -132,7 +178,7 @@ export default function Signup() {
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
               >
-                {Object.entries(ROLES_MAP).map(([key, val]) => (
+                {Object.entries(getFilteredRoles(tier)).map(([key, val]) => (
                   <option key={key} value={key}>{val}</option>
                 ))}
               </select>

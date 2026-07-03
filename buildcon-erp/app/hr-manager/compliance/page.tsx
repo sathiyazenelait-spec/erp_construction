@@ -1,12 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   ShieldCheck, AlertTriangle, CheckCircle2, Clock, 
   Search, Filter, Plus, FileSpreadsheet, Eye, RefreshCw
 } from "lucide-react";
 
 interface AuditLog {
-  id: string;
+  id: number;
   auditName: string;
   category: "Labour Law" | "Safety" | "Training" | "Internal Financial";
   date: string;
@@ -16,7 +16,7 @@ interface AuditLog {
 }
 
 interface ChecklistItem {
-  id: string;
+  id: number;
   task: string;
   category: string;
   dueDate: string;
@@ -28,26 +28,100 @@ export default function CompliancePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
 
-  const [audits, setAudits] = useState<AuditLog[]>([
-    { id: "AUD-101", auditName: "Q1 Labour Law Compliance", category: "Labour Law", date: "2025-03-15", status: "Completed", auditor: "S. K. Sharma & Co.", score: "98.5%" },
-    { id: "AUD-102", auditName: "Site Safety Regulation Audit", category: "Safety", date: "2025-04-10", status: "Completed", auditor: "State Safety Board", score: "97.0%" },
-    { id: "AUD-103", auditName: "Mandatory Employee Training Audit", category: "Training", date: "2025-05-02", status: "Completed", auditor: "Internal HR Committee", score: "100%" },
-    { id: "AUD-104", auditName: "Contractor Wage & PF Compliance Audit", category: "Labour Law", date: "2025-05-20", status: "Action Required", auditor: "District Labour Commissioner", score: "89.2%" },
-    { id: "AUD-105", auditName: "Q2 Internal Financial Audit", category: "Internal Financial", date: "2025-06-15", status: "Pending", auditor: "Verma & Associates", score: "Pending" },
-  ]);
+  const [audits, setAudits] = useState<AuditLog[]>([]);
+  const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const [checklist, setChecklist] = useState<ChecklistItem[]>([
-    { id: "CL-01", task: "Submit PF & ESI Monthly Returns", category: "Labour Law", dueDate: "2025-06-15", status: "done" },
-    { id: "CL-02", task: "Submit Gratuity Act Annual Returns", category: "Labour Law", dueDate: "2025-06-30", status: "pending" },
-    { id: "CL-03", task: "Verify Construction Site Labour Safety Certifications", category: "Safety", dueDate: "2025-06-18", status: "pending" },
-    { id: "CL-04", task: "Conduct Workplace Harassment (POSH) Refresher", category: "Training", dueDate: "2025-06-25", status: "pending" },
-    { id: "CL-05", task: "Renew Workman Compensation Insurance Policy", category: "Labour Law", dueDate: "2025-07-05", status: "done" },
-    { id: "CL-06", task: "Submit Minimum Wages Compliance Declaration", category: "Labour Law", dueDate: "2025-06-20", status: "pending" }
-  ]);
+  async function loadComplianceData() {
+    try {
+      setLoading(true);
+      setErrorMsg(null);
+      const sessionStr = localStorage.getItem("buildcon_session");
+      const token = localStorage.getItem("buildcon_token");
+      if (!sessionStr || !token) {
+        setErrorMsg("Session expired or missing authentication.");
+        setLoading(false);
+        return;
+      }
+      const session = JSON.parse(sessionStr);
+      const orgId = session.organizationId;
+      if (!orgId) {
+        setErrorMsg("No organization associated with this session.");
+        setLoading(false);
+        return;
+      }
 
-  const toggleChecklist = (id: string) => {
-    setChecklist(prev => prev.map(item => item.id === id ? { ...item, status: item.status === "done" ? "pending" : "done" } : item));
+      // Fetch Audits
+      const auRes = await fetch(`http://localhost:8081/api/hr-manager/compliance/audits/org/${orgId}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (auRes.ok) {
+        const auData = await auRes.json();
+        setAudits(auData);
+      }
+
+      // Fetch Checklist
+      const chRes = await fetch(`http://localhost:8081/api/hr-manager/compliance/checklist/org/${orgId}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (chRes.ok) {
+        const chData = await chRes.json();
+        setChecklist(chData);
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Failed to connect to the backend server.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadComplianceData();
+  }, []);
+
+  const toggleChecklist = async (id: number) => {
+    try {
+      const token = localStorage.getItem("buildcon_token");
+      if (!token) return;
+
+      const res = await fetch(`http://localhost:8081/api/hr-manager/compliance/checklist/${id}/toggle`, {
+        method: "PUT",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        const updated = await res.json();
+        setChecklist(prev => prev.map(item => item.id === id ? { ...item, status: updated.status } : item));
+      } else {
+        alert("Failed to toggle checklist status.");
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="bg-[#111C30]/50 border border-slate-800 rounded-xl p-12 text-center text-slate-400 text-xs italic flex flex-col items-center justify-center space-y-3">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+        <span>Synchronizing compliance logs with database...</span>
+      </div>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <div className="bg-[#111C30] border border-slate-800 rounded-xl p-6 text-center text-slate-400 text-xs">
+        <AlertTriangle className="h-8 w-8 text-rose-500 mx-auto mb-2" />
+        <p className="font-semibold text-rose-455 text-rose-400 mb-2">{errorMsg}</p>
+        <button onClick={loadComplianceData} className="px-3 py-1.5 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition">
+          Retry Load
+        </button>
+      </div>
+    );
+  }
 
   const filteredAudits = audits.filter(audit => {
     const matchesSearch = audit.auditName.toLowerCase().includes(searchTerm.toLowerCase()) || audit.auditor.toLowerCase().includes(searchTerm.toLowerCase());
@@ -63,9 +137,12 @@ export default function CompliancePage() {
           <h2 className="text-xl font-bold text-white tracking-wide">Compliance Center</h2>
           <p className="text-xs text-slate-400">Track audits, labour regulations, certification statuses, and policy compliance checklists.</p>
         </div>
-        <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition-colors self-start sm:self-center">
-          <Plus className="h-4 w-4" />
-          Schedule Audit
+        <button
+          onClick={loadComplianceData}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#111C30] hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white rounded-lg text-xs font-semibold transition-all self-start sm:self-auto"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+          Refresh
         </button>
       </div>
 
@@ -202,7 +279,7 @@ export default function CompliancePage() {
               <tbody className="text-xs divide-y divide-slate-800/50">
                 {filteredAudits.map((audit) => (
                   <tr key={audit.id} className="hover:bg-white/5 transition-colors">
-                    <td className="p-4 font-mono font-medium text-emerald-400">{audit.id}</td>
+                    <td className="p-4 font-mono font-medium text-emerald-400">AUD-{audit.id}</td>
                     <td className="p-4 font-semibold text-white">{audit.auditName}</td>
                     <td className="p-4">
                       <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#111C30] border border-slate-800 text-slate-300">
@@ -218,7 +295,7 @@ export default function CompliancePage() {
                           ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                           : audit.status === "Pending"
                           ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                          : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                          : "bg-rose-500/10 text-rose-455 text-rose-450 text-rose-400 border border-rose-500/20"
                       }`}>
                         {audit.status}
                       </span>

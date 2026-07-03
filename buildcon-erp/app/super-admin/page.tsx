@@ -1,24 +1,62 @@
 "use client";
-import React from "react";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, Cell, PieChart, Pie } from "recharts";
-import { Building2, Briefcase, DollarSign, Users, Cpu, ShieldAlert, Sparkles, Activity, ArrowUpRight } from "lucide-react";
-
-const platformRevenue = [
-  { m: "Jan", rev: 120000, aiCalls: 45000 },
-  { m: "Feb", rev: 135000, aiCalls: 52000 },
-  { m: "Mar", rev: 150000, aiCalls: 68000 },
-  { m: "Apr", rev: 185000, aiCalls: 85000 },
-  { m: "May", rev: 210000, aiCalls: 110000 },
-  { m: "Jun", rev: 245000, aiCalls: 142000 },
-];
-
-const aiModelUsage = [
-  { name: "Gemini 1.5 Pro", value: 55, color: "#10B981" },
-  { name: "Gemini 1.5 Flash", value: 30, color: "#3B82F6" },
-  { name: "Claude 3.5 Sonnet", value: 15, color: "#8B5CF6" },
-];
+import React, { useEffect, useState } from "react";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from "recharts";
+import { Building2, Briefcase, DollarSign, Users, Cpu, Activity, Sparkles, ArrowUpRight } from "lucide-react";
 
 export default function SuperAdminDashboard() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const loadTelemetry = async () => {
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
+      const res = await fetch("http://localhost:8081/api/super-admin/telemetry", {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        }
+      });
+      if (!res.ok) throw new Error("Failed to load telemetry statistics.");
+      const json = await res.json();
+      setData(json);
+    } catch (err: any) {
+      setError(err.message || "An error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadTelemetry();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
+        <div className="h-8 w-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
+        <p className="text-xs text-slate-400">Loading system telemetry...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-xl text-center">
+        <p className="text-sm text-red-400 font-semibold">{error}</p>
+        <button
+          onClick={loadTelemetry}
+          className="mt-3 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  const platformRevenue = data?.platformRevenue || [];
+  const aiModelUsage = data?.aiModelUsage || [];
+
   return (
     <div className="space-y-6">
       {/* Title */}
@@ -42,8 +80,8 @@ export default function SuperAdminDashboard() {
             <Building2 className="h-4 w-4 text-emerald-400" />
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">42</div>
-            <div className="text-[10px] text-emerald-400 font-semibold mt-1">↑ 4 new this month</div>
+            <div className="text-2xl font-bold text-white">{data?.totalOrganizations ?? 0}</div>
+            <div className="text-[10px] text-emerald-400 font-semibold mt-1">↑ Active in multi-tenant cloud</div>
           </div>
         </div>
 
@@ -54,7 +92,7 @@ export default function SuperAdminDashboard() {
             <Briefcase className="h-4 w-4 text-blue-400" />
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">186</div>
+            <div className="text-2xl font-bold text-white">{data?.totalProjects ?? 0}</div>
             <div className="text-[10px] text-blue-400 font-semibold mt-1">Active construction sites</div>
           </div>
         </div>
@@ -66,8 +104,8 @@ export default function SuperAdminDashboard() {
             <DollarSign className="h-4 w-4 text-yellow-400" />
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">₹ 24.5 Lakhs</div>
-            <div className="text-[10px] text-emerald-400 font-semibold mt-1">↑ 18.2% Q/Q growth</div>
+            <div className="text-2xl font-bold text-white">{data?.platformMRR ?? "₹ 0 Lakhs"}</div>
+            <div className="text-[10px] text-emerald-400 font-semibold mt-1">↑ Calculated from active tiers</div>
           </div>
         </div>
 
@@ -78,8 +116,8 @@ export default function SuperAdminDashboard() {
             <Users className="h-4 w-4 text-violet-400" />
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">8,450</div>
-            <div className="text-[10px] text-slate-400 mt-1">98.4% concurrency rate</div>
+            <div className="text-2xl font-bold text-white">{data?.activeUsers ?? 0}</div>
+            <div className="text-[10px] text-slate-400 mt-1">Concurrency rate managed</div>
           </div>
         </div>
 
@@ -90,8 +128,8 @@ export default function SuperAdminDashboard() {
             <Cpu className="h-4 w-4 text-teal-400" />
           </div>
           <div className="mt-2">
-            <div className="text-2xl font-bold text-white">142K Calls</div>
-            <div className="text-[10px] text-teal-400 font-semibold mt-1">↑ 29% AI request surge</div>
+            <div className="text-2xl font-bold text-white">{data?.aiCallsMTD ?? "0 Calls"}</div>
+            <div className="text-[10px] text-teal-400 font-semibold mt-1">↑ Platform request rate</div>
           </div>
         </div>
       </div>
@@ -130,7 +168,7 @@ export default function SuperAdminDashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie data={aiModelUsage} dataKey="value" nameKey="name" innerRadius={42} outerRadius={62} paddingAngle={5}>
-                    {aiModelUsage.map((entry, index) => (
+                    {aiModelUsage.map((entry: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -142,7 +180,7 @@ export default function SuperAdminDashboard() {
               </div>
             </div>
             <div className="flex flex-wrap justify-center gap-4 mt-4 text-[10px]">
-              {aiModelUsage.map((m) => (
+              {aiModelUsage.map((m: any) => (
                 <div key={m.name} className="flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full" style={{ backgroundColor: m.color }}></span>
                   <span className="text-slate-400 font-medium">{m.name} ({m.value}%)</span>
@@ -155,27 +193,27 @@ export default function SuperAdminDashboard() {
 
       {/* Row 3: Action center and System health logs */}
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* System Health Telemetry */}
+        {/* System Health Telemetry Info Summary */}
         <div className="bg-[#0e1628] border border-slate-800/80 rounded-xl p-5 lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-emerald-400" />
               <h3 className="text-sm font-bold text-white">Infrastructure Status</h3>
             </div>
-            <span className="text-xs text-slate-400">CPU Load: <span className="text-emerald-400 font-bold">14%</span></span>
+            <span className="text-xs text-slate-400">SLA: <span className="text-emerald-400 font-bold">99.98% MTD</span></span>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center text-xs p-2.5 rounded-lg bg-[#080d18] border border-slate-800/40">
               <span className="text-slate-300">Auth Microservice</span>
-              <span className="text-emerald-400 font-bold flex items-center gap-1">Online <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span></span>
+              <span className="text-emerald-400 font-bold flex items-center gap-1">Online <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span></span>
             </div>
             <div className="flex justify-between items-center text-xs p-2.5 rounded-lg bg-[#080d18] border border-slate-800/40">
               <span className="text-slate-300">PostgreSQL Primary DB Cluster</span>
-              <span className="text-emerald-400 font-bold flex items-center gap-1">Online <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span></span>
+              <span className="text-emerald-400 font-bold flex items-center gap-1">Online <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span></span>
             </div>
             <div className="flex justify-between items-center text-xs p-2.5 rounded-lg bg-[#080d18] border border-slate-800/40">
               <span className="text-slate-300">AI Prompt Router Node</span>
-              <span className="text-emerald-400 font-bold flex items-center gap-1">Online <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span></span>
+              <span className="text-emerald-400 font-bold flex items-center gap-1">Online <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span></span>
             </div>
           </div>
         </div>
@@ -188,7 +226,7 @@ export default function SuperAdminDashboard() {
               <h3 className="text-xs font-bold text-white uppercase tracking-wider">AI Operations Suggestion</h3>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Platform AI utilization spiked by **29%** in the past week. Consider switching high-concurrency background routing queries to <strong>Gemini 1.5 Flash</strong> to optimize monthly API expenses.
+              {data?.aiOperationsSuggestion || "Switch background queries to Gemini 1.5 Flash to optimize monthly expenses."}
             </p>
           </div>
           <div className="mt-4 pt-3 border-t border-slate-800">

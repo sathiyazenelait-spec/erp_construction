@@ -35,6 +35,11 @@ public class ProgressClaimController {
         return ResponseEntity.ok(service.payClaim(id, paymentReference));
     }
 
+    @PostMapping("/{id}/hold")
+    public ResponseEntity<ProgressClaim> holdClaim(@PathVariable Long id) {
+        return ResponseEntity.ok(service.holdClaim(id));
+    }
+
     @GetMapping
     public ResponseEntity<List<ProgressClaim>> getAllClaims() {
         return ResponseEntity.ok(service.getAllClaims());

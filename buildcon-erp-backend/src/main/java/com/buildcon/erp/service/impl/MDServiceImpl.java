@@ -39,6 +39,17 @@ public class MDServiceImpl implements MDService {
             encoder.encode(request.getPassword())
         );
         item.setOrganizationId(request.getOrganizationId());
+
+        String initials = java.util.Arrays.stream(request.getUsername().split(" "))
+            .filter(n -> !n.isEmpty())
+            .map(n -> String.valueOf(n.charAt(0)))
+            .collect(java.util.stream.Collectors.joining(""))
+            .toUpperCase();
+        if (initials.length() > 2) {
+            initials = initials.substring(0, 2);
+        }
+        item.setAvatarInitials(initials.isEmpty() ? "MD" : initials);
+
         return repository.save(item);
     }
 }

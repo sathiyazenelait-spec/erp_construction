@@ -12,4 +12,5 @@ public interface MDRepository extends JpaRepository<MD, Long> {
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
     void deleteByOrganizationId(Long organizationId);
+    java.util.List<MD> findByOrganizationId(Long organizationId);
 }

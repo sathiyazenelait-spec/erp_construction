@@ -22,56 +22,158 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
   const router = useRouter();
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
-
   const [tier, setTier] = useState("Enterprise");
 
+  // Dynamic states
+  const [profileName, setProfileName] = useState("");
+  const [avatarInitials, setAvatarInitials] = useState("");
+  const [sidebarMenus, setSidebarMenus] = useState("");
+  const [headerDate, setHeaderDate] = useState("Wednesday, 28 May 2025");
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const s = getSession();
-    if (s) {
-      setName(s.name);
-      setRole(s.role);
-    }
-    const t = localStorage.getItem("selected_login_tier");
-    if (t) {
-      setTier(t);
-    }
+    const updateSessionData = () => {
+      const s = getSession();
+      if (s) {
+        setName(s.name);
+        setRole(s.role);
+      }
+      const orgId = s?.organizationId || 1;
+      const token = localStorage.getItem("buildcon_token");
+      fetch(`http://localhost:8081/api/chairman/dashboard/org/${orgId}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+        .then((res) => res.json())
+        .then((d) => {
+          setProfileName(d.profileName || s?.name || "Chairman");
+          setAvatarInitials(d.avatarInitials || "CH");
+          setSidebarMenus(d.sidebar_menus || "");
+          if (d.header_date) {
+            setHeaderDate(d.header_date);
+          }
+          const t = d.subscriptionTier || localStorage.getItem("selected_login_tier") || "Enterprise";
+          setTier(t);
+          localStorage.setItem("selected_login_tier", t);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error("Error loading Chairman layout configurations:", err);
+          setProfileName(s?.name || "Chairman");
+          setAvatarInitials("CH");
+          const t = localStorage.getItem("selected_login_tier") || "Enterprise";
+          setTier(t);
+          setLoading(false);
+        });
+    };
+    updateSessionData();
+    window.addEventListener("storage", updateSessionData);
+    return () => window.removeEventListener("storage", updateSessionData);
   }, []);
 
-  const nav: NavItem[] = [
-    { href: "/chairman", label: "Executive Summary", icon: <LayoutDashboard className="h-4 w-4" /> },
-    { href: "/chairman/portfolio", label: "Company Portfolio", icon: <Briefcase className="h-4 w-4" /> },
-    { href: "/chairman/financial", label: "Financial Command", icon: <Wallet className="h-4 w-4" /> },
-    { href: "/chairman/sales", label: "Sales & Opportunities", icon: <TrendingUp className="h-4 w-4" /> },
-    { href: "/chairman/clients", label: "Client Insights", icon: <Heart className="h-4 w-4" /> },
-    { href: "/chairman/workforce", label: "Workforce Analysis", icon: <Users className="h-4 w-4" /> },
-    { href: "/chairman/safety", label: "Safety Center", icon: <ShieldCheck className="h-4 w-4" /> },
-    { href: "/chairman/approvals", label: "Approval Center", icon: <Inbox className="h-4 w-4" />, badge: 3 },
-    { href: "/chairman/board", label: "Board Reports", icon: <FileText className="h-4 w-4" /> },
-    { href: "/chairman/ai", label: "AI Executive Assistant", icon: <Bot className="h-4 w-4" /> },
-    { href: "/chairman/strategy", label: "Strategic Planning", icon: <Target className="h-4 w-4" /> },
-    { href: "/chairman/investments", label: "Investment Tracker", icon: <LineIcon className="h-4 w-4" /> },
-    { href: "/chairman/settings", label: "Settings", icon: <Settings className="h-4 w-4" /> },
-  ];
-
-  const filteredNav = nav.filter(item => {
-    if (tier === "Growth") {
-      // Growth allows Executive Summary, Portfolio, Approvals, AI Assistant, Settings
-      return ["/chairman", "/chairman/portfolio", "/chairman/approvals", "/chairman/ai", "/chairman/settings"].includes(item.href);
-    } else if (tier === "Premium") {
-      // Premium adds Financial Command, Safety, Workforce
-      return ["/chairman", "/chairman/portfolio", "/chairman/financial", "/chairman/safety", "/chairman/workforce", "/chairman/approvals", "/chairman/ai", "/chairman/settings"].includes(item.href);
+  const getSidebarIcon = (menuName: string) => {
+    switch (menuName) {
+      case "Dashboard":
+      case "Executive Summary": return <LayoutDashboard className="h-4 w-4" />;
+      case "Company Portfolio": return <Briefcase className="h-4 w-4" />;
+      case "Financial Command":
+      case "Financial Snapshot": return <Wallet className="h-4 w-4" />;
+      case "Sales & Opportunities":
+      case "Sales Pipeline": return <TrendingUp className="h-4 w-4" />;
+      case "Client Insights":
+      case "Client Directory": return <Heart className="h-4 w-4" />;
+      case "Workforce Overview":
+      case "Workforce Analysis": return <Users className="h-4 w-4" />;
+      case "Safety Center":
+      case "Safety Audits": return <ShieldCheck className="h-4 w-4" />;
+      case "Approval Center":
+      case "Board Approvals": return <Inbox className="h-4 w-4" />;
+      case "Board Reports": return <FileText className="h-4 w-4" />;
+      case "AI Executive Assistant": return <Bot className="h-4 w-4" />;
+      case "Strategic Planning":
+      case "Strategy Sandbox": return <Target className="h-4 w-4" />;
+      case "Investment Tracker": return <LineIcon className="h-4 w-4" />;
+      case "Subscription Package":
+      case "Subscription": return <Crown className="h-4 w-4" />;
+      case "Settings":
+      case "System Settings": return <Settings className="h-4 w-4" />;
+      default: return <FileText className="h-4 w-4" />;
     }
-    // Enterprise allows all
+  };
+
+  const getSidebarHref = (menuName: string) => {
+    switch (menuName) {
+      case "Dashboard":
+      case "Executive Summary": return "/chairman";
+      case "Company Portfolio": return "/chairman/portfolio";
+      case "Financial Command":
+      case "Financial Snapshot": return "/chairman/financial";
+      case "Sales & Opportunities":
+      case "Sales Pipeline": return "/chairman/sales";
+      case "Client Insights":
+      case "Client Directory": return "/chairman/clients";
+      case "Workforce Overview":
+      case "Workforce Analysis": return "/chairman/workforce";
+      case "Safety Center":
+      case "Safety Audits": return "/chairman/safety";
+      case "Approval Center":
+      case "Board Approvals": return "/chairman/approvals";
+      case "Board Reports": return "/chairman/board";
+      case "AI Executive Assistant": return "/chairman/ai";
+      case "Strategic Planning":
+      case "Strategy Sandbox": return "/chairman/strategy";
+      case "Investment Tracker": return "/chairman/investments";
+      case "Subscription Package":
+      case "Subscription": return "/chairman/subscription";
+      case "Settings":
+      case "System Settings": return "/chairman/settings";
+      default: return "/chairman";
+    }
+  };
+
+  const sidebarList = sidebarMenus
+    ? sidebarMenus.split("|").map((n) => n.trim()).filter(Boolean)
+    : [
+        "Executive Summary",
+        "Company Portfolio",
+        "Financial Command",
+        "Sales & Opportunities",
+        "Client Insights",
+        "Workforce Analysis",
+        "Safety Center",
+        "Board Approvals",
+        "Board Reports",
+        "AI Executive Assistant",
+        "Strategic Planning",
+        "Investment Tracker",
+        "Subscription",
+        "Settings"
+      ];
+
+  const filteredNav = sidebarList.filter(item => {
+    const href = getSidebarHref(item);
+    const normalizedTier = tier.toLowerCase();
+    if (normalizedTier === "growth") {
+      return ["/chairman", "/chairman/portfolio", "/chairman/approvals", "/chairman/settings", "/chairman/subscription"].includes(href);
+    } else if (normalizedTier === "premium") {
+      return ["/chairman", "/chairman/portfolio", "/chairman/financial", "/chairman/safety", "/chairman/workforce", "/chairman/approvals", "/chairman/ai", "/chairman/settings", "/chairman/subscription"].includes(href);
+    }
     return true;
   });
 
-  // Helper to determine active route
   const isLinkActive = (href: string) => {
     if (href === "/chairman") {
       return pathname === "/chairman" || pathname === "/chairman/executive";
     }
     return pathname === href || pathname.startsWith(href + "/");
   };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#0B111E] text-slate-350 text-sm">
+        Loading Strategic Command...
+      </div>
+    );
+  }
 
   return (
     <AuthGuard role="chairman">
@@ -90,21 +192,23 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
             </div>
 
             <nav className="p-3 space-y-1 overflow-y-auto">
-              {filteredNav.map((it) => {
-                const active = isLinkActive(it.href);
+              {filteredNav.map((item) => {
+                const href = getSidebarHref(item);
+                const active = isLinkActive(href);
+                const isApproval = item === "Board Approvals" || item === "Approval Center";
                 return (
                   <LinkComponent
-                    key={it.href}
-                    href={it.href}
+                    key={item}
+                    href={href}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
                       active
                         ? "bg-gradient-to-r from-blue-600/90 to-blue-500/90 text-white font-semibold shadow-md shadow-blue-500/20"
                         : "text-slate-400 hover:bg-white/5 hover:text-white"
                     }`}
                   >
-                    {it.icon}
-                    <span className="flex-1">{it.label}</span>
-                    {it.badge ? <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-red-500 text-white">{it.badge}</span> : null}
+                    {getSidebarIcon(item)}
+                    <span className="flex-1">{item}</span>
+                    {isApproval ? <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-red-500 text-white">3</span> : null}
                   </LinkComponent>
                 );
               })}
@@ -113,16 +217,16 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
 
           <div className="p-4 border-t border-slate-800 flex items-center gap-3">
             <div className="h-9 w-9 rounded-full bg-blue-600/20 text-blue-400 border border-blue-500/30 grid place-items-center text-sm font-bold shadow-inner">
-              {name ? name[0] : "C"}
+              {avatarInitials}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold text-white truncate">{name || "Chairman"}</div>
+              <div className="text-sm font-semibold text-white truncate">{profileName}</div>
               <div className="text-[11px] text-slate-400 font-medium capitalize truncate">{role.replace("-", " ")}</div>
             </div>
             <button
               onClick={() => {
                 logout();
-                router.push("/");
+                router.push("/login/chairman");
               }}
               className="p-1.5 rounded-md text-slate-400 hover:bg-white/5 hover:text-white transition-colors"
               title="Sign out"
@@ -138,14 +242,14 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
           <header className="bg-[#0E1726]/50 backdrop-blur-md border-b border-slate-800 px-6 py-4 flex items-center gap-4">
             <div className="flex-1">
               <h1 className="text-lg font-bold text-white flex items-center gap-2">
-                Good Morning, Rajesh Kumar <span className="animate-pulse">👋</span>
+                Good Morning, {profileName} <span className="animate-pulse">👋</span>
               </h1>
               <p className="text-xs text-slate-400">Here's what's happening with BuildCon Constructions today.</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="bg-[#111A2E] border border-slate-800 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300 flex items-center gap-2">
                 <Calendar className="h-3.5 w-3.5 text-blue-400" />
-                Wednesday, 28 May 2025
+                {headerDate}
               </div>
               <div className="bg-[#111A2E] border border-slate-800 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300 flex items-center gap-2 hover:bg-slate-800 cursor-pointer">
                 <Filter className="h-3.5 w-3.5 text-slate-400" />

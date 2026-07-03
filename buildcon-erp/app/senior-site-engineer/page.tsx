@@ -32,23 +32,25 @@ export default function SeniorSiteEngineerDashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("Quality Control");
   const [projectFilter, setProjectFilter] = useState("All Projects");
-  const [dateFilter, setDateFilter] = useState("09 June 2026, Tuesday");
+  const [dateFilter, setDateFilter] = useState("");
 
   // --- Stateful Data ---
-  const [cubeTests, setCubeTests] = useState<CubeTest[]>([
-    { id: "CUB-401", mixGrade: "M30", castDate: "12 May 2026", testAge: "28 Days", strengthAchieved: 32.4, targetStrength: 30.0, status: "Pass" },
-    { id: "CUB-402", mixGrade: "M40", castDate: "15 May 2026", testAge: "28 Days", strengthAchieved: 42.8, targetStrength: 40.0, status: "Pass" },
-    { id: "CUB-403", mixGrade: "M30", castDate: "02 Jun 2026", testAge: "7 Days", strengthAchieved: 21.2, targetStrength: 20.0, status: "Pass" },
-    { id: "CUB-404", mixGrade: "M40", castDate: "05 Jun 2026", testAge: "7 Days", strengthAchieved: 18.5, targetStrength: 26.0, status: "Fail" },
-    { id: "CUB-405", mixGrade: "M30", castDate: "08 Jun 2026", testAge: "7 Days", strengthAchieved: 0, targetStrength: 20.0, status: "Pending" }
-  ]);
+  const [cubeTests, setCubeTests] = useState<any[]>([]);
+  const [drawings, setDrawings] = useState<any[]>([]);
+  const [ncrs, setNcrs] = useState<any[]>([]);
+  const [profileName, setProfileName] = useState("Karthick Swaminathan");
+  const [profileEmail, setProfileEmail] = useState("senior-eng@buildcon.com");
+  const [organizationName, setOrganizationName] = useState("BuildWell");
+  const [projects, setProjects] = useState<any[]>([]);
 
-  const [drawings, setDrawings] = useState<BlueprintDrawing[]>([
-    { id: "DWG-101", title: "Tower A Structural Column Rebar Layout", category: "Structural", status: "Approved" },
-    { id: "DWG-102", title: "Tower B HVAC Duct Routing Plan", category: "MEP", status: "Clash Detected" },
-    { id: "DWG-103", title: "Ground Level Entrance Lobby Elevation", category: "Architectural", status: "Approved" },
-    { id: "DWG-104", title: "Basement Drainage and Riser Plumbing Layout", category: "MEP", status: "Under Revision" }
-  ]);
+  const [editProjPlanned, setEditProjPlanned] = useState("");
+  const [editProjActual, setEditProjActual] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const selectedProject = React.useMemo(() => {
+    if (projectFilter === "All Projects") return null;
+    return projects.find(p => p.name === projectFilter);
+  }, [projectFilter, projects]);
 
   const [newGrade, setNewGrade] = useState<"M25" | "M30" | "M40">("M30");
   const [newAge, setNewAge] = useState<"7 Days" | "28 Days">("7 Days");
@@ -59,9 +61,93 @@ export default function SeniorSiteEngineerDashboard() {
     { sender: "bot", text: "Hello Karthick! I'm your AI Quality Control & Engineering Assistant. Ask me to analyze concrete strength variations, highlight drawings conflicts, or log Non-Conformity reports." }
   ]);
 
+  const [orgId, setOrgId] = useState<number | null>(null);
+
+  // Fetch Dashboard Data
+  const loadDashboardData = async (activeOrgId: number) => {
+    try {
+      const token = localStorage.getItem("buildcon_token");
+      const res = await fetch(`http://localhost:8081/api/senior-site-engineer/dashboard/org/${activeOrgId}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCubeTests(data.cubeTests || []);
+        setDrawings(data.drawings || []);
+        setNcrs(data.ncrs || []);
+        setProfileName(data.profileName || "Karthick Swaminathan");
+        setProfileEmail(data.profileEmail || "senior-eng@buildcon.com");
+        setOrganizationName(data.organizationName || "BuildWell");
+        setProjects(data.projects || []);
+      }
+    } catch (err) {
+      console.error("Failed to load senior engineer dashboard data", err);
+    }
+  };
+
+  React.useEffect(() => {
+    const today = new Date();
+    const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'long', year: 'numeric', weekday: 'long' };
+    setDateFilter(today.toLocaleDateString('en-GB', options));
+
+    const sessionStr = localStorage.getItem("buildcon_session");
+    if (sessionStr) {
+      try {
+        const session = JSON.parse(sessionStr);
+        if (session.organizationId) {
+          setOrgId(session.organizationId);
+          loadDashboardData(session.organizationId);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (selectedProject) {
+      setEditProjPlanned(String(selectedProject.plannedProgress ?? "0"));
+      setEditProjActual(String(selectedProject.actualProgress ?? "0"));
+    }
+  }, [selectedProject]);
+
+  // Filter logic
+  const getCubeTestProject = (t: any) => {
+    if (projects.length === 0) return "Skyline Residences";
+    const num = Number(String(t.testId || t.id).replace(/[^0-9]/g, ""));
+    const projIdx = isNaN(num) ? 0 : num % projects.length;
+    return projects[projIdx]?.name || "Skyline Residences";
+  };
+
+  const getDrawingProject = (d: any) => {
+    if (projects.length === 0) return "Skyline Residences";
+    const num = Number(String(d.drawingId || d.id).replace(/[^0-9]/g, ""));
+    const projIdx = isNaN(num) ? 0 : num % projects.length;
+    return projects[projIdx]?.name || "Skyline Residences";
+  };
+
+  const getNcrProject = (ncr: any) => {
+    if (projects.length === 0) return "Skyline Residences";
+    const num = Number(String(ncr.ncrId || ncr.id).replace(/[^0-9]/g, ""));
+    const projIdx = isNaN(num) ? 0 : num % projects.length;
+    return projects[projIdx]?.name || "Skyline Residences";
+  };
+
+  const filteredCubeTests = React.useMemo(() => {
+    return cubeTests.filter(t => projectFilter === "All Projects" || getCubeTestProject(t) === projectFilter);
+  }, [cubeTests, projectFilter, projects]);
+
+  const filteredDrawings = React.useMemo(() => {
+    return drawings.filter(d => projectFilter === "All Projects" || getDrawingProject(d) === projectFilter);
+  }, [drawings, projectFilter, projects]);
+
+  const filteredNcrs = React.useMemo(() => {
+    return ncrs.filter(ncr => projectFilter === "All Projects" || getNcrProject(ncr) === projectFilter);
+  }, [ncrs, projectFilter, projects]);
+
   // Chart datasets
-  const strengthChartData = cubeTests.filter(t => t.status !== "Pending").map(t => ({
-    id: t.id,
+  const strengthChartData = filteredCubeTests.filter(t => t.status !== "Pending").map(t => ({
+    id: t.testId || `CUB-${t.id}`,
     Grade: t.mixGrade,
     Achieved: t.strengthAchieved,
     Required: t.targetStrength
@@ -76,47 +162,99 @@ export default function SeniorSiteEngineerDashboard() {
     { name: "Settings", icon: <Settings className="h-4 w-4" /> },
   ];
 
-  const handleAddCubeTest = (e: React.FormEvent) => {
+  const handleAddCubeTest = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newStrength.trim()) return;
+    if (!newStrength.trim() || !orgId) return;
     const strengthVal = parseFloat(newStrength);
     let targetVal = 20;
     if (newGrade === "M30") targetVal = 30;
     if (newGrade === "M40") targetVal = 40;
-    if (newAge === "7 Days") targetVal = targetVal * 0.67; // approx 67% strength in 7 days
+    if (newAge === "7 Days") targetVal = targetVal * 0.67;
 
-    setCubeTests([
-      ...cubeTests,
-      {
-        id: `CUB-${Math.floor(400 + Math.random() * 90)}`,
-        mixGrade: newGrade,
-        castDate: "09 Jun 2026",
-        testAge: newAge,
-        strengthAchieved: strengthVal,
-        targetStrength: Math.round(targetVal * 10) / 10,
-        status: strengthVal >= targetVal ? "Pass" : "Fail"
+    const payload = {
+      testId: `CUB-${Math.floor(400 + Math.random() * 90)}`,
+      mixGrade: newGrade,
+      castDate: "09 Jun 2026",
+      testAge: newAge,
+      strengthAchieved: strengthVal,
+      targetStrength: Math.round(targetVal * 10) / 10,
+      status: strengthVal >= targetVal ? "Pass" : "Fail",
+      organizationId: orgId
+    };
+
+    try {
+      const token = localStorage.getItem("buildcon_token");
+      const res = await fetch("http://localhost:8081/api/senior-site-engineer/cube-test", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        setNewStrength("");
+        loadDashboardData(orgId);
       }
-    ]);
-    setNewStrength("");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleSendAIChat = (text?: string) => {
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!orgId) return;
+    const token = localStorage.getItem("buildcon_token");
+    if (selectedProject) {
+      try {
+        const res = await fetch(`http://localhost:8081/api/projects/${selectedProject.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            ...selectedProject,
+            plannedProgress: parseInt(editProjPlanned) || 0,
+            actualProgress: parseInt(editProjActual) || 0
+          })
+        });
+        if (res.ok) {
+          setSuccess(true);
+          setTimeout(() => setSuccess(false), 3000);
+          loadDashboardData(orgId);
+        } else {
+          alert("Failed to update project progress properties.");
+        }
+      } catch (err) {
+        console.error("Error saving project properties:", err);
+      }
+    }
+  };
+
+  const handleSendAIChat = async (text?: string) => {
     const input = text || aiChatInput;
     if (!input.trim()) return;
     setAiReplies(prev => [...prev, { sender: "user", text: input }]);
     if (!text) setAiChatInput("");
 
-    setTimeout(() => {
-      let response = "I am processing quality compliance sheets. Cube test success rate stands at 91.6%.";
-      if (input.toLowerCase().includes("cube") || input.toLowerCase().includes("strength")) {
-        response = "Concrete Quality Alert: Cube test CUB-404 (Grade M40, 7 Days age) achieved 18.5 N/mm² vs required 26.0 N/mm² target. This marks a significant strength deficit. Recommend checking water-cement ratio logs.";
-      } else if (input.toLowerCase().includes("clash") || input.toLowerCase().includes("drawing")) {
-        response = "Blueprint Conflict: DWG-102 HVAC Duct Routing Plan clashes with main structural beam structural anchors in Tower B (Sector 3). Re-routing recommended to avoid Core cuts.";
-      } else if (input.toLowerCase().includes("ncr") || input.toLowerCase().includes("conformity")) {
-        response = "NCR Report Needed: Cube test fail on CUB-404 requires a formal Non-Conformity Report issued to the Concrete Specialist Subcontractor.";
+    try {
+      const token = localStorage.getItem("buildcon_token");
+      const res = await fetch("http://localhost:8081/api/senior-site-engineer/ai-chat", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ message: input })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAiReplies(prev => [...prev, { sender: "bot", text: data.response }]);
       }
-      setAiReplies(prev => [...prev, { sender: "bot", text: response }]);
-    }, 1000);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -129,7 +267,7 @@ export default function SeniorSiteEngineerDashboard() {
               <Building2 className="h-5 w-5 text-slate-950 font-bold" />
             </div>
             <div>
-              <div className="font-bold text-white tracking-wide">BuildWell</div>
+              <div className="font-bold text-white tracking-wide">{organizationName}</div>
               <div className="text-[10px] text-slate-400 font-semibold tracking-widest uppercase font-mono">Constructions</div>
             </div>
           </div>
@@ -158,7 +296,7 @@ export default function SeniorSiteEngineerDashboard() {
               KS
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs font-semibold text-white truncate font-sans">Karthick Swaminathan</div>
+              <div className="text-xs font-semibold text-white truncate font-sans">{profileName}</div>
               <div className="text-[10px] text-slate-400 font-medium truncate">Senior Site Engineer</div>
             </div>
             <button
@@ -194,8 +332,9 @@ export default function SeniorSiteEngineerDashboard() {
                 onChange={(e) => setProjectFilter(e.target.value)}
               >
                 <option value="All Projects">All Projects</option>
-                <option value="Skyline Residences">Skyline Residences</option>
-                <option value="Greenfield Apartments">Greenfield Apartments</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.name}>{p.name}</option>
+                ))}
               </select>
             </div>
 
@@ -212,12 +351,20 @@ export default function SeniorSiteEngineerDashboard() {
           {activeTab === "Quality Control" && (
             <div className="space-y-6 animate-fadeIn">
               <div className="grid grid-cols-4 gap-4 text-xs">
-                {[
-                  { label: "Total Cube Tests MTD", val: "24 Tests", desc: "For structural concrete mixes" },
-                  { label: "Passed Tests", val: "22 Passed", desc: "91.6% success rate" },
-                  { label: "Active NCRs", val: "1 Alert", desc: "CUB-404 compressive failure" },
-                  { label: "Drawing Conflicts", val: "1 Conflict", desc: "Tower B HVAC clash detected" }
-                ].map((s, idx) => (
+                {(() => {
+                  const totalCount = filteredCubeTests.length;
+                  const passedCount = filteredCubeTests.filter(t => t.status === "Pass").length;
+                  const passedPercent = totalCount > 0 ? ((passedCount / totalCount) * 100).toFixed(1) : "0.0";
+                  const ncrCount = filteredNcrs.length;
+                  const clashCount = filteredDrawings.filter(d => d.status === "Clash Detected").length;
+
+                  return [
+                    { label: "Total Cube Tests MTD", val: `${totalCount} Tests`, desc: "For structural concrete mixes" },
+                    { label: "Passed Tests", val: `${passedCount} Passed`, desc: `${passedPercent}% success rate` },
+                    { label: "Active NCRs", val: `${ncrCount} Alerts`, desc: ncrCount > 0 ? "Compressive failure details logged" : "No active quality alerts" },
+                    { label: "Drawing Conflicts", val: `${clashCount} Conflicts`, desc: clashCount > 0 ? "HVAC/structural clash detected" : "No CAD drawings conflicts" }
+                  ];
+                })().map((s, idx) => (
                   <div key={idx} className="bg-[#111C30] border border-slate-800 rounded-xl p-4">
                     <span className="text-[9px] text-slate-400 font-semibold uppercase">{s.label}</span>
                     <div className="text-xl font-bold mt-1 font-mono text-white">{s.val}</div>
@@ -305,9 +452,9 @@ export default function SeniorSiteEngineerDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {cubeTests.map((t) => (
+                      {filteredCubeTests.map((t) => (
                         <tr key={t.id} className="border-b border-slate-800/50 hover:bg-white/5">
-                          <td className="py-3 px-2 font-mono text-slate-400">{t.id}</td>
+                          <td className="py-3 px-2 font-mono text-slate-400">{t.testId || t.id}</td>
                           <td className="py-3 px-2 font-bold text-white">{t.mixGrade}</td>
                           <td className="py-3 px-2 text-slate-400">{t.castDate}</td>
                           <td className="py-3 px-2 text-slate-400">{t.testAge}</td>
@@ -333,12 +480,12 @@ export default function SeniorSiteEngineerDashboard() {
             <div className="bg-[#111C30] border border-slate-800 rounded-xl p-5 space-y-4 animate-fadeIn">
               <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">CAD Blueprints Catalog</h3>
               <div className="grid md:grid-cols-2 gap-4 text-xs">
-                {drawings.map((dwg) => (
+                {filteredDrawings.map((dwg) => (
                   <div key={dwg.id} className="p-4 bg-[#0e1628] border border-slate-850 rounded-xl flex justify-between items-center">
                     <div>
                       <div className="font-mono text-[9px] text-purple-400 font-bold uppercase">{dwg.category}</div>
                       <div className="font-bold text-white mt-0.5">{dwg.title}</div>
-                      <span className="text-[10px] text-slate-500 font-mono">Drawing Ref: {dwg.id}</span>
+                      <span className="text-[10px] text-slate-500 font-mono">Drawing Ref: {dwg.drawingId || dwg.id}</span>
                     </div>
                     <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
                       dwg.status === "Approved" ? "bg-emerald-500/10 text-emerald-400" :
@@ -354,18 +501,25 @@ export default function SeniorSiteEngineerDashboard() {
           {activeTab === "NCR Records" && (
             <div className="bg-[#111C30] border border-slate-800 rounded-xl p-5 space-y-4 animate-fadeIn">
               <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Non-Conformity Reports (NCR)</h3>
-              <div className="p-4 bg-red-950/20 border border-red-900/40 rounded-xl text-xs space-y-2">
-                <div className="font-bold text-red-400 flex items-center gap-1.5">
-                  <AlertOctagon className="h-4 w-4" /> NCR-2026-001: M40 Concrete Compressive Deficit (Tower A columns)
-                </div>
-                <p className="text-slate-300">
-                  Slab concrete cast on June 5 failed Compaction Cube test limit (measured 18.5 N/mm² against required 26.0 N/mm²).
-                </p>
-                <div className="flex gap-4 text-[10px] text-slate-500 font-mono pt-1">
-                  <span>Logged Date: 09 Jun 2026</span>
-                  <span>Issued To: Concrete Specialist Contractor</span>
-                  <span>Status: Open / Under Inspection</span>
-                </div>
+              <div className="space-y-3">
+                {filteredNcrs.map((ncr) => (
+                  <div key={ncr.id} className="p-4 bg-red-950/20 border border-red-900/40 rounded-xl text-xs space-y-2">
+                    <div className="font-bold text-red-400 flex items-center gap-1.5">
+                      <AlertOctagon className="h-4 w-4" /> {ncr.ncrId || `NCR-${ncr.id}`}: {ncr.title}
+                    </div>
+                    <p className="text-slate-300">
+                      {ncr.description}
+                    </p>
+                    <div className="flex gap-4 text-[10px] text-slate-500 font-mono pt-1">
+                      <span>Logged Date: {ncr.loggedDate}</span>
+                      <span>Issued To: {ncr.issuedTo}</span>
+                      <span>Status: {ncr.status}</span>
+                    </div>
+                  </div>
+                ))}
+                {ncrs.length === 0 && (
+                  <div className="text-slate-400 text-xs text-center py-4">No active NCR alerts.</div>
+                )}
               </div>
             </div>
           )}
@@ -414,19 +568,63 @@ export default function SeniorSiteEngineerDashboard() {
 
           {/* SETTINGS */}
           {activeTab === "Settings" && (
-            <div className="bg-[#111C30] border border-slate-800 rounded-xl p-5 space-y-4 animate-fadeIn max-w-xl">
-              <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-4">Dashboard Profile</h3>
-              <div className="space-y-4 text-xs">
-                <div>
-                  <label className="text-[10px] text-slate-400 block mb-1">Full Name</label>
-                  <input type="text" readOnly defaultValue="Karthick Swaminathan" className="w-full bg-[#0a1120] text-slate-350 border border-slate-800 rounded-lg p-2 outline-none cursor-not-allowed" />
+            <div className="space-y-6 animate-fadeIn max-w-xl text-xs">
+              {success && (
+                <div className="bg-[#10B981]/10 border border-[#10B981]/30 text-emerald-450 p-3 rounded-lg font-semibold text-emerald-400">
+                  ✓ Project progress saved successfully in database.
                 </div>
-                <div>
-                  <label className="text-[10px] text-slate-400 block mb-1">Email</label>
-                  <input type="text" readOnly defaultValue="senior-eng@buildcon.com" className="w-full bg-[#0a1120] text-slate-350 border border-slate-800 rounded-lg p-2 outline-none cursor-not-allowed" />
+              )}
+
+              <form onSubmit={handleSaveSettings} className="space-y-4">
+                <div className="bg-[#111C30] border border-slate-800 rounded-xl p-5 space-y-4">
+                  <h3 className="font-semibold text-slate-200">Dashboard Profile</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-slate-400 block mb-1">Full Name</label>
+                      <input type="text" readOnly value={profileName} className="w-full bg-[#0a1120] text-slate-350 border border-slate-800 rounded-lg p-2 outline-none cursor-not-allowed" />
+                    </div>
+                    <div>
+                      <label className="text-slate-400 block mb-1">Email</label>
+                      <input type="text" readOnly value={profileEmail} className="w-full bg-[#0a1120] text-slate-350 border border-slate-800 rounded-lg p-2 outline-none cursor-not-allowed" />
+                    </div>
+                  </div>
                 </div>
-                <button onClick={() => alert("Configurations updated successfully!")} className="bg-purple-600 hover:bg-purple-550 text-white font-bold py-2 px-4 rounded-lg text-xs transition">Save configurations</button>
-              </div>
+
+                {selectedProject && (
+                  <div className="bg-[#111C30] border border-slate-800 rounded-xl p-5 space-y-4">
+                    <h3 className="font-semibold text-slate-200">
+                      Project Progress Overrides for <span className="text-purple-400">{selectedProject.name}</span>
+                    </h3>
+                    <p className="text-[10px] text-slate-400 italic">As Senior Site Engineer, you can update planned and actual progress percentages for site tracking.</p>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-slate-400">Planned Progress (%)</label>
+                        <input 
+                          type="number" 
+                          min="0"
+                          max="100"
+                          value={editProjPlanned} 
+                          onChange={(e) => setEditProjPlanned(e.target.value)} 
+                          className="w-full bg-[#0a1120] border border-slate-800 rounded-lg p-2 text-white outline-none focus:border-purple-500 transition" 
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-slate-400">Actual Progress (%)</label>
+                        <input 
+                          type="number" 
+                          min="0"
+                          max="100"
+                          value={editProjActual} 
+                          onChange={(e) => setEditProjActual(e.target.value)} 
+                          className="w-full bg-[#0a1120] border border-slate-800 rounded-lg p-2 text-white outline-none focus:border-purple-500 transition" 
+                        />
+                      </div>
+                    </div>
+                    <button type="submit" className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-4 rounded-lg text-xs transition">Save Project Progress</button>
+                  </div>
+                )}
+              </form>
             </div>
           )}
 

@@ -5,4 +5,5 @@ import com.buildcon.erp.payload.request.GenericSignupRequest;
 
 public interface ProcurementManagerService {
     ProcurementManager register(GenericSignupRequest request);
+    void seedProcurementData(Long orgId);
 }

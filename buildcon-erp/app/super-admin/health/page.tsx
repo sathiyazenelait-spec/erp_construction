@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import { Activity, Server, Database, Layers, CheckCircle2, AlertTriangle, ShieldCheck } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Activity, Server, Database, Layers, CheckCircle2 } from "lucide-react";
 
 interface LogEntry {
   timestamp: string;
@@ -9,19 +9,66 @@ interface LogEntry {
   message: string;
 }
 
-const INITIAL_LOGS: LogEntry[] = [
-  { timestamp: "10:04:12", service: "Auth", level: "INFO", message: "User Rajesh Kumar successfully authenticated via chairman route." },
-  { timestamp: "10:03:54", service: "DB-Proxy", level: "INFO", message: "Query optimized on Table 'projects' for user 'chairman@buildcon.com'." },
-  { timestamp: "10:02:11", service: "AI-Router", level: "WARN", message: "Claude API responded with 820ms latency. Routing fallback threshold near limits." },
-  { timestamp: "10:01:05", service: "Core-Engine", level: "INFO", message: "Scheduled garbage cleanup finished. Freed 420MB heap allocation." },
-  { timestamp: "09:58:32", service: "Billing-Svc", level: "ERROR", message: "Webhook invoice failed for tenant ID: org-4 (Past Due trigger set)." },
-];
-
 export default function SystemHealth() {
-  const [logs] = useState<LogEntry[]>(INITIAL_LOGS);
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [filter, setFilter] = useState<"ALL" | "INFO" | "WARN" | "ERROR">("ALL");
 
-  const filteredLogs = filter === "ALL" ? logs : logs.filter(l => l.level === filter);
+  const loadHealth = async (showLoading = false) => {
+    if (showLoading) setLoading(true);
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
+      const res = await fetch("http://localhost:8081/api/super-admin/health", {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        }
+      });
+      if (!res.ok) throw new Error("Failed to load health telemetry.");
+      const json = await res.json();
+      setData(json);
+    } catch (err: any) {
+      setError(err.message || "An error occurred.");
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadHealth(true);
+    // Poll logs and metrics every 5 seconds for dynamic real-time telemetry feeling
+    const interval = setInterval(() => {
+      loadHealth(false);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
+        <div className="h-8 w-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
+        <p className="text-xs text-slate-400">Loading cluster health metrics...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-xl text-center">
+        <p className="text-sm text-red-400 font-semibold">{error}</p>
+        <button
+          onClick={() => loadHealth(true)}
+          className="mt-3 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  const logs = data?.logs || [];
+  const filteredLogs = filter === "ALL" ? logs : logs.filter((l: LogEntry) => l.level === filter);
 
   return (
     <div className="space-y-6">
@@ -46,8 +93,8 @@ export default function SystemHealth() {
           </div>
           <div>
             <div className="text-xs text-slate-400">Next.js Web Instance</div>
-            <div className="text-base font-bold text-white">CPU: 12.4%</div>
-            <div className="text-[10px] text-slate-500">RAM: 4.8GB / 16.0GB</div>
+            <div className="text-base font-bold text-white">CPU: {data?.cpuLoad ?? "12.4%"}</div>
+            <div className="text-[10px] text-slate-500">RAM: {data?.ramUsed ?? "4.8GB"} / {data?.ramTotal ?? "16.0GB"}</div>
           </div>
         </div>
 
@@ -58,8 +105,8 @@ export default function SystemHealth() {
           </div>
           <div>
             <div className="text-xs text-slate-400">PostgreSQL Primary</div>
-            <div className="text-base font-bold text-white">Active Conns: 184</div>
-            <div className="text-[10px] text-emerald-400 font-semibold">Latency: 4ms</div>
+            <div className="text-base font-bold text-white">Active Conns: {data?.dbActiveConnections ?? 184}</div>
+            <div className="text-[10px] text-emerald-400 font-semibold">Latency: {data?.dbLatency ?? "4ms"}</div>
           </div>
         </div>
 
@@ -70,8 +117,8 @@ export default function SystemHealth() {
           </div>
           <div>
             <div className="text-xs text-slate-400">Redis Cache Cluster</div>
-            <div className="text-base font-bold text-white">Hit Rate: 98.7%</div>
-            <div className="text-[10px] text-slate-500">Key Evictions: 0</div>
+            <div className="text-base font-bold text-white">Hit Rate: {data?.redisHitRate ?? "98.7%"}</div>
+            <div className="text-[10px] text-slate-500">Key Evictions: {data?.redisKeyEvictions ?? 0}</div>
           </div>
         </div>
 
@@ -82,8 +129,8 @@ export default function SystemHealth() {
           </div>
           <div>
             <div className="text-xs text-slate-400">Global API Gateway</div>
-            <div className="text-base font-bold text-white">Avg Latency: 112ms</div>
-            <div className="text-[10px] text-slate-500">Error Rate: &lt; 0.01%</div>
+            <div className="text-base font-bold text-white">Avg Latency: {data?.apiGatewayLatency ?? "112ms"}</div>
+            <div className="text-[10px] text-slate-500">Error Rate: {data?.apiGatewayErrorRate ?? "< 0.01%"}</div>
           </div>
         </div>
       </div>
@@ -111,20 +158,24 @@ export default function SystemHealth() {
 
         {/* Console Box */}
         <div className="bg-[#050810] border border-slate-900 rounded-xl p-4 font-mono text-xs text-slate-300 space-y-2.5 max-h-80 overflow-y-auto shadow-inner">
-          {filteredLogs.map((log, idx) => (
-            <div key={idx} className="flex gap-3 items-start border-b border-slate-900/60 pb-2 last:border-0 last:pb-0">
-              <span className="text-slate-500 shrink-0 select-none">{log.timestamp}</span>
-              <span className={`font-bold px-1.5 py-0.5 rounded text-[9px] shrink-0 ${
-                log.level === "INFO" ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" :
-                log.level === "WARN" ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20" :
-                "bg-red-500/10 text-red-400 border border-red-500/20"
-              }`}>
-                {log.level}
-              </span>
-              <span className="text-emerald-400 shrink-0">[{log.service}]</span>
-              <span className="text-slate-300">{log.message}</span>
-            </div>
-          ))}
+          {filteredLogs.length === 0 ? (
+            <div className="text-center text-slate-500 py-6">No logs available for level: {filter}</div>
+          ) : (
+            filteredLogs.map((log: LogEntry, idx: number) => (
+              <div key={idx} className="flex gap-3 items-start border-b border-slate-900/60 pb-2 last:border-0 last:pb-0">
+                <span className="text-slate-500 shrink-0 select-none">{log.timestamp}</span>
+                <span className={`font-bold px-1.5 py-0.5 rounded text-[9px] shrink-0 ${
+                  log.level === "INFO" ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" :
+                  log.level === "WARN" ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20" :
+                  "bg-red-500/10 text-red-400 border border-red-500/20"
+                }`}>
+                  {log.level}
+                </span>
+                <span className="text-emerald-400 shrink-0">[{log.service}]</span>
+                <span className="text-slate-300">{log.message}</span>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

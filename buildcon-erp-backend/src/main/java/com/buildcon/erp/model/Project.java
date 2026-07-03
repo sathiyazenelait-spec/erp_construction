@@ -47,9 +47,34 @@ public class Project {
     @Column(name = "ai_hazard_warnings", length = 1000)
     private String aiHazardWarnings;
 
-    private Double length;
+    @Column(name = "builtup_sqft")
+    private Double builtupSqft;
 
     private Integer floors;
+
+    @Column(name = "location_type")
+    private String locationType;
+
+    @Column(name = "planning_image", columnDefinition = "LONGTEXT")
+    private String planningImage;
+
+    @Column(name = "construction_image", columnDefinition = "LONGTEXT")
+    private String constructionImage;
+
+    @Column(name = "building_model_image", columnDefinition = "LONGTEXT")
+    private String buildingModelImage;
+
+    @Column(name = "architect_name")
+    private String architectName;
+
+    @Column(name = "site_management_id")
+    private Long siteManagementId;
+
+    @Column(name = "planned_progress")
+    private Integer plannedProgress = 0;
+
+    @Column(name = "actual_progress")
+    private Integer actualProgress = 0;
 
     public Project() {
     }
@@ -175,12 +200,12 @@ public class Project {
         this.aiHazardWarnings = aiHazardWarnings;
     }
 
-    public Double getLength() {
-        return length;
+    public Double getBuiltupSqft() {
+        return builtupSqft;
     }
 
-    public void setLength(Double length) {
-        this.length = length;
+    public void setBuiltupSqft(Double builtupSqft) {
+        this.builtupSqft = builtupSqft;
     }
 
     public Integer getFloors() {
@@ -189,5 +214,69 @@ public class Project {
 
     public void setFloors(Integer floors) {
         this.floors = floors;
+    }
+
+    public String getLocationType() {
+        return locationType;
+    }
+
+    public void setLocationType(String locationType) {
+        this.locationType = locationType;
+    }
+
+    public String getPlanningImage() {
+        return planningImage;
+    }
+
+    public void setPlanningImage(String planningImage) {
+        this.planningImage = planningImage;
+    }
+
+    public String getConstructionImage() {
+        return constructionImage;
+    }
+
+    public void setConstructionImage(String constructionImage) {
+        this.constructionImage = constructionImage;
+    }
+
+    public String getArchitectName() {
+        return architectName;
+    }
+
+    public void setArchitectName(String architectName) {
+        this.architectName = architectName;
+    }
+
+    public String getBuildingModelImage() {
+        return buildingModelImage;
+    }
+
+    public void setBuildingModelImage(String buildingModelImage) {
+        this.buildingModelImage = buildingModelImage;
+    }
+
+    public Long getSiteManagementId() {
+        return siteManagementId;
+    }
+
+    public void setSiteManagementId(Long siteManagementId) {
+        this.siteManagementId = siteManagementId;
+    }
+
+    public Integer getPlannedProgress() {
+        return plannedProgress;
+    }
+
+    public void setPlannedProgress(Integer plannedProgress) {
+        this.plannedProgress = plannedProgress;
+    }
+
+    public Integer getActualProgress() {
+        return actualProgress;
+    }
+
+    public void setActualProgress(Integer actualProgress) {
+        this.actualProgress = actualProgress;
     }
 }

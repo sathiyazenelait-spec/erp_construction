@@ -2,6 +2,7 @@ package com.buildcon.erp.controller;
 
 import com.buildcon.erp.payload.request.AiChatRequest;
 import com.buildcon.erp.payload.response.AiChatResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,39 @@ public class AiController {
         String message = request.getMessage().toLowerCase();
         String role = request.getRole() != null ? request.getRole().toLowerCase() : "user";
         
+        // Try forwarding to Python AI service first
+        try {
+            java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+            java.util.Map<String, Object> reqBody = java.util.Map.of(
+                "message", request.getMessage(),
+                "role", role,
+                "profileName", role,
+                "organizationId", ""
+            );
+            
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonReq = mapper.writeValueAsString(reqBody);
+            
+            java.net.http.HttpRequest httpRequest = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create("http://localhost:8001/api/ai/generic-chat"))
+                .header("Content-Type", "application/json")
+                .header("X-API-Key", "BuildconERPSecretKeyForSecurityAuthenticationJWT")
+                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(jsonReq))
+                .build();
+            
+            java.net.http.HttpResponse<String> httpResponse = client.send(httpRequest, java.net.http.HttpResponse.BodyHandlers.ofString());
+            if (httpResponse.statusCode() == 200) {
+                java.util.Map<String, Object> resMap = mapper.readValue(httpResponse.body(), java.util.Map.class);
+                String responseText = (String) resMap.get("response");
+                if (responseText != null && !responseText.isBlank()) {
+                    return ResponseEntity.ok(new AiChatResponse(responseText));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error calling generic AI chat service from AiController: " + e.getMessage());
+        }
+
+        // Fallback keyword-matching response
         String responseText = "I am the BuildWell AI Assistant. How can I help you with your role as " + role + "?";
         
         if (message.contains("hello") || message.contains("hi")) {

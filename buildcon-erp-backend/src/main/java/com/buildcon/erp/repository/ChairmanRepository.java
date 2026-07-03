@@ -13,4 +13,5 @@ public interface ChairmanRepository extends JpaRepository<Chairman, Long> {
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
     void deleteByOrganizationId(Long organizationId);
+    java.util.List<Chairman> findByOrganizationId(Long organizationId);
 }

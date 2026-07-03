@@ -1,9 +1,9 @@
 "use client";
-import React, { useState } from "react";
-import { Box, Check, X, ToggleLeft, ToggleRight, Sparkles, Sliders, Settings } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Box, ToggleLeft, ToggleRight, Sliders } from "lucide-react";
 
 interface ERPModule {
-  id: string;
+  id: number;
   name: string;
   key: string;
   description: string;
@@ -12,29 +12,82 @@ interface ERPModule {
   activeOrgs: number;
 }
 
-const INITIAL_MODULES: ERPModule[] = [
-  { id: "mod-1", name: "Financial Command Center", key: "finance", description: "Expense tracking, balance sheets, profit forecasting, and accounts payable/receivable automation.", status: "Global Enable", tierRequired: "Premium", activeOrgs: 36 },
-  { id: "mod-2", name: "Company Portfolio Tracker", key: "portfolio", description: "Multi-site construction progress visualization, budget performance, and contract value logging.", status: "Global Enable", tierRequired: "Growth", activeOrgs: 42 },
-  { id: "mod-3", name: "Workforce & Payroll Analysis", key: "workforce", description: "Employee register, department structures, manager hierarchy alignment, and site timeclock reports.", status: "Global Enable", tierRequired: "Growth", activeOrgs: 40 },
-  { id: "mod-4", name: "Safety & Compliance Audit", key: "safety", description: "Site incident reports, safety scorecard audits, and compliance checklist certifications.", status: "Global Enable", tierRequired: "Premium", activeOrgs: 28 },
-  { id: "mod-5", name: "AI Executive Assistant Bot", key: "ai_bot", description: "Natural language query interface, automated summary generator, and contextual risk prediction model.", status: "Global Enable", tierRequired: "Enterprise", activeOrgs: 12 },
-  { id: "mod-6", name: "Sales & CRM Pipeline", key: "sales", description: "Lead funnels, proposal generators, and client win/loss ratio calculators.", status: "Global Enable", tierRequired: "Premium", activeOrgs: 30 },
-];
-
 export default function ConfigureModules() {
-  const [modules, setModules] = useState<ERPModule[]>(INITIAL_MODULES);
+  const [modules, setModules] = useState<ERPModule[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const toggleModuleStatus = (id: string) => {
-    setModules(modules.map(m => {
-      if (m.id === id) {
-        return {
-          ...m,
-          status: m.status === "Global Enable" ? "Global Disable" : "Global Enable"
-        };
-      }
-      return m;
-    }));
+  const loadModules = async () => {
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
+      const res = await fetch("http://localhost:8081/api/super-admin/modules", {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        }
+      });
+      if (!res.ok) throw new Error("Failed to load global modules.");
+      const json = await res.json();
+      const mapped = json.map((x: any) => ({
+        id: x.id,
+        name: x.name,
+        key: x.moduleKey,
+        description: x.description,
+        status: x.status,
+        tierRequired: x.tierRequired,
+        activeOrgs: x.activeOrgs
+      }));
+      setModules(mapped);
+    } catch (err: any) {
+      setError(err.message || "An error occurred.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    loadModules();
+  }, []);
+
+  const toggleModuleStatus = async (id: number) => {
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
+      const res = await fetch(`http://localhost:8081/api/super-admin/modules/${id}/toggle`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        }
+      });
+      if (!res.ok) throw new Error("Failed to toggle module activation.");
+      loadModules();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
+        <div className="h-8 w-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
+        <p className="text-xs text-slate-400">Loading module configuration...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-xl text-center">
+        <p className="text-sm text-red-400 font-semibold">{error}</p>
+        <button
+          onClick={loadModules}
+          className="mt-3 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

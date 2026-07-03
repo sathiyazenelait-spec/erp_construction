@@ -4,7 +4,7 @@ import AuthGuard from "@/components/AuthGuard";
 import { usePathname, useRouter } from "next/navigation";
 import LinkComponent from "next/link";
 import {
-  LayoutDashboard, Building2, CreditCard, Box, Activity, Cpu, Settings, LogOut, Calendar, Bell, ShieldCheck
+  LayoutDashboard, Building2, CreditCard, Box, Activity, Cpu, LogOut, Calendar, Bell, ShieldCheck
 } from "lucide-react";
 import { logout, getSession } from "@/lib/auth";
 
@@ -36,7 +36,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     { href: "/super-admin/modules", label: "ERP Modules", icon: <Box className="h-4 w-4" /> },
     { href: "/super-admin/ai", label: "AI Configuration", icon: <Cpu className="h-4 w-4" /> },
     { href: "/super-admin/health", label: "System Health", icon: <Activity className="h-4 w-4" />, badge: 0 },
-    { href: "/super-admin/settings", label: "Global Settings", icon: <Settings className="h-4 w-4" /> },
+
   ];
 
   const isLinkActive = (href: string) => {
@@ -69,11 +69,10 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
                   <LinkComponent
                     key={it.href}
                     href={it.href}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
-                      active
-                        ? "bg-gradient-to-r from-emerald-600/90 to-teal-500/90 text-white font-semibold shadow-md shadow-emerald-500/20"
-                        : "text-slate-400 hover:bg-white/5 hover:text-white"
-                    }`}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${active
+                      ? "bg-gradient-to-r from-emerald-600/90 to-teal-500/90 text-white font-semibold shadow-md shadow-emerald-500/20"
+                      : "text-slate-400 hover:bg-white/5 hover:text-white"
+                      }`}
                   >
                     {it.icon}
                     <span className="flex-1">{it.label}</span>
@@ -95,7 +94,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
             <button
               onClick={() => {
                 logout();
-                router.push("/");
+                router.push("/login/super-admin");
               }}
               className="p-1.5 rounded-md text-slate-400 hover:bg-white/5 hover:text-white transition-colors"
               title="Sign out"

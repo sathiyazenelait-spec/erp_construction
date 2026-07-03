@@ -22,6 +22,32 @@ public class OrganizationController {
         return ResponseEntity.ok(res);
     }
 
+    @PostMapping("/authenticate")
+    public ResponseEntity<?> authenticate(@RequestBody java.util.Map<String, String> request) {
+        String name = request.get("name");
+        String username = request.get("username");
+        String password = request.get("password");
+
+        if (name == null || username == null || password == null) {
+            return ResponseEntity.badRequest().body(new com.buildcon.erp.payload.response.MessageResponse("Error: Missing credentials!"));
+        }
+
+        java.util.Optional<Organization> orgOpt = service.getAllOrganizations().stream()
+                .filter(o -> o.getName().equalsIgnoreCase(name))
+                .findFirst();
+
+        if (orgOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(new com.buildcon.erp.payload.response.MessageResponse("Error: Organization not found!"));
+        }
+
+        Organization org = orgOpt.get();
+        if (username.equals(org.getOrgUsername()) && password.equals(org.getOrgPassword())) {
+            return ResponseEntity.ok(org);
+        } else {
+            return ResponseEntity.status(401).body(new com.buildcon.erp.payload.response.MessageResponse("Error: Invalid credentials!"));
+        }
+    }
+
     @GetMapping
     public ResponseEntity<List<Organization>> getAll() {
         return ResponseEntity.ok(service.getAllOrganizations());
@@ -36,5 +62,17 @@ public class OrganizationController {
     public ResponseEntity<?> delete(@PathVariable Long id) {
         service.deleteOrganization(id);
         return ResponseEntity.ok("Organization deleted successfully!");
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> updateStatus(@PathVariable Long id, @RequestParam String status) {
+        Organization res = service.updateOrganizationStatus(id, status);
+        return ResponseEntity.ok(res);
+    }
+
+    @PutMapping("/{id}/subscription")
+    public ResponseEntity<?> updateSubscription(@PathVariable Long id, @RequestParam String tier) {
+        Organization res = service.updateOrganizationSubscription(id, tier);
+        return ResponseEntity.ok(res);
     }
 }

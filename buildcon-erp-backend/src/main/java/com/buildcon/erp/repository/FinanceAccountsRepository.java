@@ -12,4 +12,5 @@ public interface FinanceAccountsRepository extends JpaRepository<FinanceAccounts
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
     void deleteByOrganizationId(Long organizationId);
+    java.util.List<FinanceAccounts> findByOrganizationId(Long organizationId);
 }

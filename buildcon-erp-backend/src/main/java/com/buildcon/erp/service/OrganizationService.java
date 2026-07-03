@@ -9,4 +9,6 @@ public interface OrganizationService {
     List<Organization> getAllOrganizations();
     Organization getOrganizationById(Long id);
     void deleteOrganization(Long id);
+    Organization updateOrganizationStatus(Long id, String status);
+    Organization updateOrganizationSubscription(Long id, String tier);
 }

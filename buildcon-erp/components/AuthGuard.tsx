@@ -8,7 +8,18 @@ export default function AuthGuard({ role, children }: { role: Role; children: Re
   const [ok, setOk] = useState(false);
   useEffect(() => {
     const s = getSession();
-    if (!s) { router.replace(role === "chairman" ? "/login/chairman" : "/login/director"); return; }
+    if (!s) {
+      if (role === "chairman") {
+        router.replace("/login/chairman");
+      } else if (role === "super-admin" || role === "admin") {
+        router.replace("/login/super-admin");
+      } else if (["md", "project-director", "business-director", "finance-director"].includes(role)) {
+        router.replace("/login/director");
+      } else {
+        router.replace("/login/manager");
+      }
+      return;
+    }
     const matches = s.role === role || (role === "super-admin" && s.role === "admin");
     if (!matches) { router.replace(homeForRole(s.role)); return; }
     setOk(true);

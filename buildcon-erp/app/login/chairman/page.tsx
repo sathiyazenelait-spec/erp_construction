@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Crown, Building2 } from "lucide-react";
+import { Crown, Building2, ArrowLeft } from "lucide-react";
 import { login, homeForRole } from "@/lib/auth";
 
 export default function ChairmanLogin() {
@@ -50,23 +50,30 @@ export default function ChairmanLogin() {
       </div>
 
       <div className="flex items-center justify-center p-8">
-        <form onSubmit={submit} className="w-full max-w-sm">
-          <h1 className="text-2xl font-bold mb-1">Chairman Sign in</h1>
-          <p className="text-sm text-slate-500 mb-6">Restricted — Chairman / Owner access only.</p>
-
-          <label className="text-xs font-medium text-slate-600">Email</label>
-          <input className="input mt-1 mb-4" value={email} onChange={(e)=>setEmail(e.target.value)} />
-
-          <label className="text-xs font-medium text-slate-600">Password</label>
-          <input type="password" className="input mt-1 mb-4" value={password} onChange={(e)=>setPassword(e.target.value)} />
-
-          {err && <div className="text-sm text-red-600 mb-3">{err}</div>}
-          <button className="btn-primary w-full">Sign in as Chairman</button>
-
-          <div className="mt-6 text-center text-sm text-slate-500">
-            Director? <Link className="text-blue-600 hover:underline" href="/login/director">Use directors portal</Link>
+        <div className="w-full max-w-sm">
+          <div className="mb-4">
+            <Link href="/" className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 hover:text-white transition-colors">
+              <ArrowLeft className="h-3.5 w-3.5" /> Back to Home
+            </Link>
           </div>
-        </form>
+          <form onSubmit={submit}>
+            <h1 className="text-2xl font-bold mb-1">Chairman Sign in</h1>
+            <p className="text-sm text-slate-500 mb-6">Restricted — Chairman / Owner access only.</p>
+
+            <label className="text-xs font-medium text-slate-600">Email</label>
+            <input className="input mt-1 mb-4" value={email} onChange={(e)=>setEmail(e.target.value)} />
+
+            <label className="text-xs font-medium text-slate-600">Password</label>
+            <input type="password" className="input mt-1 mb-4" value={password} onChange={(e)=>setPassword(e.target.value)} />
+
+            {err && <div className="text-sm text-red-600 mb-3">{err}</div>}
+            <button className="btn-primary w-full">Sign in as Chairman</button>
+
+            <div className="mt-6 text-center text-sm text-slate-500">
+              Director? <Link className="text-blue-600 hover:underline" href="/login/director">Use directors portal</Link>
+            </div>
+          </form>
+        </div>
       </div>
     </main>
   );

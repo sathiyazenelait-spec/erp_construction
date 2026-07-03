@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Users, Building2, ShieldAlert } from "lucide-react";
+import { Users, Building2, ShieldAlert, ArrowLeft } from "lucide-react";
 import { login, homeForRole, Role } from "@/lib/auth";
 
 const ALLOWED: Role[] = ["md", "project-director", "business-director", "finance-director"];
@@ -70,6 +70,11 @@ export default function DirectorLogin() {
       {/* LOGIN FORM RIGHT BAR */}
       <div className="flex items-center justify-center p-8 bg-[#0A1120]">
         <div className="w-full max-w-sm bg-[#0F182A] border border-slate-800 rounded-2xl p-8 shadow-xl shadow-black/30">
+          <div className="mb-4">
+            <Link href="/" className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 hover:text-white transition-colors">
+              <ArrowLeft className="h-3.5 w-3.5" /> Back to Home
+            </Link>
+          </div>
           <h1 className="text-xl font-bold mb-1 tracking-wide text-white">Director Sign in</h1>
           <p className="text-xs text-slate-400 mb-6">Select your executive seat and log into your board dashboard.</p>
 

@@ -12,4 +12,5 @@ public interface QuantitySurveyorRepository extends JpaRepository<QuantitySurvey
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
     void deleteByOrganizationId(Long organizationId);
+    java.util.List<QuantitySurveyor> findByOrganizationId(Long organizationId);
 }

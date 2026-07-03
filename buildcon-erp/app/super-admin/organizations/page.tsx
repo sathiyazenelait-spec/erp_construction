@@ -28,6 +28,8 @@ export default function ManageOrganizations() {
   const [location, setLocation] = useState("");
   const [phone, setPhone] = useState("");
   const [search, setSearch] = useState("");
+  const [selectedTier, setSelectedTier] = useState<string>("All");
+  const [sortBy, setSortBy] = useState<"latest" | "name">("latest");
 
   const getHeaders = () => {
     const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
@@ -117,10 +119,34 @@ export default function ManageOrganizations() {
     }
   };
 
-  const filteredOrgs = orgs.filter(o =>
-    o.name.toLowerCase().includes(search.toLowerCase()) ||
-    o.domain.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleToggleStatus = async (id: number, currentStatus: string) => {
+    const newStatus = currentStatus === "Active" ? "Inactive" : "Active";
+    try {
+      const res = await fetch(`http://localhost:8081/api/organizations/${id}/status?status=${newStatus}`, {
+        method: "PUT",
+        headers: getHeaders()
+      });
+      if (!res.ok) throw new Error("Failed to update organization status.");
+      loadOrgs();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const filteredOrgs = orgs
+    .filter(o => {
+      const matchesSearch = o.name.toLowerCase().includes(search.toLowerCase()) ||
+                            o.domain.toLowerCase().includes(search.toLowerCase());
+      const matchesTier = selectedTier === "All" || o.subscriptionTier === selectedTier;
+      return matchesSearch && matchesTier;
+    })
+    .sort((a, b) => {
+      if (sortBy === "latest") {
+        return b.id - a.id;
+      } else {
+        return a.name.localeCompare(b.name);
+      }
+    });
 
   return (
     <div className="space-y-6">
@@ -139,8 +165,8 @@ export default function ManageOrganizations() {
         </button>
       </div>
 
-      {/* Search Bar */}
-      <div className="bg-[#0e1628] border border-slate-800/80 rounded-xl p-4 flex gap-4 items-center">
+      {/* Search and Filters Bar */}
+      <div className="bg-[#0e1628] border border-slate-800/80 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-stretch md:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
           <input
@@ -149,6 +175,34 @@ export default function ManageOrganizations() {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-[#080d18] border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-xs text-white outline-none focus:border-emerald-500 transition"
           />
+        </div>
+
+        {/* Tier Filter */}
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] uppercase font-bold text-slate-400">Tier:</span>
+          <select
+            value={selectedTier}
+            onChange={(e) => setSelectedTier(e.target.value)}
+            className="bg-[#080d18] border border-slate-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-emerald-500 transition min-w-[120px]"
+          >
+            <option value="All">All Tiers</option>
+            <option value="Enterprise">Enterprise</option>
+            <option value="Premium">Premium</option>
+            <option value="Growth">Growth</option>
+          </select>
+        </div>
+
+        {/* Sorting Option */}
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] uppercase font-bold text-slate-400">Sort By:</span>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as "latest" | "name")}
+            className="bg-[#080d18] border border-slate-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-emerald-500 transition min-w-[150px]"
+          >
+            <option value="latest">Latest Created</option>
+            <option value="name">Organization Name</option>
+          </select>
         </div>
       </div>
 
@@ -214,13 +268,25 @@ export default function ManageOrganizations() {
                       </span>
                     </td>
                     <td className="p-4 text-right">
-                      <button
-                        onClick={() => handleDelete(o.id)}
-                        className="text-red-400 hover:text-red-300 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
-                        title="Delete Organization"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleToggleStatus(o.id, o.status)}
+                          className={`px-2 py-1 rounded text-[10px] font-bold border transition-colors ${
+                            o.status === "Active"
+                              ? "bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20"
+                              : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                          }`}
+                        >
+                          {o.status === "Active" ? "Deactivate" : "Activate"}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(o.id)}
+                          className="text-red-400 hover:text-red-300 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
+                          title="Delete Organization"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

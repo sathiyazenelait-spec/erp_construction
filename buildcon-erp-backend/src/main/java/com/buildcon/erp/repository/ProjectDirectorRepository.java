@@ -12,4 +12,5 @@ public interface ProjectDirectorRepository extends JpaRepository<ProjectDirector
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
     void deleteByOrganizationId(Long organizationId);
+    java.util.List<ProjectDirector> findByOrganizationId(Long organizationId);
 }

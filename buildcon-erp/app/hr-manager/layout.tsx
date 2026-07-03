@@ -23,12 +23,14 @@ export default function HRManagerLayout({ children }: { children: React.ReactNod
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
 
+  const [tier, setTier] = useState<string>("");
   useEffect(() => {
     const s = getSession();
     if (s) {
       setName(s.name);
       setRole(s.role);
     }
+    setTier((localStorage.getItem("selected_login_tier") || "Enterprise").toLowerCase());
   }, []);
 
   const nav: NavItem[] = [
@@ -47,6 +49,11 @@ export default function HRManagerLayout({ children }: { children: React.ReactNod
     { href: "/hr-manager/settings", label: "Settings", icon: <Settings className="h-4 w-4" /> },
   ];
 
+  const visibleNav = nav.filter(it => {
+    const isAi = it.href.endsWith("/ai") || it.label.toLowerCase().includes("ai");
+    return !(isAi && tier === "growth");
+  });
+
   const isLinkActive = (href: string) => {
     if (href === "/hr-manager") {
       return pathname === "/hr-manager";
@@ -63,15 +70,15 @@ export default function HRManagerLayout({ children }: { children: React.ReactNod
             <div className="p-5 border-b border-slate-800 flex items-center gap-3">
               <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 grid place-items-center shadow-lg shadow-emerald-500/20">
                 <Building2 className="h-5 w-5 text-slate-950 font-bold" />
-              </div>
+               </div>
               <div>
                 <div className="font-bold text-white tracking-wide">BuildWell</div>
                 <div className="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">Constructions</div>
               </div>
             </div>
-
+ 
             <nav className="p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-140px)]">
-              {nav.map((it) => {
+              {visibleNav.map((it) => {
                 const active = isLinkActive(it.href);
                 return (
                   <LinkComponent
@@ -103,7 +110,7 @@ export default function HRManagerLayout({ children }: { children: React.ReactNod
             <button
               onClick={() => {
                 logout();
-                router.push("/");
+                router.push("/login/manager");
               }}
               className="p-1.5 rounded-md text-slate-400 hover:bg-white/5 hover:text-white transition-colors"
               title="Sign out"

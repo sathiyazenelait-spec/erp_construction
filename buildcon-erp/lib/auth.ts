@@ -2,7 +2,7 @@
 
 export type Role = "chairman" | "md" | "project-director" | "business-director" | "finance-director" | "super-admin" | "admin" | "construction-manager" | "marketing-manager" | "hr-manager" | "digital-marketing-tl" | "digital-marketing-executive" | "sales-executive" | "project-manager" | "quantity-surveyor" | "procurement-manager" | "finance-accounts" | "site-management" | "workforce-manager" | "subcontractor" | "senior-site-engineer";
 
-export interface Session { email: string; role: Role; name: string; organizationId?: number; }
+export interface Session { email: string; role: Role; name: string; organizationId?: number; userId?: number; }
 
 const KEY = "buildcon_session";
 
@@ -21,7 +21,7 @@ export async function login(email: string, password: string, allowedRoles: Role[
       const backendRoles = data.roles || [];
       
       for (const r of backendRoles) {
-        const cleaned = r.replace("ROLE_", "").toLowerCase().replace("_", "-");
+        const cleaned = r.replace("ROLE_", "").toLowerCase().replace(/_/g, "-");
         matchedRole = cleaned as Role;
       }
       
@@ -30,7 +30,8 @@ export async function login(email: string, password: string, allowedRoles: Role[
           email: data.email || email, 
           role: matchedRole, 
           name: data.username,
-          organizationId: data.organizationId
+          organizationId: data.organizationId,
+          userId: data.id
         };
         localStorage.setItem(KEY, JSON.stringify(s));
         localStorage.setItem("buildcon_token", data.token); // Use token property from backend

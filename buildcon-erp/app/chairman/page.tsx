@@ -23,6 +23,12 @@ export default function ChairmanDashboard() {
   const [liveAlert, setLiveAlert] = useState<string | null>(null);
   const [liveAlertTime, setLiveAlertTime] = useState<string | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [dbAlerts, setDbAlerts] = useState<any[]>([]);
+  const [notificationSettings, setNotificationSettings] = useState({
+    notifyCuringDelay: true,
+    notifyBudgetDeficit: true,
+    notifyMaterialDelay: true,
+  });
   const [stats, setStats] = useState({
     totalProjects: 18,
     activeProjects: 12,
@@ -35,6 +41,38 @@ export default function ChairmanDashboard() {
     orgName: "BuildCon Organization",
     subscriptionTier: "Enterprise"
   });
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+
+  const handleResolveAlert = async (alertId: number, projectName: string) => {
+    try {
+      const token = localStorage.getItem("buildcon_token");
+      const res = await fetch(`http://localhost:8081/api/alerts/${alertId}/resolve`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        setDbAlerts(prev => prev.filter(a => a.id !== alertId));
+        const noticeMsg = `Chairman noticed progress warning: Project '${projectName}' delay alert has been acknowledged and dismissed.`;
+        localStorage.setItem("chairman_noticed_alert_msg", noticeMsg);
+        window.dispatchEvent(new Event("storage"));
+      } else {
+        alert("Failed to resolve alert.");
+      }
+    } catch (e) {
+      console.error("Error resolving alert", e);
+    }
+  };
+
+  const handleResolveLiveAlert = () => {
+    localStorage.removeItem("chairman_delay_alert_msg");
+    localStorage.removeItem("chairman_delay_alert_time");
+    setLiveAlert(null);
+    const noticeMsg = `Chairman noticed live warning: AI Site Delay Alert has been acknowledged and dismissed.`;
+    localStorage.setItem("chairman_noticed_alert_msg", noticeMsg);
+    window.dispatchEvent(new Event("storage"));
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -80,9 +118,38 @@ export default function ChairmanDashboard() {
             orgName: data.orgName ?? "BuildCon Organization",
             subscriptionTier: data.subscriptionTier ?? "Enterprise"
           });
+          if (data.ai_suggestions) {
+            setAiSuggestions(data.ai_suggestions.split("|").map((item: string) => item.trim()));
+          }
           if (data.subscriptionTier) {
             localStorage.setItem("selected_login_tier", data.subscriptionTier);
           }
+        }
+
+        // Fetch DB project alerts
+        const alertsRes = await fetch(`http://localhost:8081/api/alerts/org/${orgId}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        if (alertsRes.ok) {
+          const alertsData = await alertsRes.json();
+          setDbAlerts(alertsData);
+        }
+
+        // Fetch Settings for Alert Filtering
+        const settingsRes = await fetch("http://localhost:8081/api/chairman/settings", {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        if (settingsRes.ok) {
+          const settingsData = await settingsRes.json();
+          setNotificationSettings({
+            notifyCuringDelay: settingsData.notifyCuringDelay !== false,
+            notifyBudgetDeficit: settingsData.notifyBudgetDeficit !== false,
+            notifyMaterialDelay: settingsData.notifyMaterialDelay !== false,
+          });
         }
       } catch (e) {
         console.error("Failed to fetch chairman dashboard stats", e);
@@ -92,7 +159,64 @@ export default function ChairmanDashboard() {
     }
 
     fetchStats();
+
+    // Listen to storage events to refresh settings if edited in another tab
+    const handleStorage = async () => {
+      const token = localStorage.getItem("buildcon_token");
+      if (!token) return;
+      try {
+        const settingsRes = await fetch("http://localhost:8081/api/chairman/settings", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (settingsRes.ok) {
+          const settingsData = await settingsRes.json();
+          setNotificationSettings({
+            notifyCuringDelay: settingsData.notifyCuringDelay !== false,
+            notifyBudgetDeficit: settingsData.notifyBudgetDeficit !== false,
+            notifyMaterialDelay: settingsData.notifyMaterialDelay !== false,
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
   }, []);
+
+  const shouldShowAlert = (alertItem: any) => {
+    const issues = (alertItem.detectedIssues || "").toLowerCase();
+    
+    // Check if curing alert
+    if (issues.includes("curing") || issues.includes("concrete") || issues.includes("hydration")) {
+      return notificationSettings.notifyCuringDelay;
+    }
+    // Check if budget/cost alert
+    if (issues.includes("budget") || issues.includes("deficit") || issues.includes("cost") || issues.includes("price") || issues.includes("expense")) {
+      return notificationSettings.notifyBudgetDeficit;
+    }
+    // Check if material alert
+    if (issues.includes("material") || issues.includes("steel") || issues.includes("cement") || issues.includes("supply") || issues.includes("ties") || issues.includes("aggregate")) {
+      return notificationSettings.notifyMaterialDelay;
+    }
+    return true;
+  };
+
+  const shouldShowLiveAlert = () => {
+    if (!liveAlert) return false;
+    const alertText = liveAlert.toLowerCase();
+    
+    if (alertText.includes("curing") || alertText.includes("concrete") || alertText.includes("hydration")) {
+      return notificationSettings.notifyCuringDelay;
+    }
+    if (alertText.includes("budget") || alertText.includes("deficit") || alertText.includes("cost") || alertText.includes("price") || alertText.includes("expense")) {
+      return notificationSettings.notifyBudgetDeficit;
+    }
+    if (alertText.includes("material") || alertText.includes("steel") || alertText.includes("cement") || alertText.includes("supply") || alertText.includes("ties") || alertText.includes("aggregate") || alertText.includes("lagging")) {
+      return notificationSettings.notifyCuringDelay || notificationSettings.notifyMaterialDelay;
+    }
+    return true;
+  };
 
   return (
     <div className="space-y-6">
@@ -106,16 +230,76 @@ export default function ChairmanDashboard() {
         </div>
       </div>
 
+      {/* Database AI Delay Alerts */}
+      {dbAlerts.filter(a => !a.resolved && shouldShowAlert(a)).map((alertItem: any) => (
+        <div key={alertItem.id} className="bg-red-950/40 border border-red-500/30 text-red-400 p-4 rounded-xl flex flex-col gap-2 relative animate-fadeIn">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-red-500" />
+              <span className="font-bold text-xs">AI Progress Warning: Project '{alertItem.projectName}' is lagging!</span>
+            </div>
+            <span className="text-[10px] text-slate-500 font-mono">{alertItem.alertTime ? alertItem.alertTime.replace('T', ' ').substring(0, 16) : ""}</span>
+          </div>
+          <div className="grid md:grid-cols-4 gap-4 text-xs mt-1 bg-[#16131F]/50 p-3 rounded-lg border border-red-900/20">
+            <div>
+              <span className="text-[10px] text-slate-400 block font-semibold">Expected Progress</span>
+              <span className="text-sm font-bold font-mono text-blue-400">{alertItem.expectedProgress}%</span>
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-400 block font-semibold">Actual progress</span>
+              <span className="text-sm font-bold font-mono text-amber-400">{alertItem.actualProgress}%</span>
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-400 block font-semibold">Timeline Delay</span>
+              <span className="text-sm font-bold font-mono text-red-400">{alertItem.delayDays} Days</span>
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-400 block font-semibold font-mono">Predicted Requirements</span>
+              <span className="text-[11px] text-slate-200">{alertItem.predictedRequirements}</span>
+            </div>
+          </div>
+          <div className="text-xs space-y-1.5 mt-1 border-t border-slate-800/80 pt-2 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="space-y-1 flex-1">
+              <div><span className="font-semibold text-slate-300">Detected Issues:</span> {alertItem.detectedIssues}</div>
+              {alertItem.siteEngineerJustification ? (
+                <div className="bg-slate-900/40 p-2.5 rounded border border-slate-800 text-[11px] text-emerald-300">
+                  <span className="font-bold block text-slate-400 uppercase text-[9px] mb-0.5">Site Engineer's Justification:</span>
+                  &ldquo;{alertItem.siteEngineerJustification}&rdquo;
+                </div>
+              ) : (
+                <div className="text-slate-500 italic text-[11px]">
+                  Waiting for Site Engineer delay justification...
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => handleResolveAlert(alertItem.id, alertItem.projectName)}
+              className="bg-red-850 hover:bg-red-800 text-white border border-red-700/40 hover:border-red-600 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all uppercase tracking-wide shrink-0 h-fit"
+            >
+              Remove Warning & Notify
+            </button>
+          </div>
+        </div>
+      ))}
+
       {/* Dynamic AI Alert Banner */}
-      {liveAlert && (
-        <div className="bg-red-950/45 border border-red-500/30 text-red-400 p-4 rounded-xl flex items-center justify-between animate-pulse">
+      {shouldShowLiveAlert() && (
+        <div className="bg-red-950/45 border border-red-500/30 text-red-400 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 animate-pulse">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 shrink-0 text-red-500" />
             <div className="text-xs">
               <span className="font-bold">Live AI Site Delay Alert:</span> {liveAlert}
             </div>
           </div>
-          <span className="text-[10px] text-slate-500 font-mono font-semibold shrink-0">{liveAlertTime}</span>
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-[10px] text-slate-500 font-mono font-semibold">{liveAlertTime}</span>
+            <button
+              onClick={handleResolveLiveAlert}
+              className="bg-red-850 hover:bg-red-800 text-white border border-red-700/40 hover:border-red-600 px-3 py-1.5 rounded-lg text-[9px] font-bold transition-all uppercase tracking-wide"
+            >
+              Remove Warning & Notify
+            </button>
+          </div>
         </div>
       )}
 
@@ -357,7 +541,7 @@ export default function ChairmanDashboard() {
         </div>
       </div>
 
-      <AIAssistantBar suggestions={["Show delayed projects", "Revenue forecast", "Department performance", "Cash flow prediction"]} />
+      <AIAssistantBar suggestions={aiSuggestions.length > 0 ? aiSuggestions : ["Show delayed projects", "Revenue forecast", "Department performance", "Cash flow prediction"]} />
     </div>
   );
 }

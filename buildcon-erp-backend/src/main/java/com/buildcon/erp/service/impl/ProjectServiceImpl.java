@@ -47,6 +47,34 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public Project updateProject(Long id, Project details) {
+        Project existing = getProjectById(id);
+        if (details.getName() != null) existing.setName(details.getName());
+        if (details.getLocation() != null) existing.setLocation(details.getLocation());
+        if (details.getBudget() != null) existing.setBudget(details.getBudget());
+        if (details.getStartDate() != null) existing.setStartDate(details.getStartDate());
+        if (details.getEndDate() != null) existing.setEndDate(details.getEndDate());
+        if (details.getStatus() != null) existing.setStatus(details.getStatus());
+        if (details.getDesignPlanName() != null) existing.setDesignPlanName(details.getDesignPlanName());
+        if (details.getArchitectSpecName() != null) existing.setArchitectSpecName(details.getArchitectSpecName());
+        if (details.getWorkforceDetails() != null) existing.setWorkforceDetails(details.getWorkforceDetails());
+        if (details.getAiSuggestedBudget() != null) existing.setAiSuggestedBudget(details.getAiSuggestedBudget());
+        if (details.getAiEstimatedHours() != null) existing.setAiEstimatedHours(details.getAiEstimatedHours());
+        if (details.getAiHazardWarnings() != null) existing.setAiHazardWarnings(details.getAiHazardWarnings());
+        if (details.getBuiltupSqft() != null) existing.setBuiltupSqft(details.getBuiltupSqft());
+        if (details.getFloors() != null) existing.setFloors(details.getFloors());
+        if (details.getLocationType() != null) existing.setLocationType(details.getLocationType());
+        if (details.getPlanningImage() != null) existing.setPlanningImage(details.getPlanningImage());
+        if (details.getConstructionImage() != null) existing.setConstructionImage(details.getConstructionImage());
+        if (details.getBuildingModelImage() != null) existing.setBuildingModelImage(details.getBuildingModelImage());
+        if (details.getArchitectName() != null) existing.setArchitectName(details.getArchitectName());
+        if (details.getSiteManagementId() != null) existing.setSiteManagementId(details.getSiteManagementId());
+        if (details.getPlannedProgress() != null) existing.setPlannedProgress(details.getPlannedProgress());
+        if (details.getActualProgress() != null) existing.setActualProgress(details.getActualProgress());
+        return repository.save(existing);
+    }
+
+    @Override
     public Project approveProject(Long id) {
         Project project = getProjectById(id);
         project.setStatus("Active");

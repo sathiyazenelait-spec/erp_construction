@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Sparkles } from "lucide-react";
+import { getSession } from "@/lib/auth";
 
 interface Message {
   sender: "ai" | "user";
@@ -8,45 +9,95 @@ interface Message {
   time: string;
 }
 
-const autoReplies: Record<string, string> = {
-  "why profit margin decreased?": "Consolidated Gross Margin decreased by 1.2% in May due to a 12% rise in structural steel pricing from supplier Global Steel Inc. Adjusting subcontractor milestones is recommended to stabilize cash outflows.",
-  "least profitable project": "The Villa Community project in Coimbatore currently registers the lowest margins (18.6%) due to a ₹1.8 Cr cost overrun caused by foundational excavation delays.",
-  "year-end profit forecast": "Based on the remaining contracts backlog of ₹182 Cr, the FY26 year-end net profit is projected at ₹23.4 Cr with an expected margin of 24.1%, provided overhead costs do not escalate beyond 5%.",
-};
-
 export default function AIFinanceAssistant() {
+  const [session, setSession] = useState<any>(null);
   const [messages, setMessages] = useState<Message[]>([
-    { sender: "ai", text: "Good day, Suresh. I am your AI Finance Assistant. Ask me anything about accounts, margins, cash flow projections, or budget status.", time: "10:30 AM" }
+    { sender: "ai", text: "Good day. I am your AI Finance Assistant. Ask me anything about accounts, margins, cash flow projections, or budget status.", time: "10:30 AM" }
   ]);
   const [input, setInput] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const s = getSession();
+    setSession(s);
+    const orgId = s?.organizationId || 1;
+    const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
+    fetch(`http://localhost:8081/api/finance-director/dashboard/org/${orgId}`, {
+      headers: token ? { "Authorization": `Bearer ${token}` } : {}
+    })
+      .then((res) => res.json())
+      .then((d) => {
+        if (d.ai_suggestions) {
+          setSuggestions(d.ai_suggestions.split("|").map((item: string) => item.trim()));
+        }
+        if (d.profileName) {
+          setMessages([
+            { sender: "ai", text: `Good day, ${d.profileName}. I am your AI Finance Assistant. Ask me anything about accounts, margins, cash flow projections, or budget status.`, time: "10:30 AM" }
+          ]);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching AI suggestions for FD:", err);
+        setSuggestions([
+          "Why profit margin decreased?",
+          "Least profitable project",
+          "Year-end profit forecast"
+        ]);
+      });
+  }, []);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = (textToSend?: string) => {
+  const handleSend = async (textToSend?: string) => {
     const text = textToSend || input;
     if (!text.trim()) return;
 
-    const userMsg: Message = { sender: "user", text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+    const userMsg: Message = { 
+      sender: "user", 
+      text, 
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    };
     setMessages((prev) => [...prev, userMsg]);
     if (!textToSend) setInput("");
 
-    setTimeout(() => {
-      const lower = text.toLowerCase().trim();
-      let replyText = "I will look into the ledger data. Can you specify if you want me to pull the reports for a specific site or month?";
-      
-      for (const key of Object.keys(autoReplies)) {
-        if (lower.includes(key) || key.includes(lower)) {
-          replyText = autoReplies[key];
-          break;
-        }
+    try {
+      const orgId = session?.organizationId || 1;
+      const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
+      const res = await fetch("http://localhost:8081/api/finance-director/ai-chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ message: text, organizationId: String(orgId) }),
+      });
+      if (res.ok) {
+        const d = await res.json();
+        const aiMsg: Message = { 
+          sender: "ai", 
+          text: d.response, 
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+        };
+        setMessages((prev) => [...prev, aiMsg]);
+      } else {
+        const aiMsg: Message = { 
+          sender: "ai", 
+          text: "Error calling AI Assistant backend.", 
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+        };
+        setMessages((prev) => [...prev, aiMsg]);
       }
-
-      const aiMsg: Message = { sender: "ai", text: replyText, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+    } catch {
+      const aiMsg: Message = { 
+        sender: "ai", 
+        text: "AI service is currently offline. Please check connection.", 
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+      };
       setMessages((prev) => [...prev, aiMsg]);
-    }, 800);
+    }
   };
 
   return (
@@ -93,13 +144,13 @@ export default function AIFinanceAssistant() {
 
       {/* Suggestions List */}
       <div className="p-3 border-t border-slate-850 bg-[#0e1628] flex flex-wrap gap-2">
-        {Object.keys(autoReplies).map((suggestion) => (
+        {suggestions.map((suggestion) => (
           <button
             key={suggestion}
             onClick={() => handleSend(suggestion)}
             className="text-[10px] bg-[#111C30] hover:bg-slate-800 text-slate-300 hover:text-white px-2.5 py-1 rounded-full border border-slate-800 transition"
           >
-            {suggestion.charAt(0).toUpperCase() + suggestion.slice(1)}
+            {suggestion}
           </button>
         ))}
       </div>

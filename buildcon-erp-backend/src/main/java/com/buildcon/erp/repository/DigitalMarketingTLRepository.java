@@ -11,5 +11,6 @@ public interface DigitalMarketingTLRepository extends JpaRepository<DigitalMarke
     Optional<DigitalMarketingTL> findByEmail(String email);
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
+    java.util.List<DigitalMarketingTL> findByOrganizationId(Long organizationId);
     void deleteByOrganizationId(Long organizationId);
 }

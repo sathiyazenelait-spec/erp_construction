@@ -12,4 +12,5 @@ public interface SubcontractorRepository extends JpaRepository<Subcontractor, Lo
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
     void deleteByOrganizationId(Long organizationId);
+    java.util.List<Subcontractor> findByOrganizationId(Long organizationId);
 }

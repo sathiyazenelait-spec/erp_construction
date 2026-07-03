@@ -41,6 +41,13 @@ public class ProgressClaimServiceImpl implements ProgressClaimService {
     }
 
     @Override
+    public ProgressClaim holdClaim(Long id) {
+        ProgressClaim claim = getClaimById(id);
+        claim.setStatus("HOLD");
+        return repository.save(claim);
+    }
+
+    @Override
     public ProgressClaim payClaim(Long id, String paymentReference) {
         ProgressClaim claim = getClaimById(id);
         if (!"APPROVED".equals(claim.getStatus())) {

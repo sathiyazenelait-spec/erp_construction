@@ -1,22 +1,107 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { TrendingUp, Clock, AlertTriangle } from "lucide-react";
 import AIAssistantBar from "@/components/AIAssistantBar";
-
-const progressTrend = [
-  { m: "Jan", Planned: 45, Actual: 42 },
-  { m: "Feb", Planned: 50, Actual: 48 },
-  { m: "Mar", Planned: 58, Actual: 54 },
-  { m: "Apr", Planned: 65, Actual: 60 },
-  { m: "May", Planned: 72, Actual: 72 },
-];
+import { getSession } from "@/lib/auth";
 
 export default function ProjectProgress() {
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const s = getSession();
+    const orgId = s?.organizationId || 1;
+    const token = localStorage.getItem("buildcon_token");
+    fetch(`http://localhost:8081/api/projects/org/${orgId}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setProjects(data || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching projects for progress:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-40 items-center justify-center text-slate-350 text-xs font-semibold">
+        Loading Project Progress Analytics...
+      </div>
+    );
+  }
+
+  // Calculate dynamic metrics
+  const totalActual = projects.reduce((acc, p) => acc + (p.actualProgress || 0), 0);
+  const avgProgress = projects.length > 0 ? (totalActual / projects.length).toFixed(1) : "0.0";
+
+  const onTrackCount = projects.filter((p) => (p.actualProgress || 0) >= (p.plannedProgress || 0)).length;
+  const onTrackPercent = projects.length > 0 ? Math.round((onTrackCount / projects.length) * 100) : 0;
+
+  const criticalCount = projects.filter((p) => ((p.actualProgress || 0) - (p.plannedProgress || 0)) <= -10).length;
+
+  // Generate dynamic monthly trend from project portfolio
+  const generateProgressTrend = (projectList: any[]) => {
+    const months = [
+      { name: "Jan", date: new Date("2026-01-31") },
+      { name: "Feb", date: new Date("2026-02-28") },
+      { name: "Mar", date: new Date("2026-03-31") },
+      { name: "Apr", date: new Date("2026-04-30") },
+      { name: "May", date: new Date("2026-05-31") },
+      { name: "Jun", date: new Date("2026-06-25") },
+    ];
+
+    if (!projectList || projectList.length === 0) {
+      return months.map(m => ({ m: m.name, Planned: 0, Actual: 0 }));
+    }
+
+    return months.map(m => {
+      let totalPlanned = 0;
+      let totalActual = 0;
+
+      projectList.forEach(p => {
+        const start = p.startDate ? new Date(p.startDate) : new Date("2026-01-01");
+        const currentValPlanned = p.plannedProgress || 0;
+        const currentValActual = p.actualProgress || 0;
+        const today = new Date("2026-06-25"); // Anchor today to context date
+
+        if (m.date < start) {
+          // Project hasn't started yet
+          totalPlanned += 0;
+          totalActual += 0;
+        } else if (m.date >= today) {
+          // Current/future month gets the current progress
+          totalPlanned += currentValPlanned;
+          totalActual += currentValActual;
+        } else {
+          // Interpolate monthly progress from start to today
+          const totalDuration = today.getTime() - start.getTime();
+          const elapsedDuration = m.date.getTime() - start.getTime();
+          const fraction = totalDuration > 0 ? Math.max(0, Math.min(1, elapsedDuration / totalDuration)) : 0;
+
+          totalPlanned += Math.round(fraction * currentValPlanned);
+          totalActual += Math.round(fraction * currentValActual);
+        }
+      });
+
+      return {
+        m: m.name,
+        Planned: Math.round(totalPlanned / projectList.length),
+        Actual: Math.round(totalActual / projectList.length)
+      };
+    });
+  };
+
+  const progressTrend = generateProgressTrend(projects);
+
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-white tracking-wide">01. PROJECT PROGRESS</h2>
+        <h2 className="text-xl font-bold text-white tracking-wide font-sans">01. PROJECT PROGRESS</h2>
         <p className="text-xs text-slate-400">Detailed overview of target completions, milestone progress trends, and variances across active sites.</p>
       </div>
 
@@ -27,7 +112,7 @@ export default function ProjectProgress() {
           </div>
           <div>
             <div className="text-[10px] text-slate-400">Average Portfolio Progress</div>
-            <div className="text-xl font-bold text-white">54.2%</div>
+            <div className="text-xl font-bold text-white">{avgProgress}%</div>
           </div>
         </div>
 
@@ -37,17 +122,17 @@ export default function ProjectProgress() {
           </div>
           <div>
             <div className="text-[10px] text-slate-400">Projects On Track</div>
-            <div className="text-xl font-bold text-white">78% (14 Sites)</div>
+            <div className="text-xl font-bold text-white">{onTrackPercent}% ({onTrackCount} {onTrackCount === 1 ? "Site" : "Sites"})</div>
           </div>
         </div>
 
         <div className="bg-[#111C30] border border-slate-800 rounded-xl p-4 flex items-center gap-4">
-          <div className="h-10 w-10 rounded-lg bg-rose-500/10 text-rose-450 text-rose-450 text-rose-400 grid place-items-center">
+          <div className="h-10 w-10 rounded-lg bg-rose-500/10 text-rose-455 text-rose-450 text-rose-400 grid place-items-center">
             <AlertTriangle className="h-5 w-5" />
           </div>
           <div>
             <div className="text-[10px] text-slate-400">Critical Delays</div>
-            <div className="text-xl font-bold text-rose-450 text-rose-450 text-rose-400">2 Projects</div>
+            <div className="text-xl font-bold text-rose-400">{criticalCount} {criticalCount === 1 ? "Project" : "Projects"}</div>
           </div>
         </div>
       </div>
@@ -94,33 +179,48 @@ export default function ProjectProgress() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/50">
-              {[
-                ["Skyline Residences", "75%", "72%", "-3%", "Behind"],
-                ["Greenfield Apartments", "52%", "55%", "+3%", "On Track"],
-                ["Phoenix Commercial", "42%", "30%", "-12%", "Critical"],
-                ["Lakeview Villas", "60%", "65%", "+5%", "On Track"],
-                ["IT Park Phase - 1", "45%", "40%", "-5%", "Behind"]
-              ].map((row, idx) => (
-                <tr key={idx}>
-                  <td className="py-3 font-medium text-slate-200">{row[0]}</td>
-                  <td className="text-slate-350">{row[1]}</td>
-                  <td className="text-white font-bold">{row[2]}</td>
-                  <td className={row[3].includes("-") ? "text-rose-400 font-semibold" : "text-emerald-450 text-emerald-400 font-semibold"}>
-                    {row[3]}
-                  </td>
-                  <td>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
-                      row[4] === "Critical" 
-                        ? "bg-rose-500/10 text-rose-455 text-rose-450 text-rose-400 border-rose-500/20" 
-                        : row[4] === "Behind"
-                        ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                        : "bg-emerald-500/10 text-emerald-450 text-emerald-400 border-emerald-500/20"
-                    }`}>
-                      {row[4]}
-                    </span>
+              {projects.map((p, idx) => {
+                const planned = p.plannedProgress || 0;
+                const actual = p.actualProgress || 0;
+                const variance = actual - planned;
+                const varianceStr = variance >= 0 ? `+${variance}%` : `${variance}%`;
+                
+                let status = "On Track";
+                if (variance <= -10) {
+                  status = "Critical";
+                } else if (variance < 0) {
+                  status = "Behind";
+                }
+
+                return (
+                  <tr key={p.id || idx}>
+                    <td className="py-3 font-medium text-slate-200">{p.name}</td>
+                    <td className="text-slate-350">{planned}%</td>
+                    <td className="text-white font-bold">{actual}%</td>
+                    <td className={variance < 0 ? "text-rose-455 text-rose-450 text-rose-400 font-semibold" : "text-emerald-450 text-emerald-400 font-semibold"}>
+                      {varianceStr}
+                    </td>
+                    <td>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                        status === "Critical" 
+                          ? "bg-rose-500/10 text-rose-400 border-rose-500/20" 
+                          : status === "Behind"
+                          ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                          : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                      }`}>
+                        {status}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+              {projects.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="py-4 text-center text-slate-400">
+                    No projects found for this organization.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

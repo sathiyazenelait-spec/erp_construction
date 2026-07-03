@@ -128,6 +128,10 @@ public class OrganizationServiceImpl implements OrganizationService {
             "Active",
             request.getSubscriptionTier()
         );
+        String defaultOrgUsername = org.getName().toLowerCase().replace(" ", "") + "&0123";
+        String defaultOrgPassword = org.getName().toLowerCase().split(" ")[0] + "@123";
+        org.setOrgUsername(defaultOrgUsername);
+        org.setOrgPassword(defaultOrgPassword);
         org = repository.save(org);
 
         // 2. Create and save Chairman
@@ -194,5 +198,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         // 4. Finally delete the organization itself
         repository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public Organization updateOrganizationStatus(Long id, String status) {
+        Organization org = repository.findById(id)
+                .orElseThrow(() -> new CustomValidationException("Error: Organization not found with ID: " + id));
+        org.setStatus(status);
+        return repository.save(org);
+    }
+
+    @Override
+    @Transactional
+    public Organization updateOrganizationSubscription(Long id, String tier) {
+        Organization org = repository.findById(id)
+                .orElseThrow(() -> new CustomValidationException("Error: Organization not found with ID: " + id));
+        org.setSubscriptionTier(tier);
+        return repository.save(org);
     }
 }

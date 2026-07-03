@@ -12,4 +12,5 @@ public interface HRManagerRepository extends JpaRepository<HRManager, Long> {
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
     void deleteByOrganizationId(Long organizationId);
+    java.util.List<HRManager> findByOrganizationId(Long organizationId);
 }

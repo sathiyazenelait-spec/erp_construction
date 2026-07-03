@@ -12,4 +12,5 @@ public interface WorkforceManagerRepository extends JpaRepository<WorkforceManag
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
     void deleteByOrganizationId(Long organizationId);
+    java.util.List<WorkforceManager> findByOrganizationId(Long organizationId);
 }

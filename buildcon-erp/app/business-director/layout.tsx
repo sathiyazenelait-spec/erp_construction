@@ -22,30 +22,107 @@ export default function BDDLayout({ children }: { children: React.ReactNode }) {
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
 
+  // Dynamic states
+  const [profileName, setProfileName] = useState("");
+  const [avatarInitials, setAvatarInitials] = useState("");
+  const [sidebarMenus, setSidebarMenus] = useState("");
+  const [headerDate, setHeaderDate] = useState("Wednesday, 28 May 2025");
+  const [loading, setLoading] = useState(true);
+  const [tier, setTier] = useState<string>("");
+
   useEffect(() => {
     const s = getSession();
     if (s) {
       setName(s.name);
       setRole(s.role);
     }
+    setTier((localStorage.getItem("selected_login_tier") || "Enterprise").toLowerCase());
+    const orgId = s?.organizationId || 1;
+    const token = localStorage.getItem("buildcon_token");
+    fetch(`http://localhost:8081/api/business-director/dashboard/org/${orgId}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+      .then((res) => res.json())
+      .then((d) => {
+        setProfileName(d.profileName || s?.name || "Rajesh Verma");
+        setAvatarInitials(d.avatarInitials || "RV");
+        setSidebarMenus(d.sidebar_menus || "");
+        if (d.header_date) {
+          setHeaderDate(d.header_date);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error loading BD layout configurations:", err);
+        setProfileName(s?.name || "Rajesh Verma");
+        setAvatarInitials("RV");
+        setLoading(false);
+      });
   }, []);
 
-  const nav: NavItem[] = [
-    { href: "/business-director", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
-    { href: "/business-director/leads", label: "Leads Management", icon: <Target className="h-4 w-4" /> },
-    { href: "/business-director/opportunities", label: "Opportunities", icon: <FolderKanban className="h-4 w-4" /> },
-    { href: "/business-director/tenders", label: "Tenders", icon: <FileText className="h-4 w-4" /> },
-    { href: "/business-director/crm", label: "Clients & CRM", icon: <Users className="h-4 w-4" /> },
-    { href: "/business-director/marketing", label: "Marketing Analytics", icon: <Megaphone className="h-4 w-4" /> },
-    { href: "/business-director/pipeline", label: "Sales Pipeline", icon: <TrendingUp className="h-4 w-4" /> },
-    { href: "/business-director/proposals", label: "Proposals", icon: <FileEdit className="h-4 w-4" /> },
-    { href: "/business-director/competitor", label: "Competitor Analysis", icon: <BarChart3 className="h-4 w-4" /> },
-    { href: "/business-director/reports", label: "Reports & Analytics", icon: <FileText className="h-4 w-4" /> },
-    { href: "/business-director/ai", label: "AI Sales Assistant", icon: <Bot className="h-4 w-4" /> },
-    { href: "/business-director/targets", label: "Targets & Incentives", icon: <Trophy className="h-4 w-4" /> },
-    { href: "/business-director/team", label: "Team Performance", icon: <Users className="h-4 w-4" /> },
-    { href: "/business-director/settings", label: "Settings", icon: <Settings className="h-4 w-4" /> },
-  ];
+  const getSidebarIcon = (menuName: string) => {
+    switch (menuName) {
+      case "Dashboard": return <LayoutDashboard className="h-4 w-4" />;
+      case "Leads Management": return <Target className="h-4 w-4" />;
+      case "Opportunities": return <FolderKanban className="h-4 w-4" />;
+      case "Tenders": return <FileText className="h-4 w-4" />;
+      case "Clients & CRM": return <Users className="h-4 w-4" />;
+      case "Marketing Analytics": return <Megaphone className="h-4 w-4" />;
+      case "Sales Pipeline": return <TrendingUp className="h-4 w-4" />;
+      case "Proposals": return <FileEdit className="h-4 w-4" />;
+      case "Competitor Analysis": return <BarChart3 className="h-4 w-4" />;
+      case "Reports & Analytics": return <FileText className="h-4 w-4" />;
+      case "AI Sales Assistant": return <Bot className="h-4 w-4" />;
+      case "Targets & Incentives": return <Trophy className="h-4 w-4" />;
+      case "Team Performance": return <Users className="h-4 w-4" />;
+      case "Settings": return <Settings className="h-4 w-4" />;
+      default: return <FileText className="h-4 w-4" />;
+    }
+  };
+
+  const getSidebarHref = (menuName: string) => {
+    switch (menuName) {
+      case "Dashboard": return "/business-director";
+      case "Leads Management": return "/business-director/leads";
+      case "Opportunities": return "/business-director/opportunities";
+      case "Tenders": return "/business-director/tenders";
+      case "Clients & CRM": return "/business-director/crm";
+      case "Marketing Analytics": return "/business-director/marketing";
+      case "Sales Pipeline": return "/business-director/pipeline";
+      case "Proposals": return "/business-director/proposals";
+      case "Competitor Analysis": return "/business-director/competitor";
+      case "Reports & Analytics": return "/business-director/reports";
+      case "AI Sales Assistant": return "/business-director/ai";
+      case "Targets & Incentives": return "/business-director/targets";
+      case "Team Performance": return "/business-director/team";
+      case "Settings": return "/business-director/settings";
+      default: return "/business-director";
+    }
+  };
+
+  const sidebarList = sidebarMenus
+    ? sidebarMenus.split("|").map((n) => n.trim()).filter(Boolean)
+    : [
+        "Dashboard",
+        "Leads Management",
+        "Opportunities",
+        "Tenders",
+        "Clients & CRM",
+        "Marketing Analytics",
+        "Sales Pipeline",
+        "Proposals",
+        "Competitor Analysis",
+        "Reports & Analytics",
+        "AI Sales Assistant",
+        "Targets & Incentives",
+        "Team Performance",
+        "Settings"
+      ];
+
+  const visibleSidebarList = sidebarList.filter(item => {
+    const isAi = item.toLowerCase().includes("ai");
+    return !(isAi && tier === "growth");
+  });
 
   const isLinkActive = (href: string) => {
     if (href === "/business-director") {
@@ -53,6 +130,14 @@ export default function BDDLayout({ children }: { children: React.ReactNode }) {
     }
     return pathname === href || pathname.startsWith(href + "/");
   };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#0A1120] text-slate-350 text-sm">
+        Loading Command Center...
+      </div>
+    );
+  }
 
   return (
     <AuthGuard role="business-director">
@@ -71,21 +156,21 @@ export default function BDDLayout({ children }: { children: React.ReactNode }) {
             </div>
 
             <nav className="p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-140px)] animate-fadeIn">
-              {nav.map((it) => {
-                const active = isLinkActive(it.href);
+              {visibleSidebarList.map((item) => {
+                const href = getSidebarHref(item);
+                const active = isLinkActive(href);
                 return (
                   <LinkComponent
-                    key={it.href}
-                    href={it.href}
+                    key={item}
+                    href={href}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
                       active
                         ? "bg-gradient-to-r from-blue-600/95 to-blue-500/95 text-white font-semibold shadow-md shadow-blue-500/20"
                         : "text-slate-450 text-slate-400 hover:bg-white/5 hover:text-white"
                     }`}
                   >
-                    {it.icon}
-                    <span className="flex-1">{it.label}</span>
-                    {it.badge ? <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-red-500 text-white">{it.badge}</span> : null}
+                    {getSidebarIcon(item)}
+                    <span className="flex-1">{item}</span>
                   </LinkComponent>
                 );
               })}
@@ -94,16 +179,16 @@ export default function BDDLayout({ children }: { children: React.ReactNode }) {
 
           <div className="p-4 border-t border-slate-800 flex items-center gap-3">
             <div className="h-9 w-9 rounded-full bg-blue-600/20 text-blue-400 border border-blue-500/30 grid place-items-center text-sm font-bold shadow-inner">
-              {name ? name[0] : "R"}
+              {avatarInitials}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold text-white truncate">{name || "Rajesh Verma"}</div>
+              <div className="text-sm font-semibold text-white truncate">{profileName}</div>
               <div className="text-[11px] text-slate-400 font-medium capitalize truncate">Business Development</div>
             </div>
             <button
               onClick={() => {
                 logout();
-                router.push("/");
+                router.push("/login/director");
               }}
               className="p-1.5 rounded-md text-slate-400 hover:bg-white/5 hover:text-white transition-colors"
               title="Sign out"
@@ -119,14 +204,14 @@ export default function BDDLayout({ children }: { children: React.ReactNode }) {
           <header className="bg-[#0F182A]/50 backdrop-blur-md border-b border-slate-800 px-6 py-4 flex items-center gap-4">
             <div className="flex-1">
               <h1 className="text-lg font-bold text-white flex items-center gap-2">
-                Good Morning, {name || "Rajesh Verma"} <span className="animate-pulse">👋</span>
+                Good Morning, {profileName} <span className="animate-pulse">👋</span>
               </h1>
               <p className="text-xs text-slate-400">Business Development Operational command console.</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="bg-[#111C30] border border-slate-850 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-300 flex items-center gap-2">
                 <Calendar className="h-3.5 w-3.5 text-blue-400" />
-                Wednesday, 28 May 2025
+                {headerDate}
               </div>
               <button className="relative p-2 rounded-lg bg-[#111C30] border border-slate-850 text-slate-300 hover:bg-slate-800">
                 <Bell className="h-4 w-4" />

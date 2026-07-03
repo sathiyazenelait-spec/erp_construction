@@ -1,70 +1,184 @@
 "use client";
-import React, { useState } from "react";
-import { Bot, Send, Sparkles } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Send, Bot, User, Sparkles } from "lucide-react";
+import { getSession } from "@/lib/auth";
+
+interface Message {
+  sender: "ai" | "user";
+  text: string;
+  time: string;
+}
 
 export default function AIBusinessAssistant() {
-  const [messages, setMessages] = useState([
-    { role: "assistant", text: "Hello Rajesh Kumar. I am your BuildWell AI Assistant. I have analyzed active construction sites, balance sheets, and procurement pipelines. Ask me anything about project delays, financial status, or material supply lines." }
+  const [session, setSession] = useState<any>(null);
+  const [messages, setMessages] = useState<Message[]>([
+    { sender: "ai", text: "Hello. I am your BuildWell AI Assistant. I have analyzed active construction sites, balance sheets, and procurement pipelines. Ask me anything about project delays, financial status, or material supply lines.", time: "10:30 AM" }
   ]);
   const [input, setInput] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const endRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input) return;
+  useEffect(() => {
+    const s = getSession();
+    setSession(s);
+    const orgId = s?.organizationId || 1;
+    const token = localStorage.getItem("buildcon_token");
+    fetch(`http://localhost:8081/api/md/dashboard/org/${orgId}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+      .then((res) => res.json())
+      .then((d) => {
+        if (d.ai_suggestions) {
+          setSuggestions(d.ai_suggestions.split("|").map((item: string) => item.trim()));
+        }
+        if (d.profileName) {
+          setMessages([
+            { sender: "ai", text: `Hello, ${d.profileName}. I am your BuildWell AI Assistant. I have analyzed active construction sites, balance sheets, and procurement pipelines. Ask me anything about project delays, financial status, or material supply lines.`, time: "10:30 AM" }
+          ]);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching AI suggestions for MD:", err);
+        setSuggestions([
+          "Show delayed projects",
+          "Revenue forecast",
+          "Department performance",
+          "Cash flow prediction"
+        ]);
+      });
+  }, []);
 
-    const userMessage = { role: "user", text: input };
-    setMessages([...messages, userMessage]);
-    setInput("");
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-    // Simulate AI response
-    setTimeout(() => {
-      let reply = "I've analyzed that request. Our primary risk is currently at the Commercial Complex site due to concrete shortages.";
-      if (input.toLowerCase().includes("delay")) {
-        reply = "Currently, Skyline Apartments is delayed by 4 weeks, and Commercial Complex is at critical risk due to labour issues.";
-      } else if (input.toLowerCase().includes("profit") || input.toLowerCase().includes("revenue")) {
-        reply = "Our revenue stands at ₹ 24.5 Cr MTD with a healthy net profit margin of 23.6% (₹ 5.8 Cr).";
+  const handleSend = async (textToSend?: string) => {
+    const text = textToSend || input;
+    if (!text.trim()) return;
+
+    const userMsg: Message = { 
+      sender: "user", 
+      text, 
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    if (!textToSend) setInput("");
+
+    try {
+      const orgId = session?.organizationId || 1;
+      const token = localStorage.getItem("buildcon_token");
+      const res = await fetch("http://localhost:8081/api/md/ai-chat", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ message: text, organizationId: String(orgId) }),
+      });
+      if (res.ok) {
+        const d = await res.json();
+        const aiMsg: Message = { 
+          sender: "ai", 
+          text: d.response, 
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+        };
+        setMessages((prev) => [...prev, aiMsg]);
+      } else {
+        const aiMsg: Message = { 
+          sender: "ai", 
+          text: "Error calling AI Assistant backend.", 
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+        };
+        setMessages((prev) => [...prev, aiMsg]);
       }
-      setMessages(prev => [...prev, { role: "assistant", text: reply }]);
-    }, 1000);
+    } catch {
+      const aiMsg: Message = { 
+        sender: "ai", 
+        text: "AI service is currently offline. Please check connection.", 
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+      };
+      setMessages((prev) => [...prev, aiMsg]);
+    }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Title */}
-      <div>
-        <h2 className="text-xl font-bold text-white tracking-wide">13. AI BUSINESS ASSISTANT</h2>
-        <p className="text-xs text-slate-400">Natural language insights, automated summaries, and site risk predictions</p>
-      </div>
-
-      <div className="bg-[#111C30] border border-slate-800 rounded-xl flex flex-col h-[500px]">
-        {/* Messages */}
-        <div className="flex-1 p-5 overflow-y-auto space-y-4">
-          {messages.map((m, idx) => (
-            <div key={idx} className={`flex gap-3 max-w-xl ${m.role === "user" ? "ml-auto flex-row-reverse" : ""}`}>
-              <div className={`h-8 w-8 rounded-lg grid place-items-center shrink-0 ${m.role === "user" ? "bg-blue-600 text-white" : "bg-emerald-500/10 text-emerald-450 text-emerald-400 border border-emerald-500/20"}`}>
-                <Bot className="h-4 w-4" />
-              </div>
-              <div className={`p-3 rounded-xl text-xs leading-relaxed ${m.role === "user" ? "bg-blue-600 text-white" : "bg-[#0e1628] border border-slate-800 text-slate-205 text-slate-200"}`}>
-                {m.text}
-              </div>
+    <div className="flex flex-col h-[calc(100vh-180px)] max-w-4xl mx-auto bg-[#111C30] border border-slate-800 rounded-xl overflow-hidden">
+      {/* Header */}
+      <div className="bg-[#0f182a] p-4 border-b border-slate-800 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="h-8 w-8 rounded-lg bg-blue-600/20 text-blue-400 grid place-items-center">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div>
+            <div className="font-bold text-white text-sm">AI Business Assistant (MD)</div>
+            <div className="text-[10px] text-blue-400 flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+              Online & Ready
             </div>
-          ))}
+          </div>
         </div>
-
-        {/* Input */}
-        <form onSubmit={handleSend} className="p-4 border-t border-slate-800 flex gap-2">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask AI about project status, finance, or logistics..."
-            className="flex-1 bg-[#0A1120] border border-slate-800 rounded-lg px-4 py-2 text-xs text-white outline-none focus:border-blue-500"
-          />
-          <button className="bg-gradient-to-r from-blue-600 to-blue-500 hover:brightness-110 text-white rounded-lg px-4 py-2 text-xs font-bold flex items-center gap-1 shadow-md shadow-blue-500/10">
-            <Send className="h-3.5 w-3.5" />
-            Send
-          </button>
-        </form>
       </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((msg, idx) => (
+          <div key={idx} className={`flex gap-3 max-w-[85%] ${msg.sender === "user" ? "ml-auto flex-row-reverse" : ""}`}>
+            <div className={`h-8 w-8 rounded-lg shrink-0 grid place-items-center text-xs font-bold border ${
+              msg.sender === "user" 
+                ? "bg-blue-600/20 text-blue-400 border-blue-500/30" 
+                : "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+            }`}>
+              {msg.sender === "user" ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+            </div>
+            <div className={`rounded-xl p-3.5 text-xs text-slate-200 leading-relaxed shadow-sm ${
+              msg.sender === "user" 
+                ? "bg-[#0e1628] border border-blue-500/20 rounded-tr-none" 
+                : "bg-[#0f182a] border border-slate-850 rounded-tl-none"
+            }`}>
+              <div>{msg.text}</div>
+              <div className="text-[9px] text-slate-500 mt-1.5 text-right">{msg.time}</div>
+            </div>
+          </div>
+        ))}
+        <div ref={endRef} />
+      </div>
+
+      {/* Suggestions List */}
+      <div className="p-3 border-t border-slate-850 bg-[#0e1628] flex flex-wrap gap-2">
+        {suggestions.map((suggestion) => (
+          <button
+            key={suggestion}
+            onClick={() => handleSend(suggestion)}
+            className="text-[10px] bg-[#111C30] hover:bg-slate-800 text-slate-300 hover:text-white px-2.5 py-1 rounded-full border border-slate-800 transition"
+          >
+            {suggestion}
+          </button>
+        ))}
+      </div>
+
+      {/* Input Form */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSend();
+        }}
+        className="p-3 border-t border-slate-800 bg-[#0f182a] flex gap-2"
+      >
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask AI about project status, finance, or logistics..."
+          className="flex-1 bg-[#111C30] border border-slate-800 rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500 transition placeholder:text-slate-500"
+        />
+        <button
+          type="submit"
+          className="bg-gradient-to-r from-blue-600 to-blue-500 hover:brightness-110 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-md shadow-blue-500/10"
+        >
+          <Send className="h-3 w-3" />
+          Send
+        </button>
+      </form>
     </div>
   );
 }

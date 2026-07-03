@@ -12,4 +12,5 @@ public interface ConstructionManagerRepository extends JpaRepository<Constructio
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
     void deleteByOrganizationId(Long organizationId);
+    java.util.List<ConstructionManager> findByOrganizationId(Long organizationId);
 }

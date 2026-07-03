@@ -27,6 +27,9 @@ public abstract class BaseUserEntity {
     @Column(name = "organization_id")
     private Long organizationId;
 
+    @Column(name = "avatar_initials", length = 10)
+    private String avatarInitials;
+
     public BaseUserEntity(String username, String email, String password) {
         this.username = username;
         this.email = email;
@@ -39,4 +42,6 @@ public abstract class BaseUserEntity {
     public String getPassword() { return password; }
     public Long getOrganizationId() { return organizationId; }
     public void setOrganizationId(Long organizationId) { this.organizationId = organizationId; }
+    public String getAvatarInitials() { return avatarInitials; }
+    public void setAvatarInitials(String avatarInitials) { this.avatarInitials = avatarInitials; }
 }
