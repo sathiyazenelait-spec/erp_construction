@@ -258,7 +258,7 @@ export default function WorkforceAnalysis() {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie data={employeeDistribution} dataKey="value" innerRadius={28} outerRadius={46} paddingAngle={2}>
-                    {employeeDistribution.map((entry, index) => (
+                    {employeeDistribution.map((entry: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -270,7 +270,7 @@ export default function WorkforceAnalysis() {
               </div>
             </div>
             <div className="space-y-1">
-              {employeeDistribution.map((item, idx) => (
+              {employeeDistribution.map((item: any, idx: number) => (
                 <div key={idx} className="flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
                   <span className="text-[10px] text-slate-305 w-20 truncate">{item.name}</span>
