@@ -55,7 +55,7 @@ public class Chairman {
     private String notifyFrequency = "INSTANT";
 
     @Column(name = "fastapi_url")
-    private String fastapiUrl = "http://localhost:8000";
+    private String fastapiUrl = "https://erp-construction-1-python.onrender.com";
 
     @Column(name = "sms_gateway_key")
     private String smsGatewayKey;

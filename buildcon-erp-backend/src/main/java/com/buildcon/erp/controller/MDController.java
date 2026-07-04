@@ -211,7 +211,7 @@ public class MDController {
                 String jsonReq = mapper.writeValueAsString(reqBody);
                 
                 java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-                    .uri(java.net.URI.create("http://localhost:8001/api/ai/generic-chat"))
+                    .uri(java.net.URI.create("https://erp-construction-1-python.onrender.com/api/ai/generic-chat"))
                     .header("Content-Type", "application/json")
                     .header("X-API-Key", "BuildconERPSecretKeyForSecurityAuthenticationJWT")
                     .POST(java.net.http.HttpRequest.BodyPublishers.ofString(jsonReq))
