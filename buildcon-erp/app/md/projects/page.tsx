@@ -23,7 +23,7 @@ export default function ProjectsCommandCenter() {
 
   async function loadSiteManagers(orgId: number, token: string) {
     try {
-      const res = await fetch(`http://localhost:8081/api/site-management/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/site-management/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -43,7 +43,7 @@ export default function ProjectsCommandCenter() {
       const managerId = managerIdStr ? parseInt(managerIdStr) : null;
       if (!managerId) return;
 
-      const res = await fetch(`http://localhost:8081/api/projects/${projectId}/assign-site/${managerId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/projects/${projectId}/assign-site/${managerId}`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${token}`
@@ -82,7 +82,7 @@ export default function ProjectsCommandCenter() {
 
       await loadSiteManagers(orgId, token);
 
-      const res = await fetch(`http://localhost:8081/api/projects/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/projects/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 

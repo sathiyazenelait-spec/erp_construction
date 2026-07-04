@@ -15,7 +15,7 @@ export default function ResourceManagement() {
     const token = localStorage.getItem("buildcon_token");
     const headers = { "Authorization": `Bearer ${token}` };
 
-    fetch(`http://localhost:8081/api/projects/org/${orgId}`, { headers })
+    fetch(`https://erp-construction.onrender.com/api/projects/org/${orgId}`, { headers })
       .then((res) => res.json())
       .then((data) => {
         setProjects(data || []);

@@ -39,7 +39,7 @@ export default function ExecutiveCommand() {
         return;
       }
 
-      const res = await fetch("http://localhost:8081/api/md/executive/metrics", {
+      const res = await fetch("https://erp-construction.onrender.com/api/md/executive/metrics", {
         headers: { "Authorization": `Bearer ${token}` }
       });
 

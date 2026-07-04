@@ -53,7 +53,7 @@ export default function CompliancePage() {
       }
 
       // Fetch Audits
-      const auRes = await fetch(`http://localhost:8081/api/hr-manager/compliance/audits/org/${orgId}`, {
+      const auRes = await fetch(`https://erp-construction.onrender.com/api/hr-manager/compliance/audits/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (auRes.ok) {
@@ -62,7 +62,7 @@ export default function CompliancePage() {
       }
 
       // Fetch Checklist
-      const chRes = await fetch(`http://localhost:8081/api/hr-manager/compliance/checklist/org/${orgId}`, {
+      const chRes = await fetch(`https://erp-construction.onrender.com/api/hr-manager/compliance/checklist/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (chRes.ok) {
@@ -86,7 +86,7 @@ export default function CompliancePage() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/hr-manager/compliance/checklist/${id}/toggle`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/hr-manager/compliance/checklist/${id}/toggle`, {
         method: "PUT",
         headers: { "Authorization": `Bearer ${token}` }
       });

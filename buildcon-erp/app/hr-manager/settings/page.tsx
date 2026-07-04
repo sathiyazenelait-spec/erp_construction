@@ -30,7 +30,7 @@ export default function HrSettingsPage() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/hr-manager/settings/user/${session.name}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/hr-manager/settings/user/${session.name}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 
@@ -69,7 +69,7 @@ export default function HrSettingsPage() {
       const token = localStorage.getItem("buildcon_token");
       if (!session || !token) return;
 
-      const res = await fetch(`http://localhost:8081/api/hr-manager/settings/user/${session.name}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/hr-manager/settings/user/${session.name}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

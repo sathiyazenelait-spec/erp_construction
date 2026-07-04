@@ -20,8 +20,8 @@ export default function SafetyCompliance() {
       const orgId = session.organizationId;
 
       const [mdRes, safetyRes] = await Promise.all([
-        fetch(`http://localhost:8081/api/md/dashboard/org/${orgId}`, { headers: { "Authorization": `Bearer ${token}` } }),
-        fetch(`http://localhost:8081/api/construction-manager/safety/org/${orgId}`, { headers: { "Authorization": `Bearer ${token}` } }).catch(() => ({ ok: false }))
+        fetch(`https://erp-construction.onrender.com/api/md/dashboard/org/${orgId}`, { headers: { "Authorization": `Bearer ${token}` } }),
+        fetch(`https://erp-construction.onrender.com/api/construction-manager/safety/org/${orgId}`, { headers: { "Authorization": `Bearer ${token}` } }).catch(() => ({ ok: false }))
       ]);
 
       if (mdRes.ok) {

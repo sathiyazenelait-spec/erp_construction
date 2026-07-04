@@ -67,7 +67,7 @@ export default function SeniorSiteEngineerDashboard() {
   const loadDashboardData = async (activeOrgId: number) => {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/senior-site-engineer/dashboard/org/${activeOrgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/senior-site-engineer/dashboard/org/${activeOrgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -184,7 +184,7 @@ export default function SeniorSiteEngineerDashboard() {
 
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/senior-site-engineer/cube-test", {
+      const res = await fetch("https://erp-construction.onrender.com/api/senior-site-engineer/cube-test", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -207,7 +207,7 @@ export default function SeniorSiteEngineerDashboard() {
     const token = localStorage.getItem("buildcon_token");
     if (selectedProject) {
       try {
-        const res = await fetch(`http://localhost:8081/api/projects/${selectedProject.id}`, {
+        const res = await fetch(`https://erp-construction.onrender.com/api/projects/${selectedProject.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -240,7 +240,7 @@ export default function SeniorSiteEngineerDashboard() {
 
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/senior-site-engineer/ai-chat", {
+      const res = await fetch("https://erp-construction.onrender.com/api/senior-site-engineer/ai-chat", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

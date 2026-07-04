@@ -27,7 +27,7 @@ export default function BusinessDirectorDashboard() {
     const s = getSession();
     const orgId = s?.organizationId || 1;
     const token = localStorage.getItem("buildcon_token");
-    fetch(`http://localhost:8081/api/business-director/dashboard/org/${orgId}`, {
+    fetch(`https://erp-construction.onrender.com/api/business-director/dashboard/org/${orgId}`, {
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then((res) => res.json())

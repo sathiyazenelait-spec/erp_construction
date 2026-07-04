@@ -45,7 +45,7 @@ export default function SubscriptionPage() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/organizations/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/organizations/${orgId}`, {
         headers: getHeaders()
       });
       if (!res.ok) throw new Error("Failed to load organization subscription info.");
@@ -58,7 +58,7 @@ export default function SubscriptionPage() {
 
   const fetchPackages = async () => {
     try {
-      const res = await fetch("http://localhost:8081/api/packages", {
+      const res = await fetch("https://erp-construction.onrender.com/api/packages", {
         headers: getHeaders()
       });
       if (res.ok) {
@@ -131,7 +131,7 @@ export default function SubscriptionPage() {
     if (!org) return;
     try {
       setUpdatingTier(tierName);
-      const res = await fetch(`http://localhost:8081/api/organizations/${org.id}/subscription?tier=${tierName}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/organizations/${org.id}/subscription?tier=${tierName}`, {
         method: "PUT",
         headers: getHeaders()
       });

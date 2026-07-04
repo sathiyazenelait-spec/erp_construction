@@ -20,8 +20,8 @@ export default function RiskManagement() {
       const orgId = session.organizationId;
 
       const [alertRes, mdRes] = await Promise.all([
-        fetch(`http://localhost:8081/api/alerts/org/${orgId}`, { headers: { "Authorization": `Bearer ${token}` } }),
-        fetch(`http://localhost:8081/api/md/dashboard/org/${orgId}`, { headers: { "Authorization": `Bearer ${token}` } })
+        fetch(`https://erp-construction.onrender.com/api/alerts/org/${orgId}`, { headers: { "Authorization": `Bearer ${token}` } }),
+        fetch(`https://erp-construction.onrender.com/api/md/dashboard/org/${orgId}`, { headers: { "Authorization": `Bearer ${token}` } })
       ]);
 
       if (alertRes.ok) setAlerts(await alertRes.json());

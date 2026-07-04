@@ -19,7 +19,7 @@ export default function SiteMonitoring() {
     const fetchData = async () => {
       try {
         // Fetch projects
-        const projRes = await fetch(`http://localhost:8081/api/projects/org/${orgId}`, { headers });
+        const projRes = await fetch(`https://erp-construction.onrender.com/api/projects/org/${orgId}`, { headers });
         let projData = [];
         if (projRes.ok) {
           projData = await projRes.json();
@@ -28,7 +28,7 @@ export default function SiteMonitoring() {
 
         // Fetch workforce audits
         try {
-          const wfRes = await fetch(`http://localhost:8081/api/workforce-manager/dashboard/org/${orgId}`, { headers });
+          const wfRes = await fetch(`https://erp-construction.onrender.com/api/workforce-manager/dashboard/org/${orgId}`, { headers });
           if (wfRes.ok) {
             const wfData = await wfRes.json();
             const audits = wfData.audits || [];
@@ -41,7 +41,7 @@ export default function SiteMonitoring() {
 
         // Fetch alerts
         try {
-          const alertsRes = await fetch(`http://localhost:8081/api/alerts/org/${orgId}`, { headers });
+          const alertsRes = await fetch(`https://erp-construction.onrender.com/api/alerts/org/${orgId}`, { headers });
           if (alertsRes.ok) {
             const alertsData = await alertsRes.json();
             setAlerts(alertsData || []);

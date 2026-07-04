@@ -37,7 +37,7 @@ export default function EquipmentMonitoring() {
     const headers = { "Authorization": `Bearer ${token}` };
 
     try {
-      const res = await fetch(`http://localhost:8081/api/construction-manager/equipment/org/${orgId}`, { headers });
+      const res = await fetch(`https://erp-construction.onrender.com/api/construction-manager/equipment/org/${orgId}`, { headers });
       if (res.ok) {
         const data = await res.json();
         setEquipmentList(data || []);
@@ -69,7 +69,7 @@ export default function EquipmentMonitoring() {
     };
 
     try {
-      const res = await fetch(`http://localhost:8081/api/construction-manager/equipment`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/construction-manager/equipment`, {
         method: "POST",
         headers,
         body: JSON.stringify({

@@ -32,7 +32,7 @@ export default function PDLayout({ children }: { children: React.ReactNode }) {
     setTier((localStorage.getItem("selected_login_tier") || "Enterprise").toLowerCase());
     const orgId = s?.organizationId || 1;
     const token = localStorage.getItem("buildcon_token");
-    fetch(`http://localhost:8081/api/project-director/dashboard/org/${orgId}`, {
+    fetch(`https://erp-construction.onrender.com/api/project-director/dashboard/org/${orgId}`, {
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then((res) => res.json())

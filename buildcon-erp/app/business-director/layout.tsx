@@ -39,7 +39,7 @@ export default function BDDLayout({ children }: { children: React.ReactNode }) {
     setTier((localStorage.getItem("selected_login_tier") || "Enterprise").toLowerCase());
     const orgId = s?.organizationId || 1;
     const token = localStorage.getItem("buildcon_token");
-    fetch(`http://localhost:8081/api/business-director/dashboard/org/${orgId}`, {
+    fetch(`https://erp-construction.onrender.com/api/business-director/dashboard/org/${orgId}`, {
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then((res) => res.json())

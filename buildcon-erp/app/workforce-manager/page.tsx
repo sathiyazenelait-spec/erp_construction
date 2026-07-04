@@ -95,7 +95,7 @@ export default function WorkforceManagerDashboard() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/workforce-manager/dashboard/org/${activeOrgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/workforce-manager/dashboard/org/${activeOrgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -164,7 +164,7 @@ export default function WorkforceManagerDashboard() {
         return;
       }
 
-      const res = await fetch("http://localhost:8081/api/workforce-manager/workers", {
+      const res = await fetch("https://erp-construction.onrender.com/api/workforce-manager/workers", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -204,7 +204,7 @@ export default function WorkforceManagerDashboard() {
     try {
       const token = localStorage.getItem("buildcon_token");
       // Pass organizationId so backend resolves dynamic profile name
-      const res = await fetch("http://localhost:8081/api/workforce-manager/ai-chat", {
+      const res = await fetch("https://erp-construction.onrender.com/api/workforce-manager/ai-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({ message: input, organizationId: orgId ? String(orgId) : "" })
@@ -222,7 +222,7 @@ export default function WorkforceManagerDashboard() {
     try {
       const token = localStorage.getItem("buildcon_token");
       if (!token || !orgId) { alert("Session or organization ID is missing."); return; }
-      const res = await fetch("http://localhost:8081/api/workforce-manager/profile/update", {
+      const res = await fetch("https://erp-construction.onrender.com/api/workforce-manager/profile/update", {
         method: "PUT",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({
@@ -255,7 +255,7 @@ export default function WorkforceManagerDashboard() {
       setAuditMsg(null);
       const token = localStorage.getItem("buildcon_token");
       if (!token || !orgId) { setAuditMsg({ type: "error", text: "Session or organization ID is missing." }); return; }
-      const res = await fetch("http://localhost:8081/api/workforce-manager/headcount-audits", {
+      const res = await fetch("https://erp-construction.onrender.com/api/workforce-manager/headcount-audits", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({

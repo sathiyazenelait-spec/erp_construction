@@ -32,7 +32,7 @@ export default function SEOAnalytics() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/marketing-manager/dashboard/org/${activeOrgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/marketing-manager/dashboard/org/${activeOrgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 

@@ -28,7 +28,7 @@ export default function ProfileSettings() {
     setSession(s);
     const orgId = s?.organizationId || 1;
     const token = localStorage.getItem("buildcon_token");
-    fetch(`http://localhost:8081/api/construction-manager/dashboard/org/${orgId}`, {
+    fetch(`https://erp-construction.onrender.com/api/construction-manager/dashboard/org/${orgId}`, {
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then((res) => res.json())
@@ -57,7 +57,7 @@ export default function ProfileSettings() {
     const orgId = session?.organizationId || 1;
     const token = localStorage.getItem("buildcon_token");
     try {
-      const res = await fetch("http://localhost:8081/api/construction-manager/profile/update", {
+      const res = await fetch("https://erp-construction.onrender.com/api/construction-manager/profile/update", {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",

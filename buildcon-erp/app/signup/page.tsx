@@ -105,7 +105,7 @@ export default function Signup() {
         roleSegment = "admin";
       }
 
-      const endpoint = `http://localhost:8081/api/${roleSegment}/signup`;
+      const endpoint = `https://erp-construction.onrender.com/api/${roleSegment}/signup`;
       const payload = { username, email, password, role, organizationId };
 
       const res = await fetch(endpoint, {

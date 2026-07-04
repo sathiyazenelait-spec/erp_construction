@@ -79,7 +79,7 @@ export default function ConstructionManagerDashboard() {
     const headers = { "Authorization": `Bearer ${token}` };
 
     try {
-      const res = await fetch(`http://localhost:8081/api/construction-manager/dashboard/org/${orgId}`, { headers });
+      const res = await fetch(`https://erp-construction.onrender.com/api/construction-manager/dashboard/org/${orgId}`, { headers });
       if (!res.ok) throw new Error("Failed to fetch dashboard config");
       const d = await res.json();
       
@@ -105,7 +105,7 @@ export default function ConstructionManagerDashboard() {
 
       // 1. Fetch dynamic Quality Control data from Senior Site Engineer dashboard
       try {
-        const sseRes = await fetch(`http://localhost:8081/api/senior-site-engineer/dashboard/org/${orgId}`, { headers });
+        const sseRes = await fetch(`https://erp-construction.onrender.com/api/senior-site-engineer/dashboard/org/${orgId}`, { headers });
         if (sseRes.ok) {
           const sseData = await sseRes.json();
           const tests = sseData.cubeTests || [];
@@ -126,7 +126,7 @@ export default function ConstructionManagerDashboard() {
 
       // 2. Fetch dynamic Workforce data from Workforce Manager headcount audits
       try {
-        const wfRes = await fetch(`http://localhost:8081/api/workforce-manager/dashboard/org/${orgId}`, { headers });
+        const wfRes = await fetch(`https://erp-construction.onrender.com/api/workforce-manager/dashboard/org/${orgId}`, { headers });
         if (wfRes.ok) {
           const wfData = await wfRes.json();
           const audits = wfData.audits || [];
@@ -145,7 +145,7 @@ export default function ConstructionManagerDashboard() {
         let compliantSafetyItems = 0;
 
         const safetyPromises = projList.slice(0, 5).map(async (p: any) => {
-          const safetyRes = await fetch(`http://localhost:8081/api/site-log/${p.id}/safety`, { headers });
+          const safetyRes = await fetch(`https://erp-construction.onrender.com/api/site-log/${p.id}/safety`, { headers });
           if (safetyRes.ok) {
             const checklist = await safetyRes.json();
             checklist.forEach((item: any) => {
@@ -172,7 +172,7 @@ export default function ConstructionManagerDashboard() {
 
       // 4. Fetch dynamic Material Inventory from Procurement Manager
       try {
-        const pmRes = await fetch(`http://localhost:8081/api/procurement-manager/dashboard/org/${orgId}`, { headers });
+        const pmRes = await fetch(`https://erp-construction.onrender.com/api/procurement-manager/dashboard/org/${orgId}`, { headers });
         if (pmRes.ok) {
           const pmData = await pmRes.json();
           const inv = pmData.inventory || [];
@@ -186,7 +186,7 @@ export default function ConstructionManagerDashboard() {
 
       // 5. Fetch project alerts
       try {
-        const alertsRes = await fetch(`http://localhost:8081/api/alerts/org/${orgId}`, { headers });
+        const alertsRes = await fetch(`https://erp-construction.onrender.com/api/alerts/org/${orgId}`, { headers });
         if (alertsRes.ok) {
           const alertsData = await alertsRes.json();
           setAlerts(alertsData || []);
@@ -199,7 +199,7 @@ export default function ConstructionManagerDashboard() {
       try {
         const workerMap: Record<number, number> = {};
         const logPromises = projList.slice(0, 3).map(async (p: any) => {
-          const logRes = await fetch(`http://localhost:8081/api/site/logs/${p.id}`, { headers });
+          const logRes = await fetch(`https://erp-construction.onrender.com/api/site/logs/${p.id}`, { headers });
           if (logRes.ok) {
             const logs = await logRes.json();
             const latestLog = logs[logs.length - 1];
@@ -214,7 +214,7 @@ export default function ConstructionManagerDashboard() {
 
       // 7. Fetch Toolbox Talks compliance rate from HR Manager training
       try {
-        const trainingRes = await fetch(`http://localhost:8081/api/hr-manager/training/org/${orgId}`, { headers });
+        const trainingRes = await fetch(`https://erp-construction.onrender.com/api/hr-manager/training/org/${orgId}`, { headers });
         if (trainingRes.ok) {
           const trainingData = await trainingRes.json();
           const toolboxMatch = trainingData.find((t: any) => t.name.toLowerCase().includes("toolbox"));
@@ -231,7 +231,7 @@ export default function ConstructionManagerDashboard() {
       try {
         const allIndents: any[] = [];
         const indentPromises = projList.slice(0, 10).map(async (p: any) => {
-          const indRes = await fetch(`http://localhost:8081/api/site/material-requests/${p.id}`, { headers });
+          const indRes = await fetch(`https://erp-construction.onrender.com/api/site/material-requests/${p.id}`, { headers });
           if (indRes.ok) {
             const indData = await indRes.json();
             indData.forEach((ind: any) => {
@@ -270,7 +270,7 @@ export default function ConstructionManagerDashboard() {
       "Content-Type": "application/json"
     };
     try {
-      const res = await fetch(`http://localhost:8081/api/site/logs/${reportProjectId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/site/logs/${reportProjectId}`, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -313,7 +313,7 @@ export default function ConstructionManagerDashboard() {
     };
     const selectedProj = projects.find(p => p.id === Number(issueProjectId));
     try {
-      const res = await fetch(`http://localhost:8081/api/alerts`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/alerts`, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -360,7 +360,7 @@ export default function ConstructionManagerDashboard() {
       "Content-Type": "application/json"
     };
     try {
-      const res = await fetch(`http://localhost:8081/api/site/material-requests/${materialProjectId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/site/material-requests/${materialProjectId}`, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -391,7 +391,7 @@ export default function ConstructionManagerDashboard() {
     try {
       setUpdatingIndentId(indentId);
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/site/material-requests/${indentId}/status`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/site/material-requests/${indentId}/status`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

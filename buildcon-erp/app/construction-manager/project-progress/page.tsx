@@ -13,7 +13,7 @@ export default function ProjectProgress() {
     const s = getSession();
     const orgId = s?.organizationId || 1;
     const token = localStorage.getItem("buildcon_token");
-    fetch(`http://localhost:8081/api/projects/org/${orgId}`, {
+    fetch(`https://erp-construction.onrender.com/api/projects/org/${orgId}`, {
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then((res) => res.json())

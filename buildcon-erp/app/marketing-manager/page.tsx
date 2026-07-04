@@ -60,7 +60,7 @@ export default function MarketingExecutiveSummary() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/marketing-manager/dashboard/org/${activeOrgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/marketing-manager/dashboard/org/${activeOrgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 
@@ -90,7 +90,7 @@ export default function MarketingExecutiveSummary() {
     try {
       setSyncing(true);
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/marketing-manager/sync-external", {
+      const res = await fetch("https://erp-construction.onrender.com/api/marketing-manager/sync-external", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

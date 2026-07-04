@@ -223,7 +223,7 @@ export default function DigitalMarketingTLDashboard() {
     try {
       setSyncing(true);
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/digital-marketing-tl/sync-external", {
+      const res = await fetch("https://erp-construction.onrender.com/api/digital-marketing-tl/sync-external", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -270,7 +270,7 @@ export default function DigitalMarketingTLDashboard() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/digital-marketing-tl/dashboard/org/${activeOrgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/digital-marketing-tl/dashboard/org/${activeOrgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 
@@ -399,7 +399,7 @@ export default function DigitalMarketingTLDashboard() {
 
         setFormBudgetLimit(findMetricVal("Marketing Budget Limit", "700000"));
 
-        const projRes = await fetch("http://localhost:8081/api/projects", {
+        const projRes = await fetch("https://erp-construction.onrender.com/api/projects", {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (projRes.ok) {
@@ -427,7 +427,7 @@ export default function DigitalMarketingTLDashboard() {
 
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/digital-marketing-tl/profile/update", {
+      const res = await fetch("https://erp-construction.onrender.com/api/digital-marketing-tl/profile/update", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -485,8 +485,8 @@ export default function DigitalMarketingTLDashboard() {
           };
           const method = existing ? "PUT" : "POST";
           const url = existing 
-            ? `http://localhost:8081/api/digital-marketing-tl/metrics/${existing.id}` 
-            : "http://localhost:8081/api/digital-marketing-tl/metrics";
+            ? `https://erp-construction.onrender.com/api/digital-marketing-tl/metrics/${existing.id}` 
+            : "https://erp-construction.onrender.com/api/digital-marketing-tl/metrics";
           
           await fetch(url, {
             method: method,
@@ -552,7 +552,7 @@ export default function DigitalMarketingTLDashboard() {
         organizationId: orgId
       };
 
-      const res = await fetch("http://localhost:8081/api/digital-marketing-tl/team-members", {
+      const res = await fetch("https://erp-construction.onrender.com/api/digital-marketing-tl/team-members", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -579,7 +579,7 @@ export default function DigitalMarketingTLDashboard() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/digital-marketing-tl/team-members/${id}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/digital-marketing-tl/team-members/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -612,9 +612,9 @@ export default function DigitalMarketingTLDashboard() {
       };
 
       await Promise.all([
-        fetch("http://localhost:8081/api/digital-marketing-tl/metrics", { method: "POST", headers, body: JSON.stringify(p1) }),
-        fetch("http://localhost:8081/api/digital-marketing-tl/metrics", { method: "POST", headers, body: JSON.stringify(p2) }),
-        fetch("http://localhost:8081/api/digital-marketing-tl/metrics", { method: "POST", headers, body: JSON.stringify(p3) })
+        fetch("https://erp-construction.onrender.com/api/digital-marketing-tl/metrics", { method: "POST", headers, body: JSON.stringify(p1) }),
+        fetch("https://erp-construction.onrender.com/api/digital-marketing-tl/metrics", { method: "POST", headers, body: JSON.stringify(p2) }),
+        fetch("https://erp-construction.onrender.com/api/digital-marketing-tl/metrics", { method: "POST", headers, body: JSON.stringify(p3) })
       ]);
 
       setNewSeoKw("");
@@ -635,7 +635,7 @@ export default function DigitalMarketingTLDashboard() {
       const targets = metrics.filter(m => m.label === kwLabel && (m.category === "tl_seo_keywords" || m.category === "tl_seo_keywords_vol" || m.category === "tl_seo_keywords_dir"));
 
       await Promise.all(targets.map(t => 
-        fetch(`http://localhost:8081/api/digital-marketing-tl/metrics/${t.id}`, {
+        fetch(`https://erp-construction.onrender.com/api/digital-marketing-tl/metrics/${t.id}`, {
           method: "DELETE",
           headers: { "Authorization": `Bearer ${token}` }
         })
@@ -667,9 +667,9 @@ export default function DigitalMarketingTLDashboard() {
       };
 
       await Promise.all([
-        fetch("http://localhost:8081/api/digital-marketing-tl/metrics", { method: "POST", headers, body: JSON.stringify(p1) }),
-        fetch("http://localhost:8081/api/digital-marketing-tl/metrics", { method: "POST", headers, body: JSON.stringify(p2) }),
-        fetch("http://localhost:8081/api/digital-marketing-tl/metrics", { method: "POST", headers, body: JSON.stringify(p3) })
+        fetch("https://erp-construction.onrender.com/api/digital-marketing-tl/metrics", { method: "POST", headers, body: JSON.stringify(p1) }),
+        fetch("https://erp-construction.onrender.com/api/digital-marketing-tl/metrics", { method: "POST", headers, body: JSON.stringify(p2) }),
+        fetch("https://erp-construction.onrender.com/api/digital-marketing-tl/metrics", { method: "POST", headers, body: JSON.stringify(p3) })
       ]);
 
       setNewGapKw("");
@@ -690,7 +690,7 @@ export default function DigitalMarketingTLDashboard() {
       const targets = metrics.filter(m => m.label === kwLabel && (m.category === "tl_competitor_gaps_our" || m.category === "tl_competitor_gaps_their" || m.category === "tl_competitor_gaps_priority"));
 
       await Promise.all(targets.map(t => 
-        fetch(`http://localhost:8081/api/digital-marketing-tl/metrics/${t.id}`, {
+        fetch(`https://erp-construction.onrender.com/api/digital-marketing-tl/metrics/${t.id}`, {
           method: "DELETE",
           headers: { "Authorization": `Bearer ${token}` }
         })
@@ -718,7 +718,7 @@ export default function DigitalMarketingTLDashboard() {
         organizationId: orgId
       };
 
-      const res = await fetch("http://localhost:8081/api/digital-marketing-tl/metrics", {
+      const res = await fetch("https://erp-construction.onrender.com/api/digital-marketing-tl/metrics", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -742,7 +742,7 @@ export default function DigitalMarketingTLDashboard() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/digital-marketing-tl/metrics/${id}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/digital-marketing-tl/metrics/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -771,7 +771,7 @@ export default function DigitalMarketingTLDashboard() {
         organizationId: orgId
       };
 
-      const res = await fetch("http://localhost:8081/api/digital-marketing-tl/trends", {
+      const res = await fetch("https://erp-construction.onrender.com/api/digital-marketing-tl/trends", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -796,7 +796,7 @@ export default function DigitalMarketingTLDashboard() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/digital-marketing-tl/trends/${id}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/digital-marketing-tl/trends/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -814,7 +814,7 @@ export default function DigitalMarketingTLDashboard() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/digital-marketing-tl/calendar-events/${id}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/digital-marketing-tl/calendar-events/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -846,7 +846,7 @@ export default function DigitalMarketingTLDashboard() {
         organizationId: orgId
       };
 
-      const res = await fetch("http://localhost:8081/api/digital-marketing-tl/campaigns", {
+      const res = await fetch("https://erp-construction.onrender.com/api/digital-marketing-tl/campaigns", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -870,7 +870,7 @@ export default function DigitalMarketingTLDashboard() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/digital-marketing-tl/campaigns/${id}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/digital-marketing-tl/campaigns/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -902,7 +902,7 @@ export default function DigitalMarketingTLDashboard() {
         organizationId: orgId
       };
 
-      const res = await fetch("http://localhost:8081/api/digital-marketing-tl/leads", {
+      const res = await fetch("https://erp-construction.onrender.com/api/digital-marketing-tl/leads", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -926,7 +926,7 @@ export default function DigitalMarketingTLDashboard() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/digital-marketing-tl/leads/${id}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/digital-marketing-tl/leads/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -944,7 +944,7 @@ export default function DigitalMarketingTLDashboard() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/digital-marketing-tl/leads/${id}/status`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/digital-marketing-tl/leads/${id}/status`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -977,7 +977,7 @@ export default function DigitalMarketingTLDashboard() {
         organizationId: orgId
       };
 
-      const res = await fetch("http://localhost:8081/api/digital-marketing-tl/calendar-events", {
+      const res = await fetch("https://erp-construction.onrender.com/api/digital-marketing-tl/calendar-events", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1004,7 +1004,7 @@ export default function DigitalMarketingTLDashboard() {
 
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/digital-marketing-tl/ai-chat", {
+      const res = await fetch("https://erp-construction.onrender.com/api/digital-marketing-tl/ai-chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -2394,7 +2394,7 @@ export default function DigitalMarketingTLDashboard() {
                         const desc = (e.target as any).elements[1].value;
                         try {
                           const token = localStorage.getItem("buildcon_token");
-                          const res = await fetch(`http://localhost:8081/api/digital-marketing-tl/team-members/${targetId}/assign-task`, {
+                          const res = await fetch(`https://erp-construction.onrender.com/api/digital-marketing-tl/team-members/${targetId}/assign-task`, {
                             method: "PUT",
                             headers: {
                               "Authorization": `Bearer ${token}`

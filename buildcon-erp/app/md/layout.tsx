@@ -32,7 +32,7 @@ export default function MDLayout({ children }: { children: React.ReactNode }) {
     setTier((localStorage.getItem("selected_login_tier") || "Enterprise").toLowerCase());
     const orgId = s?.organizationId || 1;
     const token = localStorage.getItem("buildcon_token");
-    fetch(`http://localhost:8081/api/md/dashboard/org/${orgId}`, {
+    fetch(`https://erp-construction.onrender.com/api/md/dashboard/org/${orgId}`, {
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then((res) => res.json())

@@ -92,17 +92,17 @@ export default function StrategicPlanning() {
       const headers = { Authorization: `Bearer ${token}` };
 
       // Fetch Goals
-      const goalsRes = await fetch(`http://localhost:8081/api/chairman/strategy/goals/${orgId}`, { headers });
+      const goalsRes = await fetch(`https://erp-construction.onrender.com/api/chairman/strategy/goals/${orgId}`, { headers });
       const goalsData = await goalsRes.json();
       setGoals(goalsData);
 
       // Fetch SWOT
-      const swotRes = await fetch(`http://localhost:8081/api/chairman/strategy/swot/${orgId}`, { headers });
+      const swotRes = await fetch(`https://erp-construction.onrender.com/api/chairman/strategy/swot/${orgId}`, { headers });
       const swotData = await swotRes.json();
       setSwotItems(swotData);
 
       // Fetch Initiatives
-      const initRes = await fetch(`http://localhost:8081/api/chairman/strategy/initiatives/${orgId}`, { headers });
+      const initRes = await fetch(`https://erp-construction.onrender.com/api/chairman/strategy/initiatives/${orgId}`, { headers });
       const initData = await initRes.json();
       setInitiatives(initData);
     } catch (e) {
@@ -140,8 +140,8 @@ export default function StrategicPlanning() {
 
     try {
       const url = editingGoal 
-        ? `http://localhost:8081/api/chairman/strategy/goals/${editingGoal.id}`
-        : `http://localhost:8081/api/chairman/strategy/goals`;
+        ? `https://erp-construction.onrender.com/api/chairman/strategy/goals/${editingGoal.id}`
+        : `https://erp-construction.onrender.com/api/chairman/strategy/goals`;
       
       const method = editingGoal ? "PUT" : "POST";
       
@@ -172,7 +172,7 @@ export default function StrategicPlanning() {
   const handleDeleteGoal = async (id: number) => {
     if (!confirm("Are you sure you want to delete this goal?") || !token) return;
     try {
-      const res = await fetch(`http://localhost:8081/api/chairman/strategy/goals/${id}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/chairman/strategy/goals/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -189,7 +189,7 @@ export default function StrategicPlanning() {
     if (!newSwotValue.trim() || !orgId || !token) return;
 
     try {
-      const res = await fetch(`http://localhost:8081/api/chairman/strategy/swot`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/chairman/strategy/swot`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -215,7 +215,7 @@ export default function StrategicPlanning() {
   const handleDeleteSwotItem = async (id: number) => {
     if (!token) return;
     try {
-      const res = await fetch(`http://localhost:8081/api/chairman/strategy/swot/${id}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/chairman/strategy/swot/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -257,8 +257,8 @@ export default function StrategicPlanning() {
 
     try {
       const url = editingInitiative
-        ? `http://localhost:8081/api/chairman/strategy/initiatives/${editingInitiative.id}`
-        : `http://localhost:8081/api/chairman/strategy/initiatives`;
+        ? `https://erp-construction.onrender.com/api/chairman/strategy/initiatives/${editingInitiative.id}`
+        : `https://erp-construction.onrender.com/api/chairman/strategy/initiatives`;
 
       const method = editingInitiative ? "PUT" : "POST";
 
@@ -289,7 +289,7 @@ export default function StrategicPlanning() {
   const handleDeleteInitiative = async (id: number) => {
     if (!confirm("Are you sure you want to delete this initiative?") || !token) return;
     try {
-      const res = await fetch(`http://localhost:8081/api/chairman/strategy/initiatives/${id}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/chairman/strategy/initiatives/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

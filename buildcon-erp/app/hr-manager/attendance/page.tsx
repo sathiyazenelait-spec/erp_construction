@@ -69,12 +69,12 @@ export default function AttendanceManagement() {
       }
 
       // Fetch Staff records
-      const staffRes = await fetch(`http://localhost:8081/api/hr-manager/attendance/org/${orgId}`, {
+      const staffRes = await fetch(`https://erp-construction.onrender.com/api/hr-manager/attendance/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 
       // Fetch Labour records
-      const labourRes = await fetch(`http://localhost:8081/api/hr-manager/labour-attendance/org/${orgId}`, {
+      const labourRes = await fetch(`https://erp-construction.onrender.com/api/hr-manager/labour-attendance/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 
@@ -152,10 +152,10 @@ export default function AttendanceManagement() {
         organizationId: orgId
       };
 
-      let url = "http://localhost:8081/api/hr-manager/attendance";
+      let url = "https://erp-construction.onrender.com/api/hr-manager/attendance";
       let method = "POST";
       if (editingStaff) {
-        url = `http://localhost:8081/api/hr-manager/attendance/${editingStaff.id}`;
+        url = `https://erp-construction.onrender.com/api/hr-manager/attendance/${editingStaff.id}`;
         method = "PUT";
       }
 
@@ -194,10 +194,10 @@ export default function AttendanceManagement() {
         organizationId: orgId
       };
 
-      let url = "http://localhost:8081/api/hr-manager/labour-attendance";
+      let url = "https://erp-construction.onrender.com/api/hr-manager/labour-attendance";
       let method = "POST";
       if (editingLabour) {
-        url = `http://localhost:8081/api/hr-manager/labour-attendance/${editingLabour.id}`;
+        url = `https://erp-construction.onrender.com/api/hr-manager/labour-attendance/${editingLabour.id}`;
         method = "PUT";
       }
 

@@ -53,7 +53,7 @@ export default function HRExecutiveSummary() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/hr-manager/summary/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/hr-manager/summary/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {

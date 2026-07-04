@@ -50,7 +50,7 @@ export default function PayrollCenter() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/hr-manager/payroll/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/hr-manager/payroll/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -110,10 +110,10 @@ export default function PayrollCenter() {
         organizationId: orgId
       };
 
-      let url = "http://localhost:8081/api/hr-manager/payroll";
+      let url = "https://erp-construction.onrender.com/api/hr-manager/payroll";
       let method = "POST";
       if (editingItem) {
-        url = `http://localhost:8081/api/hr-manager/payroll/${editingItem.id}`;
+        url = `https://erp-construction.onrender.com/api/hr-manager/payroll/${editingItem.id}`;
         method = "PUT";
       }
 

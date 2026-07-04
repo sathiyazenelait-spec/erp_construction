@@ -46,7 +46,7 @@ export default function ChairmanDashboard() {
   const handleResolveAlert = async (alertId: number, projectName: string) => {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/alerts/${alertId}/resolve`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/alerts/${alertId}/resolve`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${token}`
@@ -99,7 +99,7 @@ export default function ChairmanDashboard() {
           return;
         }
 
-        const res = await fetch(`http://localhost:8081/api/chairman/dashboard/${orgId}`, {
+        const res = await fetch(`https://erp-construction.onrender.com/api/chairman/dashboard/${orgId}`, {
           headers: {
             "Authorization": `Bearer ${token}`
           }
@@ -127,7 +127,7 @@ export default function ChairmanDashboard() {
         }
 
         // Fetch DB project alerts
-        const alertsRes = await fetch(`http://localhost:8081/api/alerts/org/${orgId}`, {
+        const alertsRes = await fetch(`https://erp-construction.onrender.com/api/alerts/org/${orgId}`, {
           headers: {
             "Authorization": `Bearer ${token}`
           }
@@ -138,7 +138,7 @@ export default function ChairmanDashboard() {
         }
 
         // Fetch Settings for Alert Filtering
-        const settingsRes = await fetch("http://localhost:8081/api/chairman/settings", {
+        const settingsRes = await fetch("https://erp-construction.onrender.com/api/chairman/settings", {
           headers: {
             "Authorization": `Bearer ${token}`
           }
@@ -165,7 +165,7 @@ export default function ChairmanDashboard() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
       try {
-        const settingsRes = await fetch("http://localhost:8081/api/chairman/settings", {
+        const settingsRes = await fetch("https://erp-construction.onrender.com/api/chairman/settings", {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (settingsRes.ok) {

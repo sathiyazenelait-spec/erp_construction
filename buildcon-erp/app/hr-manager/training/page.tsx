@@ -48,7 +48,7 @@ export default function TrainingCenter() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/hr-manager/training/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/hr-manager/training/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -82,8 +82,8 @@ export default function TrainingCenter() {
       const orgId = session.organizationId || 1;
 
       const url = editingSchedule
-        ? `http://localhost:8081/api/hr-manager/training/${editingSchedule.id}`
-        : "http://localhost:8081/api/hr-manager/training";
+        ? `https://erp-construction.onrender.com/api/hr-manager/training/${editingSchedule.id}`
+        : "https://erp-construction.onrender.com/api/hr-manager/training";
 
       const method = editingSchedule ? "PUT" : "POST";
 

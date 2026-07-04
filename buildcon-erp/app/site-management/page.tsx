@@ -74,7 +74,7 @@ export default function SiteManagementDashboard() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch("http://localhost:8081/api/projects/assigned-site", {
+      const res = await fetch("https://erp-construction.onrender.com/api/projects/assigned-site", {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -116,7 +116,7 @@ export default function SiteManagementDashboard() {
       const project = projects.find(p => p.id.toString() === selectedProjectId);
       if (!project) return;
 
-      const res = await fetch(`http://localhost:8081/api/projects/${selectedProjectId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/projects/${selectedProjectId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -166,7 +166,7 @@ export default function SiteManagementDashboard() {
       const progressVal = progressRatio.replace("%", "").trim();
 
       // Retrieve existing project first to preserve other fields
-      const getRes = await fetch(`http://localhost:8081/api/projects/${selectedProjectId}`, {
+      const getRes = await fetch(`https://erp-construction.onrender.com/api/projects/${selectedProjectId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (!getRes.ok) return;
@@ -175,7 +175,7 @@ export default function SiteManagementDashboard() {
       // Set status based on predicted delays
       const newStatus = delayDays > 0 ? "Delayed" : "Active";
 
-      const res = await fetch(`http://localhost:8081/api/projects/${selectedProjectId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/projects/${selectedProjectId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -238,7 +238,7 @@ export default function SiteManagementDashboard() {
         setOrgId(resolvedOrgId);
         if (resolvedOrgId) {
           const token = localStorage.getItem("buildcon_token");
-          fetch(`http://localhost:8081/api/site-management/profile/org/${resolvedOrgId}`, {
+          fetch(`https://erp-construction.onrender.com/api/site-management/profile/org/${resolvedOrgId}`, {
             headers: { "Authorization": `Bearer ${token}` }
           })
             .then(r => r.ok ? r.json() : null)
@@ -288,7 +288,7 @@ export default function SiteManagementDashboard() {
     if (!projId) return;
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/site-management/productivity/${projId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/site-management/productivity/${projId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -316,7 +316,7 @@ export default function SiteManagementDashboard() {
       if (!token) return;
 
       // 1. Fetch Daily Logs
-      const logsRes = await fetch(`http://localhost:8081/api/site/logs/${projId}`, {
+      const logsRes = await fetch(`https://erp-construction.onrender.com/api/site/logs/${projId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (logsRes.ok) {
@@ -325,7 +325,7 @@ export default function SiteManagementDashboard() {
       }
 
       // 2. Fetch Safety Checklist
-      const safetyRes = await fetch(`http://localhost:8081/api/site/safety/${projId}`, {
+      const safetyRes = await fetch(`https://erp-construction.onrender.com/api/site/safety/${projId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (safetyRes.ok) {
@@ -334,7 +334,7 @@ export default function SiteManagementDashboard() {
       }
 
       // 3. Fetch Material Requests
-      const matRes = await fetch(`http://localhost:8081/api/site/material-requests/${projId}`, {
+      const matRes = await fetch(`https://erp-construction.onrender.com/api/site/material-requests/${projId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (matRes.ok) {
@@ -363,7 +363,7 @@ export default function SiteManagementDashboard() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/site/logs/${selectedProjectId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/site/logs/${selectedProjectId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -396,7 +396,7 @@ export default function SiteManagementDashboard() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/site/safety/${selectedProjectId}/item/${ruleId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/site/safety/${selectedProjectId}/item/${ruleId}`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${token}`
@@ -419,7 +419,7 @@ export default function SiteManagementDashboard() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/site/material-requests/${selectedProjectId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/site/material-requests/${selectedProjectId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -454,7 +454,7 @@ export default function SiteManagementDashboard() {
 
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/site-management/ai-chat", {
+      const res = await fetch("https://erp-construction.onrender.com/api/site-management/ai-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({ message: input, organizationId: orgId })
@@ -472,7 +472,7 @@ export default function SiteManagementDashboard() {
     try {
       const token = localStorage.getItem("buildcon_token");
       if (!token || !orgId) { alert("Session or organization ID is missing."); return; }
-      const res = await fetch("http://localhost:8081/api/site-management/profile/update", {
+      const res = await fetch("https://erp-construction.onrender.com/api/site-management/profile/update", {
         method: "PUT",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({ username: profileName, email: profileEmail, organizationId: orgId })
@@ -540,7 +540,7 @@ export default function SiteManagementDashboard() {
 
         // If delayed (or skyvilla which has a delay predicted), create project alert in database
         if (data.status === "Delayed" || data.predictedDelayDays > 0) {
-          const alertRes = await fetch("http://localhost:8081/api/alerts", {
+          const alertRes = await fetch("https://erp-construction.onrender.com/api/alerts", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -618,7 +618,7 @@ export default function SiteManagementDashboard() {
         await updateProjectProgressInDb(simReport.actualProgress.toString() + "%", simReport.predictedDelayDays, activeImage);
 
         // Save mock alert
-        const alertRes = await fetch("http://localhost:8081/api/alerts", {
+        const alertRes = await fetch("https://erp-construction.onrender.com/api/alerts", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -968,7 +968,7 @@ export default function SiteManagementDashboard() {
     if (!activeAlertId || !justificationText.trim()) return;
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/alerts/${activeAlertId}/justification`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/alerts/${activeAlertId}/justification`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

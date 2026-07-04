@@ -23,7 +23,7 @@ export default function AIFinanceAssistant() {
     setSession(s);
     const orgId = s?.organizationId || 1;
     const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
-    fetch(`http://localhost:8081/api/finance-director/dashboard/org/${orgId}`, {
+    fetch(`https://erp-construction.onrender.com/api/finance-director/dashboard/org/${orgId}`, {
       headers: token ? { "Authorization": `Bearer ${token}` } : {}
     })
       .then((res) => res.json())
@@ -66,7 +66,7 @@ export default function AIFinanceAssistant() {
     try {
       const orgId = session?.organizationId || 1;
       const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
-      const res = await fetch("http://localhost:8081/api/finance-director/ai-chat", {
+      const res = await fetch("https://erp-construction.onrender.com/api/finance-director/ai-chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

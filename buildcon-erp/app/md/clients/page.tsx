@@ -21,8 +21,8 @@ export default function ClientsOverview() {
       const orgId = session.organizationId;
 
       const [mdRes, clientRes] = await Promise.all([
-        fetch(`http://localhost:8081/api/md/dashboard/org/${orgId}`, { headers: { "Authorization": `Bearer ${token}` } }),
-        fetch(`http://localhost:8081/api/clients/org/${orgId}`, { headers: { "Authorization": `Bearer ${token}` } }).catch(() => ({ ok: false }))
+        fetch(`https://erp-construction.onrender.com/api/md/dashboard/org/${orgId}`, { headers: { "Authorization": `Bearer ${token}` } }),
+        fetch(`https://erp-construction.onrender.com/api/clients/org/${orgId}`, { headers: { "Authorization": `Bearer ${token}` } }).catch(() => ({ ok: false }))
       ]);
 
       if (mdRes.ok) {

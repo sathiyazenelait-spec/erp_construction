@@ -20,7 +20,7 @@ export default function ConfigureModules() {
   const loadModules = async () => {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
-      const res = await fetch("http://localhost:8081/api/super-admin/modules", {
+      const res = await fetch("https://erp-construction.onrender.com/api/super-admin/modules", {
         headers: {
           "Content-Type": "application/json",
           ...(token ? { "Authorization": `Bearer ${token}` } : {})
@@ -52,7 +52,7 @@ export default function ConfigureModules() {
   const toggleModuleStatus = async (id: number) => {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
-      const res = await fetch(`http://localhost:8081/api/super-admin/modules/${id}/toggle`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/super-admin/modules/${id}/toggle`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

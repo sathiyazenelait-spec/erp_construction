@@ -40,7 +40,7 @@ export default function WorkforceOverview() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/hr-manager/workforce/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/hr-manager/workforce/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {

@@ -19,7 +19,7 @@ export default function SystemHealth() {
     if (showLoading) setLoading(true);
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
-      const res = await fetch("http://localhost:8081/api/super-admin/health", {
+      const res = await fetch("https://erp-construction.onrender.com/api/super-admin/health", {
         headers: {
           "Content-Type": "application/json",
           ...(token ? { "Authorization": `Bearer ${token}` } : {})

@@ -23,7 +23,7 @@ export default function AIConstructionAssistant() {
     setSession(s);
     const orgId = s?.organizationId || 1;
     const token = localStorage.getItem("buildcon_token");
-    fetch(`http://localhost:8081/api/construction-manager/dashboard/org/${orgId}`, {
+    fetch(`https://erp-construction.onrender.com/api/construction-manager/dashboard/org/${orgId}`, {
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then((res) => res.json())
@@ -67,7 +67,7 @@ export default function AIConstructionAssistant() {
     try {
       const orgId = session?.organizationId || 1;
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/construction-manager/ai-chat", {
+      const res = await fetch("https://erp-construction.onrender.com/api/construction-manager/ai-chat", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

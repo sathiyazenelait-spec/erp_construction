@@ -40,7 +40,7 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
       }
       const orgId = s?.organizationId || 1;
       const token = localStorage.getItem("buildcon_token");
-      fetch(`http://localhost:8081/api/chairman/dashboard/org/${orgId}`, {
+      fetch(`https://erp-construction.onrender.com/api/chairman/dashboard/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       })
         .then((res) => res.json())

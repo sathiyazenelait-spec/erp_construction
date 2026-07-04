@@ -59,7 +59,7 @@ export default function EmployeeManagement() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/hr-manager/employees/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/hr-manager/employees/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 
@@ -98,7 +98,7 @@ export default function EmployeeManagement() {
 
       // Map role name directly to REST endpoint path structure
       const roleSegment = newRole.replace("ROLE_", "").toLowerCase().replace(/_/g, "-");
-      const endpoint = `http://localhost:8081/api/${roleSegment}/signup`;
+      const endpoint = `https://erp-construction.onrender.com/api/${roleSegment}/signup`;
       const payload = {
         username: newUsername,
         email: newEmail,

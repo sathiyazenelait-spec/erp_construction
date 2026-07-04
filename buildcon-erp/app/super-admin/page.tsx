@@ -11,7 +11,7 @@ export default function SuperAdminDashboard() {
   const loadTelemetry = async () => {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
-      const res = await fetch("http://localhost:8081/api/super-admin/telemetry", {
+      const res = await fetch("https://erp-construction.onrender.com/api/super-admin/telemetry", {
         headers: {
           "Content-Type": "application/json",
           ...(token ? { "Authorization": `Bearer ${token}` } : {})

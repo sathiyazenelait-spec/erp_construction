@@ -61,12 +61,12 @@ export default function Settings() {
         const orgId = s.organizationId || 1;
 
         // Fetch settings from Settings Endpoint
-        const settingsRes = await fetch("http://localhost:8081/api/chairman/settings", {
+        const settingsRes = await fetch("https://erp-construction.onrender.com/api/chairman/settings", {
           headers: { "Authorization": `Bearer ${token}` }
         });
 
         // Fetch configs from Dashboard Config Endpoint
-        const dashboardRes = await fetch(`http://localhost:8081/api/chairman/dashboard/org/${orgId}`, {
+        const dashboardRes = await fetch(`https://erp-construction.onrender.com/api/chairman/dashboard/org/${orgId}`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
 
@@ -101,7 +101,7 @@ export default function Settings() {
           });
 
           // Fetch project alerts
-          const alertsRes = await fetch(`http://localhost:8081/api/alerts/org/${orgId}`, {
+          const alertsRes = await fetch(`https://erp-construction.onrender.com/api/alerts/org/${orgId}`, {
             headers: { "Authorization": `Bearer ${token}` }
           });
           if (alertsRes.ok) {
@@ -145,7 +145,7 @@ export default function Settings() {
       const orgId = s?.organizationId || 1;
 
       // 1. Save standard profile fields
-      const resProfile = await fetch("http://localhost:8081/api/chairman/settings/profile", {
+      const resProfile = await fetch("https://erp-construction.onrender.com/api/chairman/settings/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -159,7 +159,7 @@ export default function Settings() {
       });
 
       // 2. Save dashboard config & initials overrides
-      const resConfig = await fetch("http://localhost:8081/api/chairman/profile/update", {
+      const resConfig = await fetch("https://erp-construction.onrender.com/api/chairman/profile/update", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -199,7 +199,7 @@ export default function Settings() {
     setSaving(true);
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/chairman/settings/notifications", {
+      const res = await fetch("https://erp-construction.onrender.com/api/chairman/settings/notifications", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -226,7 +226,7 @@ export default function Settings() {
     setSaving(true);
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/chairman/settings/integrations", {
+      const res = await fetch("https://erp-construction.onrender.com/api/chairman/settings/integrations", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -257,7 +257,7 @@ export default function Settings() {
     setSaving(true);
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/chairman/settings/org-credentials", {
+      const res = await fetch("https://erp-construction.onrender.com/api/chairman/settings/org-credentials", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -285,7 +285,7 @@ export default function Settings() {
   const handleResolveAlert = async (alertId: number) => {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/alerts/${alertId}/resolve`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/alerts/${alertId}/resolve`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${token}`

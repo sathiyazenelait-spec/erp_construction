@@ -49,7 +49,7 @@ export default function PerformanceManagement() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/hr-manager/performance/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/hr-manager/performance/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -83,8 +83,8 @@ export default function PerformanceManagement() {
       const orgId = session.organizationId || 1;
 
       const url = editingAppraisal
-        ? `http://localhost:8081/api/hr-manager/performance/${editingAppraisal.id}`
-        : "http://localhost:8081/api/hr-manager/performance";
+        ? `https://erp-construction.onrender.com/api/hr-manager/performance/${editingAppraisal.id}`
+        : "https://erp-construction.onrender.com/api/hr-manager/performance";
 
       const method = editingAppraisal ? "PUT" : "POST";
 

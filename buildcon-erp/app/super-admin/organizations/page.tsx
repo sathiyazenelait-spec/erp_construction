@@ -42,7 +42,7 @@ export default function ManageOrganizations() {
   const loadOrgs = async () => {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:8081/api/organizations", {
+      const res = await fetch("https://erp-construction.onrender.com/api/organizations", {
         headers: getHeaders()
       });
       if (!res.ok) throw new Error("Failed to load organizations.");
@@ -79,7 +79,7 @@ export default function ManageOrganizations() {
         chairmanPassword
       };
 
-      const res = await fetch("http://localhost:8081/api/organizations", {
+      const res = await fetch("https://erp-construction.onrender.com/api/organizations", {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify(payload)
@@ -108,7 +108,7 @@ export default function ManageOrganizations() {
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this organization?")) return;
     try {
-      const res = await fetch(`http://localhost:8081/api/organizations/${id}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/organizations/${id}`, {
         method: "DELETE",
         headers: getHeaders()
       });
@@ -122,7 +122,7 @@ export default function ManageOrganizations() {
   const handleToggleStatus = async (id: number, currentStatus: string) => {
     const newStatus = currentStatus === "Active" ? "Inactive" : "Active";
     try {
-      const res = await fetch(`http://localhost:8081/api/organizations/${id}/status?status=${newStatus}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/organizations/${id}/status?status=${newStatus}`, {
         method: "PUT",
         headers: getHeaders()
       });

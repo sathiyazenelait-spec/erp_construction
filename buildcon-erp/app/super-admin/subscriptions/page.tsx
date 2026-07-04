@@ -63,7 +63,7 @@ export default function ManageSubscriptions() {
   const fetchPackages = async () => {
     try {
       setLoadingPkgs(true);
-      const res = await fetch("http://localhost:8081/api/packages", {
+      const res = await fetch("https://erp-construction.onrender.com/api/packages", {
         headers: getHeaders()
       });
       if (!res.ok) throw new Error("Failed to load packages.");
@@ -127,11 +127,11 @@ export default function ManageSubscriptions() {
     };
 
     try {
-      let url = "http://localhost:8081/api/packages";
+      let url = "https://erp-construction.onrender.com/api/packages";
       let method = "POST";
 
       if (editPkg && editPkg.id) {
-        url = `http://localhost:8081/api/packages/${editPkg.id}`;
+        url = `https://erp-construction.onrender.com/api/packages/${editPkg.id}`;
         method = "PUT";
       }
 
@@ -152,7 +152,7 @@ export default function ManageSubscriptions() {
   const handleDeletePackage = async (id: number) => {
     if (!confirm("Are you sure you want to delete this package?")) return;
     try {
-      const res = await fetch(`http://localhost:8081/api/packages/${id}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/packages/${id}`, {
         method: "DELETE",
         headers: getHeaders()
       });

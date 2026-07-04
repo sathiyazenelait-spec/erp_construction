@@ -43,7 +43,7 @@ export default function RecruitmentCenter() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/hr-manager/recruitment/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/hr-manager/recruitment/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -87,7 +87,7 @@ export default function RecruitmentCenter() {
         organizationId: orgId
       };
 
-      const res = await fetch("http://localhost:8081/api/hr-manager/recruitment", {
+      const res = await fetch("https://erp-construction.onrender.com/api/hr-manager/recruitment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

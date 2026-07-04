@@ -18,7 +18,7 @@ export default function LabourProductivity() {
 
     const fetchData = async () => {
       try {
-        const projRes = await fetch(`http://localhost:8081/api/projects/org/${orgId}`, { headers });
+        const projRes = await fetch(`https://erp-construction.onrender.com/api/projects/org/${orgId}`, { headers });
         if (projRes.ok) {
           const projData = await projRes.json();
           setProjects(projData || []);
@@ -27,7 +27,7 @@ export default function LabourProductivity() {
           const allLogs: any[] = [];
           const logPromises = projData.map(async (p: any) => {
             try {
-              const logRes = await fetch(`http://localhost:8081/api/site/logs/${p.id}`, { headers });
+              const logRes = await fetch(`https://erp-construction.onrender.com/api/site/logs/${p.id}`, { headers });
               if (logRes.ok) {
                 const logs = await logRes.json();
                 logs.forEach((log: any) => {

@@ -32,7 +32,7 @@ export default function LeadGenCenter() {
       }
 
       // Fetch leads from digital-marketing-tl dashboard (which includes the TlmLeads)
-      const res = await fetch(`http://localhost:8081/api/digital-marketing-tl/dashboard/org/${activeOrgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/digital-marketing-tl/dashboard/org/${activeOrgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 

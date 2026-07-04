@@ -48,7 +48,7 @@ export default function QuantitySurveyorDashboard() {
     setSession(s);
     const orgId = s?.organizationId || 1;
     const token = localStorage.getItem("buildcon_token");
-    fetch(`http://localhost:8081/api/quantity-surveyor/dashboard/org/${orgId}`, {
+    fetch(`https://erp-construction.onrender.com/api/quantity-surveyor/dashboard/org/${orgId}`, {
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then((res) => res.json())
@@ -94,7 +94,7 @@ export default function QuantitySurveyorDashboard() {
     try {
       const orgId = session?.organizationId || 1;
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/quantity-surveyor/ai-chat", {
+      const res = await fetch("https://erp-construction.onrender.com/api/quantity-surveyor/ai-chat", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -118,7 +118,7 @@ export default function QuantitySurveyorDashboard() {
     const orgId = session?.organizationId || 1;
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/quantity-surveyor/profile/update", {
+      const res = await fetch("https://erp-construction.onrender.com/api/quantity-surveyor/profile/update", {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",

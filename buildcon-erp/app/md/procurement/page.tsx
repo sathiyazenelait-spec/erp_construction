@@ -18,7 +18,7 @@ export default function ProcurementOverview() {
       const session = JSON.parse(sessionStr);
       const orgId = session.organizationId;
 
-      const res = await fetch(`http://localhost:8081/api/procurement-manager/orders/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/procurement-manager/orders/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {

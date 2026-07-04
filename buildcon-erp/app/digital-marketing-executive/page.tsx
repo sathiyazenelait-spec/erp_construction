@@ -169,7 +169,7 @@ export default function DigitalMarketingExecutiveDashboard() {
       }
 
       // Fetch dashboard data
-      const res = await fetch(`http://localhost:8081/api/digital-marketing-executive/dashboard/org/${activeOrgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/digital-marketing-executive/dashboard/org/${activeOrgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 
@@ -197,7 +197,7 @@ export default function DigitalMarketingExecutiveDashboard() {
 
       // Fetch settings
       if (activeUsername) {
-        const settingsRes = await fetch(`http://localhost:8081/api/digital-marketing-executive/settings/user/${encodeURIComponent(activeUsername)}`, {
+        const settingsRes = await fetch(`https://erp-construction.onrender.com/api/digital-marketing-executive/settings/user/${encodeURIComponent(activeUsername)}`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (settingsRes.ok) {
@@ -236,7 +236,7 @@ export default function DigitalMarketingExecutiveDashboard() {
         organizationId: orgId
       };
 
-      const res = await fetch("http://localhost:8081/api/digital-marketing-executive/tasks", {
+      const res = await fetch("https://erp-construction.onrender.com/api/digital-marketing-executive/tasks", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -265,7 +265,7 @@ export default function DigitalMarketingExecutiveDashboard() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/digital-marketing-executive/reviews/${id}/reply`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/digital-marketing-executive/reviews/${id}/reply`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -295,7 +295,7 @@ export default function DigitalMarketingExecutiveDashboard() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/digital-marketing-executive/settings/user/${encodeURIComponent(username)}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/digital-marketing-executive/settings/user/${encodeURIComponent(username)}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -759,7 +759,7 @@ export default function DigitalMarketingExecutiveDashboard() {
                                         try {
                                           const token = localStorage.getItem("buildcon_token");
                                           if (!token) return;
-                                          const res = await fetch(`http://localhost:8081/api/digital-marketing-executive/tasks/${t.id}/status`, {
+                                          const res = await fetch(`https://erp-construction.onrender.com/api/digital-marketing-executive/tasks/${t.id}/status`, {
                                             method: "PUT",
                                             headers: {
                                               "Content-Type": "application/json",

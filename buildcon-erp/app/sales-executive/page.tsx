@@ -119,40 +119,40 @@ export default function SalesExecutiveDashboard() {
       const headers = { "Authorization": `Bearer ${activeToken}` };
 
       // 1. Fetch projects
-      const projRes = await fetch("http://localhost:8081/api/projects", { headers });
+      const projRes = await fetch("https://erp-construction.onrender.com/api/projects", { headers });
       const projData = await projRes.json();
       if (Array.isArray(projData)) setProjects(projData);
 
       // 2. Fetch summary stats
-      const statsRes = await fetch(`http://localhost:8081/api/sales-executive/summary/org/${activeOrgId}`, { headers });
+      const statsRes = await fetch(`https://erp-construction.onrender.com/api/sales-executive/summary/org/${activeOrgId}`, { headers });
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         setSummaryStats(statsData);
       }
 
       // 3. Fetch leads
-      const leadsRes = await fetch(`http://localhost:8081/api/sales-executive/leads/org/${activeOrgId}`, { headers });
+      const leadsRes = await fetch(`https://erp-construction.onrender.com/api/sales-executive/leads/org/${activeOrgId}`, { headers });
       if (leadsRes.ok) {
         const leadsData = await leadsRes.json();
         setLeads(leadsData);
       }
 
       // 4. Fetch proposals
-      const proposalsRes = await fetch(`http://localhost:8081/api/sales-executive/proposals/org/${activeOrgId}`, { headers });
+      const proposalsRes = await fetch(`https://erp-construction.onrender.com/api/sales-executive/proposals/org/${activeOrgId}`, { headers });
       if (proposalsRes.ok) {
         const proposalsData = await proposalsRes.json();
         setProposals(proposalsData);
       }
 
       // 5. Fetch activities
-      const activitiesRes = await fetch(`http://localhost:8081/api/sales-executive/activities/org/${activeOrgId}`, { headers });
+      const activitiesRes = await fetch(`https://erp-construction.onrender.com/api/sales-executive/activities/org/${activeOrgId}`, { headers });
       if (activitiesRes.ok) {
         const activitiesData = await activitiesRes.json();
         setActivities(activitiesData);
       }
 
       // 6. Fetch chats
-      const chatsRes = await fetch(`http://localhost:8081/api/sales-executive/chats/org/${activeOrgId}`, { headers });
+      const chatsRes = await fetch(`https://erp-construction.onrender.com/api/sales-executive/chats/org/${activeOrgId}`, { headers });
       if (chatsRes.ok) {
         const chatsData = await chatsRes.json();
         setChats(chatsData);
@@ -162,14 +162,14 @@ export default function SalesExecutiveDashboard() {
       }
 
       // 7. Fetch revenue trend data
-      const revRes = await fetch(`http://localhost:8081/api/sales-executive/revenue/org/${activeOrgId}`, { headers });
+      const revRes = await fetch(`https://erp-construction.onrender.com/api/sales-executive/revenue/org/${activeOrgId}`, { headers });
       if (revRes.ok) {
         const revData = await revRes.json();
         setRevenueChartData(revData);
       }
 
       // 8. Fetch AI insights
-      const aiRes = await fetch(`http://localhost:8081/api/sales-executive/ai-insights/org/${activeOrgId}`, { headers });
+      const aiRes = await fetch(`https://erp-construction.onrender.com/api/sales-executive/ai-insights/org/${activeOrgId}`, { headers });
       if (aiRes.ok) {
         const aiData = await aiRes.json();
         if (aiData.insights) setAiMessages(aiData.insights);
@@ -177,7 +177,7 @@ export default function SalesExecutiveDashboard() {
       }
 
       // 9. Fetch Calendar
-      const calRes = await fetch(`http://localhost:8081/api/sales-executive/calendar/org/${activeOrgId}`, { headers });
+      const calRes = await fetch(`https://erp-construction.onrender.com/api/sales-executive/calendar/org/${activeOrgId}`, { headers });
       if (calRes.ok) {
         const calData = await calRes.json();
         setCalendarDays(calData);
@@ -185,7 +185,7 @@ export default function SalesExecutiveDashboard() {
 
       // 10. Fetch profile settings
       if (activeUsername) {
-        const settingsRes = await fetch(`http://localhost:8081/api/sales-executive/settings/user/${activeUsername}`, { headers });
+        const settingsRes = await fetch(`https://erp-construction.onrender.com/api/sales-executive/settings/user/${activeUsername}`, { headers });
         if (settingsRes.ok) {
           const settingsData = await settingsRes.json();
           setProfile({
@@ -410,7 +410,7 @@ export default function SalesExecutiveDashboard() {
     e.preventDefault();
     if (!newLeadName.trim() || !orgId) return;
     try {
-      const res = await fetch("http://localhost:8081/api/sales-executive/leads", {
+      const res = await fetch("https://erp-construction.onrender.com/api/sales-executive/leads", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -447,7 +447,7 @@ export default function SalesExecutiveDashboard() {
     e.preventDefault();
     if (!selectedQualifyLead || !token) return;
     try {
-      const res = await fetch(`http://localhost:8081/api/sales-executive/leads/${selectedQualifyLead.id}/qualify`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/sales-executive/leads/${selectedQualifyLead.id}/qualify`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -484,7 +484,7 @@ export default function SalesExecutiveDashboard() {
     e.preventDefault();
     if (!newActLeadName || !newActActivity || !orgId) return;
     try {
-      const res = await fetch("http://localhost:8081/api/sales-executive/activities", {
+      const res = await fetch("https://erp-construction.onrender.com/api/sales-executive/activities", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -518,7 +518,7 @@ export default function SalesExecutiveDashboard() {
 
   const handleCompleteActivity = async (act: any) => {
     try {
-      const res = await fetch("http://localhost:8081/api/sales-executive/activities", {
+      const res = await fetch("https://erp-construction.onrender.com/api/sales-executive/activities", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -549,7 +549,7 @@ export default function SalesExecutiveDashboard() {
     e.preventDefault();
     if (!newPropLeadName || !newPropNo || !newPropAmount || !orgId) return;
     try {
-      const res = await fetch("http://localhost:8081/api/sales-executive/proposals", {
+      const res = await fetch("https://erp-construction.onrender.com/api/sales-executive/proposals", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -580,7 +580,7 @@ export default function SalesExecutiveDashboard() {
 
   const handleUpdateProposalStatus = async (proposal: any, newStatus: string) => {
     try {
-      const res = await fetch("http://localhost:8081/api/sales-executive/proposals", {
+      const res = await fetch("https://erp-construction.onrender.com/api/sales-executive/proposals", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -655,7 +655,7 @@ export default function SalesExecutiveDashboard() {
   const handleDeleteLead = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this lead?")) return;
     try {
-      const res = await fetch(`http://localhost:8081/api/sales-executive/leads/${id}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/sales-executive/leads/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -673,7 +673,7 @@ export default function SalesExecutiveDashboard() {
     e.preventDefault();
     if (!username) return;
     try {
-      const res = await fetch(`http://localhost:8081/api/sales-executive/settings/user/${username}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/sales-executive/settings/user/${username}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

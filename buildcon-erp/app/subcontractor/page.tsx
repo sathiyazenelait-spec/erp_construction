@@ -65,7 +65,7 @@ export default function SubcontractorDashboard() {
   async function fetchClaims(loadedContracts?: any[]) {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/progress-claims", {
+      const res = await fetch("https://erp-construction.onrender.com/api/progress-claims", {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -92,7 +92,7 @@ export default function SubcontractorDashboard() {
   const loadDashboardData = async (activeOrgId: number) => {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/subcontractor/dashboard/org/${activeOrgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/subcontractor/dashboard/org/${activeOrgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -207,7 +207,7 @@ export default function SubcontractorDashboard() {
         : (contractIdx === 1 ? 2 : 1);
 
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/progress-claims", {
+      const res = await fetch("https://erp-construction.onrender.com/api/progress-claims", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -237,7 +237,7 @@ export default function SubcontractorDashboard() {
     const todayStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/subcontractor/attendance", {
+      const res = await fetch("https://erp-construction.onrender.com/api/subcontractor/attendance", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -267,7 +267,7 @@ export default function SubcontractorDashboard() {
     const todayStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/subcontractor/indent", {
+      const res = await fetch("https://erp-construction.onrender.com/api/subcontractor/indent", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -298,7 +298,7 @@ export default function SubcontractorDashboard() {
 
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/subcontractor/ai-chat", {
+      const res = await fetch("https://erp-construction.onrender.com/api/subcontractor/ai-chat", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -680,7 +680,7 @@ export default function SubcontractorDashboard() {
                   onClick={async () => {
                     try {
                       const token = localStorage.getItem("buildcon_token");
-                      const res = await fetch("http://localhost:8081/api/subcontractor/profile/update", {
+                      const res = await fetch("https://erp-construction.onrender.com/api/subcontractor/profile/update", {
                         method: "PUT",
                         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
                         body: JSON.stringify({

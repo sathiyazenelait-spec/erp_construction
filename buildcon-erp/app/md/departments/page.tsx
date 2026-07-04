@@ -19,7 +19,7 @@ export default function DepartmentPerformance() {
       const session = JSON.parse(sessionStr);
       const orgId = session.organizationId;
 
-      const res = await fetch(`http://localhost:8081/api/md/dashboard/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/md/dashboard/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {

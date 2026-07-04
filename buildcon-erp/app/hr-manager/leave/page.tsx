@@ -38,7 +38,7 @@ export default function LeaveManagement() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/hr-manager/leave/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/hr-manager/leave/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 
@@ -65,7 +65,7 @@ export default function LeaveManagement() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/hr-manager/leave/${id}/status`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/hr-manager/leave/${id}/status`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -26,7 +26,7 @@ export default function Settings() {
     setSession(s);
     const orgId = s?.organizationId || 1;
     const token = localStorage.getItem("buildcon_token");
-    fetch(`http://localhost:8081/api/business-director/dashboard/org/${orgId}`, {
+    fetch(`https://erp-construction.onrender.com/api/business-director/dashboard/org/${orgId}`, {
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then((res) => res.json())
@@ -54,7 +54,7 @@ export default function Settings() {
     const orgId = session?.organizationId || 1;
     const token = localStorage.getItem("buildcon_token");
     try {
-      const res = await fetch("http://localhost:8081/api/business-director/profile/update", {
+      const res = await fetch("https://erp-construction.onrender.com/api/business-director/profile/update", {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",

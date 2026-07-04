@@ -62,7 +62,7 @@ export default function Home() {
     setBgImage(randomImg);
 
     // Fetch organizations from the backend
-    fetch("http://localhost:8081/api/organizations")
+    fetch("https://erp-construction.onrender.com/api/organizations")
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
@@ -142,7 +142,7 @@ export default function Home() {
     if (!selectedOrg) return;
 
     try {
-      const res = await fetch("http://localhost:8081/api/organizations/authenticate", {
+      const res = await fetch("https://erp-construction.onrender.com/api/organizations/authenticate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

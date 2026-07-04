@@ -81,7 +81,7 @@ export default function FinanceAccountsDashboard() {
   async function fetchApprovedClaims() {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/progress-claims/status/APPROVED", {
+      const res = await fetch("https://erp-construction.onrender.com/api/progress-claims/status/APPROVED", {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -113,7 +113,7 @@ export default function FinanceAccountsDashboard() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/finance-accounts/dashboard/org/${activeOrgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/finance-accounts/dashboard/org/${activeOrgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -182,7 +182,7 @@ export default function FinanceAccountsDashboard() {
     try {
       const token = localStorage.getItem("buildcon_token");
       const ref = `PAY-TXN-${Math.floor(100000 + Math.random() * 900000)}`;
-      const res = await fetch(`http://localhost:8081/api/progress-claims/${id}/pay?paymentReference=${ref}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/progress-claims/${id}/pay?paymentReference=${ref}`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -208,7 +208,7 @@ export default function FinanceAccountsDashboard() {
       }
 
       // TX ID and due date are now generated server-side — no hardcoded values
-      const res = await fetch("http://localhost:8081/api/finance-accounts/transaction", {
+      const res = await fetch("https://erp-construction.onrender.com/api/finance-accounts/transaction", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -245,7 +245,7 @@ export default function FinanceAccountsDashboard() {
     try {
       const token = localStorage.getItem("buildcon_token");
       // Pass organizationId so backend can resolve dynamic profile name for greeting
-      const res = await fetch("http://localhost:8081/api/finance-accounts/ai-chat", {
+      const res = await fetch("https://erp-construction.onrender.com/api/finance-accounts/ai-chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -265,7 +265,7 @@ export default function FinanceAccountsDashboard() {
   const handleHoldPayout = async (id: number) => {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/progress-claims/${id}/hold`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/progress-claims/${id}/hold`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -287,7 +287,7 @@ export default function FinanceAccountsDashboard() {
         alert("Session or organization ID is missing.");
         return;
       }
-      const res = await fetch("http://localhost:8081/api/finance-accounts/profile/update", {
+      const res = await fetch("https://erp-construction.onrender.com/api/finance-accounts/profile/update", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

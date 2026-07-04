@@ -241,7 +241,7 @@ buildcon-erp/
 
 ## 7. API Endpoints Reference
 
-All backend APIs are hosted by default on `http://localhost:8081`. 
+All backend APIs are hosted by default on `https://erp-construction.onrender.com`. 
 
 ### Authentication Endpoints
 | HTTP Method | API Path | Request Body | Response Body | Description |
@@ -313,7 +313,7 @@ All backend APIs are hosted by default on `http://localhost:8081`.
    ```bash
    mvn spring-boot:run
    ```
-4. The backend server should start on port `8081`. You can access API documentation or perform requests via `http://localhost:8081`.
+4. The backend server should start on port `8081`. You can access API documentation or perform requests via `https://erp-construction.onrender.com`.
 
 ---
 

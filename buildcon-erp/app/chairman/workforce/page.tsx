@@ -53,7 +53,7 @@ export default function WorkforceAnalysis() {
       const orgId = session.organizationId || 1;
 
       // 1. Fetch Subcontractor Attendance
-      fetch(`http://localhost:8081/api/hr-manager/labour-attendance/org/${orgId}`, {
+      fetch(`https://erp-construction.onrender.com/api/hr-manager/labour-attendance/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       })
       .then(res => res.json())
@@ -65,7 +65,7 @@ export default function WorkforceAnalysis() {
       .catch(err => console.error("Error loading subcontractor attendance:", err));
 
       // 2. Fetch Employees Registry
-      fetch(`http://localhost:8081/api/hr-manager/employees/org/${orgId}`, {
+      fetch(`https://erp-construction.onrender.com/api/hr-manager/employees/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       })
       .then(res => res.json())
@@ -83,7 +83,7 @@ export default function WorkforceAnalysis() {
       .catch(err => console.error("Error loading employees registry:", err));
 
       // 3. Fetch Workforce Summary Overview
-      fetch(`http://localhost:8081/api/hr-manager/workforce/org/${orgId}`, {
+      fetch(`https://erp-construction.onrender.com/api/hr-manager/workforce/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       })
       .then(res => res.json())

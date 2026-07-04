@@ -48,7 +48,7 @@ export default function ApprovalCenter() {
       const orgId = session.organizationId;
       if (!orgId) return;
 
-      const res = await fetch(`http://localhost:8081/api/projects/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/projects/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -71,7 +71,7 @@ export default function ApprovalCenter() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/projects/${projId}/approve`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/projects/${projId}/approve`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
       });

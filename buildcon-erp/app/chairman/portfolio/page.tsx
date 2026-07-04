@@ -81,7 +81,7 @@ export default function CompanyPortfolio() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/projects/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/projects/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -137,7 +137,7 @@ export default function CompanyPortfolio() {
       const orgId = session.organizationId;
       if (!orgId) return;
 
-      const res = await fetch("http://localhost:8081/api/projects", {
+      const res = await fetch("https://erp-construction.onrender.com/api/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -183,7 +183,7 @@ export default function CompanyPortfolio() {
     try {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
-      const res = await fetch(`http://localhost:8081/api/projects/${id}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/projects/${id}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`
@@ -224,7 +224,7 @@ export default function CompanyPortfolio() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/projects/${editingProject.id}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/projects/${editingProject.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

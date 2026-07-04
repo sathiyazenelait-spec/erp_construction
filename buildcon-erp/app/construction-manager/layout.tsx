@@ -33,7 +33,7 @@ export default function ConstructionManagerLayout({ children }: { children: Reac
     setTier((localStorage.getItem("selected_login_tier") || "Enterprise").toLowerCase());
     const orgId = s?.organizationId || 1;
     const token = localStorage.getItem("buildcon_token");
-    fetch(`http://localhost:8081/api/construction-manager/dashboard/org/${orgId}`, {
+    fetch(`https://erp-construction.onrender.com/api/construction-manager/dashboard/org/${orgId}`, {
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then((res) => res.json())

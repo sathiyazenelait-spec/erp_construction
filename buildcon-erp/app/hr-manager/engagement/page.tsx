@@ -70,7 +70,7 @@ export default function EngagementPage() {
       }
 
       // Fetch Events
-      const evRes = await fetch(`http://localhost:8081/api/hr-manager/events/org/${orgId}`, {
+      const evRes = await fetch(`https://erp-construction.onrender.com/api/hr-manager/events/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (evRes.ok) {
@@ -79,7 +79,7 @@ export default function EngagementPage() {
       }
 
       // Fetch Grievances
-      const grRes = await fetch(`http://localhost:8081/api/hr-manager/grievances/org/${orgId}`, {
+      const grRes = await fetch(`https://erp-construction.onrender.com/api/hr-manager/grievances/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (grRes.ok) {
@@ -112,7 +112,7 @@ export default function EngagementPage() {
       const session = JSON.parse(sessionStr);
       const orgId = session.organizationId;
 
-      const res = await fetch("http://localhost:8081/api/hr-manager/events", {
+      const res = await fetch("https://erp-construction.onrender.com/api/hr-manager/events", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -156,7 +156,7 @@ export default function EngagementPage() {
       const token = localStorage.getItem("buildcon_token");
       if (!token) return;
 
-      const res = await fetch(`http://localhost:8081/api/hr-manager/grievances/${selectedGrievance.id}/status`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/hr-manager/grievances/${selectedGrievance.id}/status`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

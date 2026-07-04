@@ -45,7 +45,7 @@ export default function MDDashboard() {
         const orgId = session.organizationId;
         if (!orgId) return;
 
-        const res = await fetch(`http://localhost:8081/api/alerts/org/${orgId}`, {
+        const res = await fetch(`https://erp-construction.onrender.com/api/alerts/org/${orgId}`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
@@ -75,7 +75,7 @@ export default function MDDashboard() {
     const s = getSession();
     const orgId = s?.organizationId || 1;
     const token = localStorage.getItem("buildcon_token");
-    fetch(`http://localhost:8081/api/md/dashboard/org/${orgId}`, {
+    fetch(`https://erp-construction.onrender.com/api/md/dashboard/org/${orgId}`, {
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then((res) => res.json())

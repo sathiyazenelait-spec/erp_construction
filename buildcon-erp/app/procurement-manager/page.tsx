@@ -141,7 +141,7 @@ export default function ProcurementManagerDashboard() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8081/api/procurement-manager/dashboard/org/${activeOrgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/procurement-manager/dashboard/org/${activeOrgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -184,7 +184,7 @@ export default function ProcurementManagerDashboard() {
 
         // Fetch Purchase Orders
         try {
-          const poRes = await fetch(`http://localhost:8081/api/procurement-manager/po/org/${activeOrgId}`, {
+          const poRes = await fetch(`https://erp-construction.onrender.com/api/procurement-manager/po/org/${activeOrgId}`, {
             headers: { "Authorization": `Bearer ${token}` }
           });
           if (poRes.ok) {
@@ -242,7 +242,7 @@ export default function ProcurementManagerDashboard() {
 
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/procurement-manager/rfq", {
+      const res = await fetch("https://erp-construction.onrender.com/api/procurement-manager/rfq", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -274,7 +274,7 @@ export default function ProcurementManagerDashboard() {
 
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/procurement-manager/inventory", {
+      const res = await fetch("https://erp-construction.onrender.com/api/procurement-manager/inventory", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -310,7 +310,7 @@ export default function ProcurementManagerDashboard() {
 
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/procurement-manager/po", {
+      const res = await fetch("https://erp-construction.onrender.com/api/procurement-manager/po", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -344,7 +344,7 @@ export default function ProcurementManagerDashboard() {
 
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/procurement-manager/profile/update", {
+      const res = await fetch("https://erp-construction.onrender.com/api/procurement-manager/profile/update", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -384,7 +384,7 @@ export default function ProcurementManagerDashboard() {
 
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/procurement-manager/ai-chat", {
+      const res = await fetch("https://erp-construction.onrender.com/api/procurement-manager/ai-chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -114,7 +114,7 @@ export default function ProjectManagerDashboard() {
   async function fetchEmployees(orgId: number) {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/hr-manager/employees/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/hr-manager/employees/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -136,7 +136,7 @@ export default function ProjectManagerDashboard() {
   async function fetchTransactions(orgId: number) {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/finance-accounts/dashboard/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/finance-accounts/dashboard/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -151,7 +151,7 @@ export default function ProjectManagerDashboard() {
   async function fetchSubcontractorContracts(orgId: number) {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/subcontractor/dashboard/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/subcontractor/dashboard/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -166,7 +166,7 @@ export default function ProjectManagerDashboard() {
   async function fetchDrawings(orgId: number) {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/senior-site-engineer/dashboard/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/senior-site-engineer/dashboard/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -181,7 +181,7 @@ export default function ProjectManagerDashboard() {
   async function fetchAlerts(orgId: number) {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/alerts/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/alerts/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -198,7 +198,7 @@ export default function ProjectManagerDashboard() {
       const token = localStorage.getItem("buildcon_token");
       const allLogs: any[] = [];
       for (const p of projectsList) {
-        const res = await fetch(`http://localhost:8081/api/site/logs/${p.id}`, {
+        const res = await fetch(`https://erp-construction.onrender.com/api/site/logs/${p.id}`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
@@ -260,7 +260,7 @@ export default function ProjectManagerDashboard() {
   async function fetchPendingClaims() {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch("http://localhost:8081/api/progress-claims/status/PENDING", {
+      const res = await fetch("https://erp-construction.onrender.com/api/progress-claims/status/PENDING", {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -296,7 +296,7 @@ export default function ProjectManagerDashboard() {
   const fetchDashboardData = async (orgId: number) => {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/project-manager/dashboard/org/${orgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/project-manager/dashboard/org/${orgId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -381,7 +381,7 @@ export default function ProjectManagerDashboard() {
   const handleApproveClaim = async (id: number) => {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/progress-claims/${id}/approve`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/progress-claims/${id}/approve`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -397,7 +397,7 @@ export default function ProjectManagerDashboard() {
   const handleRejectClaim = async (id: number) => {
     try {
       const token = localStorage.getItem("buildcon_token");
-      const res = await fetch(`http://localhost:8081/api/progress-claims/${id}/reject`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/progress-claims/${id}/reject`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -839,7 +839,7 @@ export default function ProjectManagerDashboard() {
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
-      const res = await fetch(`http://localhost:8081/api/hr-manager/leave/org/${targetOrgId}`, {
+      const res = await fetch(`https://erp-construction.onrender.com/api/hr-manager/leave/org/${targetOrgId}`, {
         headers
       });
       if (res.ok) {
@@ -868,7 +868,7 @@ export default function ProjectManagerDashboard() {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const res = await fetch("http://localhost:8081/api/hr-manager/leave", {
+      const res = await fetch("https://erp-construction.onrender.com/api/hr-manager/leave", {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -912,7 +912,7 @@ export default function ProjectManagerDashboard() {
 
     try {
       const orgId = session?.organizationId || 1;
-      const res = await fetch("http://localhost:8081/api/project-manager/ai-chat", {
+      const res = await fetch("https://erp-construction.onrender.com/api/project-manager/ai-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1348,7 +1348,7 @@ export default function ProjectManagerDashboard() {
         return;
       }
 
-      const res = await fetch("http://localhost:8081/api/projects", {
+      const res = await fetch("https://erp-construction.onrender.com/api/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1403,7 +1403,7 @@ export default function ProjectManagerDashboard() {
     if (selectedProject) {
       // Save project properties override directly to the database
       try {
-        const res = await fetch(`http://localhost:8081/api/projects/${selectedProject.id}`, {
+        const res = await fetch(`https://erp-construction.onrender.com/api/projects/${selectedProject.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -1438,7 +1438,7 @@ export default function ProjectManagerDashboard() {
     } else {
       // Save global configuration overrides
       try {
-        const res = await fetch("http://localhost:8081/api/project-manager/profile/update", {
+        const res = await fetch("https://erp-construction.onrender.com/api/project-manager/profile/update", {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
