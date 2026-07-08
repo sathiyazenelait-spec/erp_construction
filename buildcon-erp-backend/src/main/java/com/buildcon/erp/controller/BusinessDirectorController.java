@@ -79,9 +79,10 @@ public class BusinessDirectorController {
         String profileName = "Rajesh Verma";
         String profileEmail = "bd@buildcon.com";
         String avatarInitials = "RV";
-        List<BusinessDirector> bdUsers = businessDirectorRepository.findByOrganizationId(orgId);
-        if (!bdUsers.isEmpty()) {
-            BusinessDirector bd = bdUsers.get(0);
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<BusinessDirector> bdOpt = businessDirectorRepository.findByUsername(currentUsername);
+        if (bdOpt.isPresent()) {
+            BusinessDirector bd = bdOpt.get();
             profileName = bd.getUsername();
             profileEmail = bd.getEmail();
             avatarInitials = bd.getAvatarInitials();
@@ -144,9 +145,10 @@ public class BusinessDirectorController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: organizationId is required."));
         }
 
-        List<BusinessDirector> bdUsers = businessDirectorRepository.findByOrganizationId(orgId);
-        if (!bdUsers.isEmpty()) {
-            BusinessDirector bd = bdUsers.get(0);
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<BusinessDirector> bdOpt = businessDirectorRepository.findByUsername(currentUsername);
+        if (bdOpt.isPresent()) {
+            BusinessDirector bd = bdOpt.get();
             if (username != null && !username.isBlank()) bd.setUsername(username);
             if (email != null && !email.isBlank()) bd.setEmail(email);
             String avatarInitials = payload.get("avatarInitials");
@@ -189,9 +191,10 @@ public class BusinessDirectorController {
         if (orgIdStr != null) {
             try {
                 Long orgId = Long.parseLong(orgIdStr);
-                List<BusinessDirector> bdUsers = businessDirectorRepository.findByOrganizationId(orgId);
-                if (!bdUsers.isEmpty()) {
-                    profileName = bdUsers.get(0).getUsername();
+                String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+                Optional<BusinessDirector> bdOpt = businessDirectorRepository.findByUsername(currentUsername);
+                if (bdOpt.isPresent()) {
+                    profileName = bdOpt.get().getUsername();
                 }
             } catch (NumberFormatException ignored) {}
         }

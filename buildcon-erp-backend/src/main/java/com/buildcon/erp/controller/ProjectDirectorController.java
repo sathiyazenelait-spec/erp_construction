@@ -79,9 +79,10 @@ public class ProjectDirectorController {
         String profileName = "Arvind Menon";
         String profileEmail = "pd@buildcon.com";
         String avatarInitials = "AM";
-        List<ProjectDirector> pdUsers = projectDirectorRepository.findByOrganizationId(orgId);
-        if (!pdUsers.isEmpty()) {
-            ProjectDirector pd = pdUsers.get(0);
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<ProjectDirector> pdOpt = projectDirectorRepository.findByUsername(currentUsername);
+        if (pdOpt.isPresent()) {
+            ProjectDirector pd = pdOpt.get();
             profileName = pd.getUsername();
             profileEmail = pd.getEmail();
             avatarInitials = pd.getAvatarInitials();
@@ -144,9 +145,10 @@ public class ProjectDirectorController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: organizationId is required."));
         }
 
-        List<ProjectDirector> pdUsers = projectDirectorRepository.findByOrganizationId(orgId);
-        if (!pdUsers.isEmpty()) {
-            ProjectDirector pd = pdUsers.get(0);
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<ProjectDirector> pdOpt = projectDirectorRepository.findByUsername(currentUsername);
+        if (pdOpt.isPresent()) {
+            ProjectDirector pd = pdOpt.get();
             if (username != null && !username.isBlank()) pd.setUsername(username);
             if (email != null && !email.isBlank()) pd.setEmail(email);
             String avatarInitials = payload.get("avatarInitials");
@@ -189,9 +191,10 @@ public class ProjectDirectorController {
         if (orgIdStr != null) {
             try {
                 Long orgId = Long.parseLong(orgIdStr);
-                List<ProjectDirector> pdUsers = projectDirectorRepository.findByOrganizationId(orgId);
-                if (!pdUsers.isEmpty()) {
-                    profileName = pdUsers.get(0).getUsername();
+                String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+                Optional<ProjectDirector> pdOpt = projectDirectorRepository.findByUsername(currentUsername);
+                if (pdOpt.isPresent()) {
+                    profileName = pdOpt.get().getUsername();
                 }
             } catch (NumberFormatException ignored) {}
         }

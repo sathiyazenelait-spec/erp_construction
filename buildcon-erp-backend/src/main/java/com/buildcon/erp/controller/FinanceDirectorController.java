@@ -80,9 +80,10 @@ public class FinanceDirectorController {
         String profileName = "Suresh Kumar";
         String profileEmail = "fd@buildcon.com";
         String avatarInitials = "SK";
-        java.util.List<FinanceDirector> fdUsers = financeDirectorRepository.findByOrganizationId(orgId);
-        if (!fdUsers.isEmpty()) {
-            FinanceDirector fd = fdUsers.get(0);
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<FinanceDirector> fdOpt = financeDirectorRepository.findByUsername(currentUsername);
+        if (fdOpt.isPresent()) {
+            FinanceDirector fd = fdOpt.get();
             profileName = fd.getUsername();
             profileEmail = fd.getEmail();
             avatarInitials = fd.getAvatarInitials();
@@ -179,9 +180,10 @@ public class FinanceDirectorController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponse("Access Denied: You do not belong to this organization."));
         }
 
-        java.util.List<FinanceDirector> fdUsers = financeDirectorRepository.findByOrganizationId(orgId);
-        if (!fdUsers.isEmpty()) {
-            FinanceDirector fd = fdUsers.get(0);
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<FinanceDirector> fdOpt = financeDirectorRepository.findByUsername(currentUsername);
+        if (fdOpt.isPresent()) {
+            FinanceDirector fd = fdOpt.get();
             if (username != null && !username.isBlank()) fd.setUsername(username);
             if (email != null && !email.isBlank()) fd.setEmail(email);
             String avatarInitials = payload.get("avatarInitials");
@@ -224,9 +226,10 @@ public class FinanceDirectorController {
         if (orgIdStr != null) {
             try {
                 Long orgId = Long.parseLong(orgIdStr);
-                java.util.List<FinanceDirector> fdUsers = financeDirectorRepository.findByOrganizationId(orgId);
-                if (!fdUsers.isEmpty()) {
-                    profileName = fdUsers.get(0).getUsername();
+                String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+                Optional<FinanceDirector> fdOpt = financeDirectorRepository.findByUsername(currentUsername);
+                if (fdOpt.isPresent()) {
+                    profileName = fdOpt.get().getUsername();
                 }
             } catch (NumberFormatException ignored) {}
         }

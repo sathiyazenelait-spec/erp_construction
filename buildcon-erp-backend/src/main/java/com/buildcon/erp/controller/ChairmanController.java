@@ -18,6 +18,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Optional;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -295,9 +296,10 @@ public class ChairmanController {
         String profileName = "Chairman User";
         String profileEmail = "chairman@buildcon.com";
         String avatarInitials = "CH";
-        List<Chairman> users = chairmanRepository.findByOrganizationId(orgId);
-        if (!users.isEmpty()) {
-            Chairman c = users.get(0);
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Chairman> cOpt = chairmanRepository.findByUsername(currentUsername);
+        if (cOpt.isPresent()) {
+            Chairman c = cOpt.get();
             profileName = c.getUsername();
             profileEmail = c.getEmail();
             avatarInitials = c.getAvatarInitials();
@@ -361,9 +363,10 @@ public class ChairmanController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: organizationId is required."));
         }
 
-        List<Chairman> users = chairmanRepository.findByOrganizationId(orgId);
-        if (!users.isEmpty()) {
-            Chairman c = users.get(0);
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Chairman> cOpt = chairmanRepository.findByUsername(currentUsername);
+        if (cOpt.isPresent()) {
+            Chairman c = cOpt.get();
             if (username != null && !username.isBlank()) c.setUsername(username);
             if (email != null && !email.isBlank()) c.setEmail(email);
             String avatarInitials = payload.get("avatarInitials");
@@ -406,9 +409,10 @@ public class ChairmanController {
         if (orgIdStr != null) {
             try {
                 Long orgId = Long.parseLong(orgIdStr);
-                List<Chairman> users = chairmanRepository.findByOrganizationId(orgId);
-                if (!users.isEmpty()) {
-                    profileName = users.get(0).getUsername();
+                String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+                Optional<Chairman> cOpt = chairmanRepository.findByUsername(currentUsername);
+                if (cOpt.isPresent()) {
+                    profileName = cOpt.get().getUsername();
                 }
             } catch (NumberFormatException ignored) {}
         }

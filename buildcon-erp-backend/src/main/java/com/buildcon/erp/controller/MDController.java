@@ -80,9 +80,10 @@ public class MDController {
         String profileName = "Rajesh Kumar";
         String profileEmail = "md@buildcon.com";
         String avatarInitials = "RK";
-        List<MD> mdUsers = mdRepository.findByOrganizationId(orgId);
-        if (!mdUsers.isEmpty()) {
-            MD md = mdUsers.get(0);
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<MD> mdOpt = mdRepository.findByUsername(currentUsername);
+        if (mdOpt.isPresent()) {
+            MD md = mdOpt.get();
             profileName = md.getUsername();
             profileEmail = md.getEmail();
             avatarInitials = md.getAvatarInitials();
@@ -145,9 +146,10 @@ public class MDController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: organizationId is required."));
         }
 
-        List<MD> mdUsers = mdRepository.findByOrganizationId(orgId);
-        if (!mdUsers.isEmpty()) {
-            MD md = mdUsers.get(0);
+        String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<MD> mdOpt = mdRepository.findByUsername(currentUsername);
+        if (mdOpt.isPresent()) {
+            MD md = mdOpt.get();
             if (username != null && !username.isBlank()) md.setUsername(username);
             if (email != null && !email.isBlank()) md.setEmail(email);
             String avatarInitials = payload.get("avatarInitials");
@@ -190,9 +192,10 @@ public class MDController {
         if (orgIdStr != null) {
             try {
                 Long orgId = Long.parseLong(orgIdStr);
-                List<MD> mdUsers = mdRepository.findByOrganizationId(orgId);
-                if (!mdUsers.isEmpty()) {
-                    profileName = mdUsers.get(0).getUsername();
+                String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+                Optional<MD> mdOpt = mdRepository.findByUsername(currentUsername);
+                if (mdOpt.isPresent()) {
+                    profileName = mdOpt.get().getUsername();
                 }
             } catch (NumberFormatException ignored) {}
         }
