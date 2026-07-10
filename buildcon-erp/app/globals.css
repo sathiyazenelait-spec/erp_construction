@@ -496,12 +496,13 @@ body.light-theme {
 .light-theme aside a.active,
 .light-theme aside Link.active,
 .light-theme aside .bg-gradient-to-r {
-  color: #ffffff !important;
+  background: #f1f5f9 !important;
+  color: #000000 !important;
 }
 
 .light-theme aside a.active *,
 .light-theme aside .bg-gradient-to-r * {
-  color: #ffffff !important;
+  color: #000000 !important;
 }
 
 /* Sidebar avatar initials */

@@ -53,6 +53,9 @@ public class ChairmanController {
     @Autowired
     private com.buildcon.erp.repository.DashboardShellConfigRepository dashboardShellConfigRepository;
 
+    @Autowired
+    private com.buildcon.erp.repository.ChairmanTicketRepository chairmanTicketRepository;
+
     @GetMapping("/settings")
     public ResponseEntity<?> getSettings(Principal principal) {
         String username = principal.getName();
@@ -297,7 +300,8 @@ public class ChairmanController {
         String profileEmail = "chairman@buildcon.com";
         String avatarInitials = "CH";
         String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Chairman> cOpt = chairmanRepository.findByUsername(currentUsername);
+        Optional<Chairman> cOpt = chairmanRepository.findByUsername(currentUsername)
+                .or(() -> chairmanRepository.findByEmail(currentUsername));
         if (cOpt.isPresent()) {
             Chairman c = cOpt.get();
             profileName = c.getUsername();
@@ -364,7 +368,8 @@ public class ChairmanController {
         }
 
         String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Chairman> cOpt = chairmanRepository.findByUsername(currentUsername);
+        Optional<Chairman> cOpt = chairmanRepository.findByUsername(currentUsername)
+                .or(() -> chairmanRepository.findByEmail(currentUsername));
         if (cOpt.isPresent()) {
             Chairman c = cOpt.get();
             if (username != null && !username.isBlank()) c.setUsername(username);
@@ -410,7 +415,8 @@ public class ChairmanController {
             try {
                 Long orgId = Long.parseLong(orgIdStr);
                 String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
-                Optional<Chairman> cOpt = chairmanRepository.findByUsername(currentUsername);
+                Optional<Chairman> cOpt = chairmanRepository.findByUsername(currentUsername)
+                        .or(() -> chairmanRepository.findByEmail(currentUsername));
                 if (cOpt.isPresent()) {
                     profileName = cOpt.get().getUsername();
                 }
@@ -456,5 +462,31 @@ public class ChairmanController {
 
     private String currentHeaderDate() {
         return java.time.format.DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy").format(java.time.LocalDate.now());
+    }
+
+    @GetMapping("/tickets/org/{orgId}")
+    public ResponseEntity<List<com.buildcon.erp.model.ChairmanTicket>> getTicketsByOrg(@PathVariable Long orgId) {
+        List<com.buildcon.erp.model.ChairmanTicket> tickets = chairmanTicketRepository.findByOrganizationId(orgId);
+        if (tickets.isEmpty()) {
+            chairmanTicketRepository.save(new com.buildcon.erp.model.ChairmanTicket("Managing Director", "Review of Q2 Revenue Targets", "Need a detailed report on commercial segment profitability.", "Strategic Directive", "High", "Open", "2026-07-01", orgId));
+            chairmanTicketRepository.save(new com.buildcon.erp.model.ChairmanTicket("Contractor", "Delay in Skyline Residences", "Concrete supply logistics are causing 3 weeks delay in slab construction.", "Delay Escalation", "Critical", "In Investigation", "2026-07-05", orgId));
+            chairmanTicketRepository.save(new com.buildcon.erp.model.ChairmanTicket("Marketing Manager", "Vite/Next.js SEO Campaign Plan", "Approve SEO budgets for digital campaigns.", "Marketing Campaign", "Medium", "Open", "2026-07-08", orgId));
+            tickets = chairmanTicketRepository.findByOrganizationId(orgId);
+        }
+        return ResponseEntity.ok(tickets);
+    }
+
+    @PostMapping("/tickets")
+    public ResponseEntity<com.buildcon.erp.model.ChairmanTicket> createTicket(@RequestBody com.buildcon.erp.model.ChairmanTicket ticket) {
+        return ResponseEntity.ok(chairmanTicketRepository.save(ticket));
+    }
+
+    @PutMapping("/tickets/{id}/status")
+    public ResponseEntity<com.buildcon.erp.model.ChairmanTicket> updateTicketStatus(@PathVariable Long id, @RequestBody String status) {
+        com.buildcon.erp.model.ChairmanTicket ticket = chairmanTicketRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+        String cleanStatus = status.replace("\"", "").trim();
+        ticket.setStatus(cleanStatus);
+        return ResponseEntity.ok(chairmanTicketRepository.save(ticket));
     }
 }

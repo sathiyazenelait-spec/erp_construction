@@ -6,7 +6,7 @@ import LinkComponent from "next/link";
 import {
   LayoutDashboard, FileText, Briefcase, BarChart3, Wallet, TrendingUp, Users, Heart,
   ShieldCheck, AlertTriangle, Inbox, Bot, Target, LineChart as LineIcon, Settings,
-  Crown, LogOut, Building2, Bell, Calendar, Filter, Plus, Sparkles, Send
+  Crown, LogOut, Building2, Bell, Calendar, Filter, Plus, Sparkles, Send, MessageSquare
 } from "lucide-react";
 import { logout, getSession } from "@/lib/auth";
 
@@ -30,6 +30,7 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
   const [sidebarMenus, setSidebarMenus] = useState("");
   const [headerDate, setHeaderDate] = useState("Wednesday, 28 May 2025");
   const [loading, setLoading] = useState(true);
+  const [brandName, setBrandName] = useState("BuildCon");
 
   useEffect(() => {
     const updateSessionData = () => {
@@ -38,6 +39,10 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
         setName(s.name);
         setRole(s.role);
       }
+      const savedOrg = localStorage.getItem("selected_login_org");
+      if (savedOrg) {
+        setBrandName(savedOrg);
+      }
       const orgId = s?.organizationId || 1;
       const token = localStorage.getItem("buildcon_token");
       fetch(`https://erp-construction.onrender.com/api/chairman/dashboard/org/${orgId}`, {
@@ -45,8 +50,12 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
       })
         .then((res) => res.json())
         .then((d) => {
-          setProfileName(d.profileName || s?.name || "Chairman");
-          setAvatarInitials(d.avatarInitials || "CH");
+          const userProfileName = (d.profileName && d.profileName !== "Chairman User" && d.profileName !== "Chairman")
+            ? d.profileName 
+            : (s?.name || d.profileName || "Chairman");
+          setProfileName(userProfileName);
+          const initials = userProfileName.split(" ").map((n: string) => n[0]).join("").toUpperCase().substring(0, 2);
+          setAvatarInitials(d.avatarInitials || initials || "CH");
           setSidebarMenus(d.sidebar_menus || "");
           if (d.header_date) {
             setHeaderDate(d.header_date);
@@ -58,8 +67,10 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
         })
         .catch((err) => {
           console.error("Error loading Chairman layout configurations:", err);
-          setProfileName(s?.name || "Chairman");
-          setAvatarInitials("CH");
+          const fallbackName = s?.name || "Chairman";
+          setProfileName(fallbackName);
+          const initials = fallbackName.split(" ").map((n: string) => n[0]).join("").toUpperCase().substring(0, 2);
+          setAvatarInitials(initials || "CH");
           const t = localStorage.getItem("selected_login_tier") || "Enterprise";
           setTier(t);
           setLoading(false);
@@ -96,6 +107,7 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
       case "Subscription": return <Crown className="h-4 w-4" />;
       case "Settings":
       case "System Settings": return <Settings className="h-4 w-4" />;
+      case "Communication & Tickets": return <MessageSquare className="h-4 w-4" />;
       default: return <FileText className="h-4 w-4" />;
     }
   };
@@ -126,12 +138,13 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
       case "Subscription": return "/chairman/subscription";
       case "Settings":
       case "System Settings": return "/chairman/settings";
+      case "Communication & Tickets": return "/chairman/communication";
       default: return "/chairman";
     }
   };
 
   const sidebarList = sidebarMenus
-    ? sidebarMenus.split("|").map((n) => n.trim()).filter(Boolean)
+    ? [...sidebarMenus.split("|").map((n) => n.trim()).filter(Boolean), "Communication & Tickets"]
     : [
         "Executive Summary",
         "Company Portfolio",
@@ -146,6 +159,7 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
         "Strategic Planning",
         "Investment Tracker",
         "Subscription",
+        "Communication & Tickets",
         "Settings"
       ];
 
@@ -153,9 +167,9 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
     const href = getSidebarHref(item);
     const normalizedTier = tier.toLowerCase();
     if (normalizedTier === "growth") {
-      return ["/chairman", "/chairman/portfolio", "/chairman/approvals", "/chairman/settings", "/chairman/subscription"].includes(href);
+      return ["/chairman", "/chairman/portfolio", "/chairman/approvals", "/chairman/settings", "/chairman/subscription", "/chairman/communication"].includes(href);
     } else if (normalizedTier === "premium") {
-      return ["/chairman", "/chairman/portfolio", "/chairman/financial", "/chairman/safety", "/chairman/workforce", "/chairman/approvals", "/chairman/ai", "/chairman/settings", "/chairman/subscription"].includes(href);
+      return ["/chairman", "/chairman/portfolio", "/chairman/financial", "/chairman/safety", "/chairman/workforce", "/chairman/approvals", "/chairman/ai", "/chairman/settings", "/chairman/subscription", "/chairman/communication"].includes(href);
     }
     return true;
   });
@@ -186,7 +200,7 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
                 <Building2 className="h-5 w-5 text-slate-950 font-bold" />
               </div>
               <div>
-                <div className="font-bold text-white tracking-wide">BuildCon</div>
+                <div className="font-bold text-white tracking-wide">{brandName}</div>
                 <div className="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">Building Better Tomorrow</div>
               </div>
             </div>

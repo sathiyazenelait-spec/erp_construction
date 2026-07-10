@@ -80,7 +80,8 @@ public class ProjectDirectorController {
         String profileEmail = "pd@buildcon.com";
         String avatarInitials = "AM";
         String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<ProjectDirector> pdOpt = projectDirectorRepository.findByUsername(currentUsername);
+        Optional<ProjectDirector> pdOpt = projectDirectorRepository.findByUsername(currentUsername)
+                .or(() -> projectDirectorRepository.findByEmail(currentUsername));
         if (pdOpt.isPresent()) {
             ProjectDirector pd = pdOpt.get();
             profileName = pd.getUsername();
@@ -146,7 +147,8 @@ public class ProjectDirectorController {
         }
 
         String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<ProjectDirector> pdOpt = projectDirectorRepository.findByUsername(currentUsername);
+        Optional<ProjectDirector> pdOpt = projectDirectorRepository.findByUsername(currentUsername)
+                .or(() -> projectDirectorRepository.findByEmail(currentUsername));
         if (pdOpt.isPresent()) {
             ProjectDirector pd = pdOpt.get();
             if (username != null && !username.isBlank()) pd.setUsername(username);
@@ -192,7 +194,8 @@ public class ProjectDirectorController {
             try {
                 Long orgId = Long.parseLong(orgIdStr);
                 String currentUsername = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
-                Optional<ProjectDirector> pdOpt = projectDirectorRepository.findByUsername(currentUsername);
+                Optional<ProjectDirector> pdOpt = projectDirectorRepository.findByUsername(currentUsername)
+                        .or(() -> projectDirectorRepository.findByEmail(currentUsername));
                 if (pdOpt.isPresent()) {
                     profileName = pdOpt.get().getUsername();
                 }

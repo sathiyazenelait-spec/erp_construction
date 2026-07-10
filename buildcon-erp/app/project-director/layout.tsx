@@ -23,11 +23,16 @@ export default function PDLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const [tier, setTier] = useState<string>("");
+  const [brandName, setBrandName] = useState("BuildWell");
   useEffect(() => {
     const s = getSession();
     if (s) {
       setName(s.name);
       setRole(s.role);
+    }
+    const savedOrg = localStorage.getItem("selected_login_org");
+    if (savedOrg) {
+      setBrandName(savedOrg);
     }
     setTier((localStorage.getItem("selected_login_tier") || "Enterprise").toLowerCase());
     const orgId = s?.organizationId || 1;
@@ -37,8 +42,12 @@ export default function PDLayout({ children }: { children: React.ReactNode }) {
     })
       .then((res) => res.json())
       .then((d) => {
-        setProfileName(d.profileName || s?.name || "Arvind Menon");
-        setAvatarInitials(d.avatarInitials || "AM");
+        const userProfileName = (d.profileName && d.profileName !== "Project Director" && d.profileName !== "Arvind Menon")
+          ? d.profileName
+          : (s?.name || d.profileName || "Arvind Menon");
+        setProfileName(userProfileName);
+        const initials = userProfileName.split(" ").map((n: string) => n[0]).join("").toUpperCase().substring(0, 2);
+        setAvatarInitials(d.avatarInitials || initials || "AM");
         setSidebarMenus(d.sidebar_menus || "");
         if (d.header_date) {
           setHeaderDate(d.header_date);
@@ -47,8 +56,10 @@ export default function PDLayout({ children }: { children: React.ReactNode }) {
       })
       .catch((err) => {
         console.error("Error loading PD layout configurations:", err);
-        setProfileName(s?.name || "Arvind Menon");
-        setAvatarInitials("AM");
+        const fallbackName = s?.name || "Arvind Menon";
+        setProfileName(fallbackName);
+        const initials = fallbackName.split(" ").map((n: string) => n[0]).join("").toUpperCase().substring(0, 2);
+        setAvatarInitials(initials || "AM");
         setLoading(false);
       });
   }, []);
@@ -57,13 +68,19 @@ export default function PDLayout({ children }: { children: React.ReactNode }) {
     switch (menuName) {
       case "Dashboard": return <LayoutDashboard className="h-4 w-4" />;
       case "Portfolio Overview": return <FolderKanban className="h-4 w-4" />;
-      case "Project Monitoring": return <Activity className="h-4 w-4" />;
+      case "Project Monitoring":
+      case "Milestone Tracker": return <Activity className="h-4 w-4" />;
       case "PM Performance": return <Users className="h-4 w-4" />;
-      case "Budget Monitoring": return <Wallet className="h-4 w-4" />;
-      case "Resource Allocation": return <Boxes className="h-4 w-4" />;
-      case "Procurement Tracking": return <ShoppingCart className="h-4 w-4" />;
-      case "Quality Center": return <ShieldCheck className="h-4 w-4" />;
-      case "Safety Monitoring": return <ShieldCheck className="h-4 w-4" />;
+      case "Budget Monitoring":
+      case "Budget Control": return <Wallet className="h-4 w-4" />;
+      case "Resource Allocation":
+      case "Engineering Insights": return <Boxes className="h-4 w-4" />;
+      case "Procurement Tracking":
+      case "Procurement Pipeline": return <ShoppingCart className="h-4 w-4" />;
+      case "Quality Center":
+      case "Quality Inspections": return <ShieldCheck className="h-4 w-4" />;
+      case "Safety Monitoring":
+      case "Safety Metrics": return <ShieldCheck className="h-4 w-4" />;
       case "Risk Center": return <AlertTriangle className="h-4 w-4" />;
       case "Delay Management": return <Clock className="h-4 w-4" />;
       case "Change Orders": return <FileEdit className="h-4 w-4" />;
@@ -78,13 +95,19 @@ export default function PDLayout({ children }: { children: React.ReactNode }) {
     switch (menuName) {
       case "Dashboard": return "/project-director";
       case "Portfolio Overview": return "/project-director/portfolio";
-      case "Project Monitoring": return "/project-director/monitoring";
+      case "Project Monitoring":
+      case "Milestone Tracker": return "/project-director/monitoring";
       case "PM Performance": return "/project-director/pm";
-      case "Budget Monitoring": return "/project-director/budget";
-      case "Resource Allocation": return "/project-director/resources";
-      case "Procurement Tracking": return "/project-director/procurement";
-      case "Quality Center": return "/project-director/quality";
-      case "Safety Monitoring": return "/project-director/safety";
+      case "Budget Monitoring":
+      case "Budget Control": return "/project-director/budget";
+      case "Resource Allocation":
+      case "Engineering Insights": return "/project-director/resources";
+      case "Procurement Tracking":
+      case "Procurement Pipeline": return "/project-director/procurement";
+      case "Quality Center":
+      case "Quality Inspections": return "/project-director/quality";
+      case "Safety Monitoring":
+      case "Safety Metrics": return "/project-director/safety";
       case "Risk Center": return "/project-director/risk";
       case "Delay Management": return "/project-director/delays";
       case "Change Orders": return "/project-director/changes";
@@ -146,7 +169,7 @@ export default function PDLayout({ children }: { children: React.ReactNode }) {
                 <Building2 className="h-5 w-5 text-slate-950 font-bold" />
               </div>
               <div>
-                <div className="font-bold text-white tracking-wide">BuildWell</div>
+                <div className="font-bold text-white tracking-wide">{brandName}</div>
                 <div className="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">Constructions</div>
               </div>
             </div>
