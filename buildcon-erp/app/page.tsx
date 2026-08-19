@@ -6,6 +6,7 @@ import {
   ArrowRight, Landmark, Info, KeyRound, Timer, AlertCircle, Sparkles,
   Sun, Moon, User, Lock
 } from "lucide-react";
+import DemoModal from "@/components/DemoModal";
 
 // Curated high-resolution construction & modern enterprise backgrounds
 const HERO_BG_IMAGES = [
@@ -49,6 +50,7 @@ export default function Home() {
   const [selectedOrg, setSelectedOrg] = useState("");
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
+  const [showDemoModal, setShowDemoModal] = useState(false);
   const [showOrgSuggestions, setShowOrgSuggestions] = useState(false);
   
   // Organization Login Credentials States
@@ -253,12 +255,20 @@ export default function Home() {
             </p>
 
             {!isUnlocked ? (
-              <button
-                onClick={() => setShowOtpModal(true)}
-                className="px-8 py-4 bg-gradient-to-r from-[#FF2E93] to-[#FF4E6B] rounded-xl text-sm font-bold tracking-widest uppercase transition-all duration-300 hover:scale-[1.05] shadow-xl shadow-[#FF2E93]/20 hover:shadow-[#FF2E93]/40 active:scale-[0.98]"
-              >
-                Get Into Portal
-              </button>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <button
+                  onClick={() => setShowOtpModal(true)}
+                  className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#FF2E93] to-[#FF4E6B] rounded-xl text-sm font-bold tracking-widest uppercase transition-all duration-300 hover:scale-[1.05] shadow-xl shadow-[#FF2E93]/20 hover:shadow-[#FF2E93]/40 active:scale-[0.98]"
+                >
+                  Get Into Portal
+                </button>
+                <button
+                  onClick={() => setShowDemoModal(true)}
+                  className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-650 rounded-xl text-sm font-bold tracking-widest uppercase transition-all duration-300 hover:scale-[1.05] shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 active:scale-[0.98] border border-blue-500/30"
+                >
+                  Start Demo
+                </button>
+              </div>
             ) : (
               <a
                 href="#portals"
@@ -587,6 +597,8 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      <DemoModal isOpen={showDemoModal} onClose={() => setShowDemoModal(false)} />
 
       {/* FOOTER */}
       {!isUnlocked && (

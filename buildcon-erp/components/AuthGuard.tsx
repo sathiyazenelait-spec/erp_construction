@@ -22,6 +22,14 @@ export default function AuthGuard({ role, children }: { role: Role; children: Re
     }
     const matches = s.role === role || (role === "super-admin" && s.role === "admin");
     if (!matches) { router.replace(homeForRole(s.role)); return; }
+
+    if (s.trialExpired && role === "chairman") {
+      if (typeof window !== "undefined" && window.location.pathname !== "/chairman/subscription") {
+        router.replace("/chairman/subscription");
+        return;
+      }
+    }
+
     setOk(true);
   }, [role, router]);
   if (!ok) return <div className="p-10 text-slate-500 text-sm">Loading…</div>;

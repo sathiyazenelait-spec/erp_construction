@@ -4,7 +4,7 @@ import AuthGuard from "@/components/AuthGuard";
 import { usePathname, useRouter } from "next/navigation";
 import LinkComponent from "next/link";
 import {
-  LayoutDashboard, Building2, CreditCard, Box, Activity, Cpu, LogOut, Calendar, Bell, ShieldCheck
+  LayoutDashboard, Building2, CreditCard, Box, Activity, Cpu, LogOut, Calendar, Bell, ShieldCheck, KeyRound
 } from "lucide-react";
 import { logout, getSession } from "@/lib/auth";
 
@@ -36,6 +36,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     { href: "/super-admin/modules", label: "ERP Modules", icon: <Box className="h-4 w-4" /> },
     { href: "/super-admin/ai", label: "AI Configuration", icon: <Cpu className="h-4 w-4" /> },
     { href: "/super-admin/health", label: "System Health", icon: <Activity className="h-4 w-4" />, badge: 0 },
+    { href: "/super-admin/forgot-passwords", label: "Forgot Passwords", icon: <KeyRound className="h-4 w-4" /> },
 
   ];
 

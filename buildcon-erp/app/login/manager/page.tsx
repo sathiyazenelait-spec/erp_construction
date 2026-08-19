@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Wrench, Building2, Megaphone, Users, User, ShieldAlert, ArrowLeft } from "lucide-react";
 import { login, homeForRole, Role } from "@/lib/auth";
+import ForgotPasswordModal from "@/components/ForgotPasswordModal";
 
 interface RoleOption {
   value: Role;
@@ -36,6 +37,7 @@ export default function CentralizedManagerLogin() {
   const [tier, setTier] = useState<string>("Enterprise");
   const [orgName, setOrgName] = useState<string>("");
   const [err, setErr] = useState("");
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -199,12 +201,24 @@ export default function CentralizedManagerLogin() {
               Sign in as Staff
             </button>
 
+            <div className="mt-2 text-center">
+              <button
+                type="button"
+                onClick={() => setShowForgotModal(true)}
+                className="text-xs text-blue-500 hover:underline"
+              >
+                Forgot Password?
+              </button>
+            </div>
+
             {getFilteredSwitch(tier) && (
               <div className="pt-4 border-t border-slate-800 text-center text-xs text-slate-450">
                 {getFilteredSwitch(tier)}
               </div>
             )}
           </form>
+          
+          <ForgotPasswordModal isOpen={showForgotModal} onClose={() => setShowForgotModal(false)} />
         </div>
       </div>
     </main>

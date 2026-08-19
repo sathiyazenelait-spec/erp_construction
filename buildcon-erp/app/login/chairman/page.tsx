@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Crown, Building2, ArrowLeft } from "lucide-react";
 import { login, homeForRole } from "@/lib/auth";
+import ForgotPasswordModal from "@/components/ForgotPasswordModal";
 
 export default function ChairmanLogin() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function ChairmanLogin() {
   const [password, setPassword] = useState("");
   const [orgName, setOrgName] = useState<string>("");
   const [err, setErr] = useState("");
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -69,10 +71,22 @@ export default function ChairmanLogin() {
             {err && <div className="text-sm text-red-600 mb-3">{err}</div>}
             <button className="btn-primary w-full">Sign in as Chairman</button>
 
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={() => setShowForgotModal(true)}
+                className="text-xs text-blue-500 hover:underline"
+              >
+                Forgot Password?
+              </button>
+            </div>
+
             <div className="mt-6 text-center text-sm text-slate-500">
               Director? <Link className="text-blue-600 hover:underline" href="/login/director">Use directors portal</Link>
             </div>
           </form>
+          
+          <ForgotPasswordModal isOpen={showForgotModal} onClose={() => setShowForgotModal(false)} />
         </div>
       </div>
     </main>

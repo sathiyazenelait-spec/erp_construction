@@ -13,6 +13,9 @@ public class OrgCreationRequest {
     private String phone;
     private String chairmanEmail;
     private String chairmanPassword;
+    private String chairmanUsername;
+    private String chairmanName;
+    private String chairmanPhone;
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -34,4 +37,13 @@ public class OrgCreationRequest {
 
     public String getChairmanPassword() { return chairmanPassword; }
     public void setChairmanPassword(String chairmanPassword) { this.chairmanPassword = chairmanPassword; }
+
+    public String getChairmanUsername() { return chairmanUsername; }
+    public void setChairmanUsername(String chairmanUsername) { this.chairmanUsername = chairmanUsername; }
+
+    public String getChairmanName() { return chairmanName; }
+    public void setChairmanName(String chairmanName) { this.chairmanName = chairmanName; }
+
+    public String getChairmanPhone() { return chairmanPhone; }
+    public void setChairmanPhone(String chairmanPhone) { this.chairmanPhone = chairmanPhone; }
 }

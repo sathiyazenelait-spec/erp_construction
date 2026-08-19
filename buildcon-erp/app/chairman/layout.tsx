@@ -6,7 +6,8 @@ import LinkComponent from "next/link";
 import {
   LayoutDashboard, FileText, Briefcase, BarChart3, Wallet, TrendingUp, Users, Heart,
   ShieldCheck, AlertTriangle, Inbox, Bot, Target, LineChart as LineIcon, Settings,
-  Crown, LogOut, Building2, Bell, Calendar, Filter, Plus, Sparkles, Send, MessageSquare
+  Crown, LogOut, Building2, Bell, Calendar, Filter, Plus, Sparkles, Send, MessageSquare,
+  KeyRound
 } from "lucide-react";
 import { logout, getSession } from "@/lib/auth";
 
@@ -63,6 +64,17 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
           const t = d.subscriptionTier || localStorage.getItem("selected_login_tier") || "Enterprise";
           setTier(t);
           localStorage.setItem("selected_login_tier", t);
+          if (d.trialExpired) {
+            const s = getSession();
+            if (s) {
+              s.trialExpired = true;
+              localStorage.setItem("buildcon_session", JSON.stringify(s));
+            }
+            if (pathname !== "/chairman/subscription") {
+              router.replace("/chairman/subscription");
+              return;
+            }
+          }
           setLoading(false);
         })
         .catch((err) => {
@@ -108,6 +120,7 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
       case "Settings":
       case "System Settings": return <Settings className="h-4 w-4" />;
       case "Communication & Tickets": return <MessageSquare className="h-4 w-4" />;
+      case "Forgot Passwords": return <KeyRound className="h-4 w-4" />;
       default: return <FileText className="h-4 w-4" />;
     }
   };
@@ -139,12 +152,13 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
       case "Settings":
       case "System Settings": return "/chairman/settings";
       case "Communication & Tickets": return "/chairman/communication";
+      case "Forgot Passwords": return "/chairman/forgot-passwords";
       default: return "/chairman";
     }
   };
 
   const sidebarList = sidebarMenus
-    ? [...sidebarMenus.split("|").map((n) => n.trim()).filter(Boolean), "Communication & Tickets"]
+    ? [...sidebarMenus.split("|").map((n) => n.trim()).filter(Boolean), "Communication & Tickets", "Forgot Passwords"]
     : [
         "Executive Summary",
         "Company Portfolio",
@@ -160,6 +174,7 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
         "Investment Tracker",
         "Subscription",
         "Communication & Tickets",
+        "Forgot Passwords",
         "Settings"
       ];
 
@@ -167,9 +182,9 @@ export default function ChairmanLayout({ children }: { children: React.ReactNode
     const href = getSidebarHref(item);
     const normalizedTier = tier.toLowerCase();
     if (normalizedTier === "growth") {
-      return ["/chairman", "/chairman/portfolio", "/chairman/approvals", "/chairman/settings", "/chairman/subscription", "/chairman/communication"].includes(href);
+      return ["/chairman", "/chairman/portfolio", "/chairman/approvals", "/chairman/settings", "/chairman/subscription", "/chairman/communication", "/chairman/forgot-passwords"].includes(href);
     } else if (normalizedTier === "premium") {
-      return ["/chairman", "/chairman/portfolio", "/chairman/financial", "/chairman/safety", "/chairman/workforce", "/chairman/approvals", "/chairman/ai", "/chairman/settings", "/chairman/subscription", "/chairman/communication"].includes(href);
+      return ["/chairman", "/chairman/portfolio", "/chairman/financial", "/chairman/safety", "/chairman/workforce", "/chairman/approvals", "/chairman/ai", "/chairman/settings", "/chairman/subscription", "/chairman/communication", "/chairman/forgot-passwords"].includes(href);
     }
     return true;
   });

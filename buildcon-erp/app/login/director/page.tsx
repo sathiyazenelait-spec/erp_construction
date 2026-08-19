@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Users, Building2, ShieldAlert, ArrowLeft } from "lucide-react";
 import { login, homeForRole, Role } from "@/lib/auth";
+import ForgotPasswordModal from "@/components/ForgotPasswordModal";
 
 const ALLOWED: Role[] = ["md", "project-director", "business-director", "finance-director"];
 
@@ -13,6 +14,7 @@ export default function DirectorLogin() {
   const [password, setPassword] = useState("");
   const [orgName, setOrgName] = useState<string>("");
   const [err, setErr] = useState("");
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -125,6 +127,16 @@ export default function DirectorLogin() {
               Sign in as Director
             </button>
 
+            <div className="mt-2 text-center">
+              <button
+                type="button"
+                onClick={() => setShowForgotModal(true)}
+                className="text-xs text-blue-500 hover:underline"
+              >
+                Forgot Password?
+              </button>
+            </div>
+
             <div className="pt-4 border-t border-slate-800 text-center text-xs text-slate-450 space-y-2">
               <div>
                 <span className="text-slate-400">Chairman? </span>
@@ -136,6 +148,8 @@ export default function DirectorLogin() {
               </div>
             </div>
           </form>
+          
+          <ForgotPasswordModal isOpen={showForgotModal} onClose={() => setShowForgotModal(false)} />
         </div>
       </div>
     </main>

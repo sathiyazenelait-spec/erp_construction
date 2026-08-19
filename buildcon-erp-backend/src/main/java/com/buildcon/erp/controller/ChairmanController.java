@@ -335,6 +335,14 @@ public class ChairmanController {
             }
         }
 
+        boolean trialExpired = false;
+        if (orgOpt.isPresent()) {
+            var orgObj = orgOpt.get();
+            if ("Trial".equalsIgnoreCase(orgObj.getSubscriptionTier()) || "0".equals(orgObj.getSubscriptionTier())) {
+                trialExpired = orgObj.getCreatedAt() != null && orgObj.getCreatedAt().plusDays(3).isBefore(java.time.LocalDateTime.now());
+            }
+        }
+
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalProjects", totalProjects);
         stats.put("activeProjects", activeProjects);
@@ -349,6 +357,7 @@ public class ChairmanController {
         stats.put("profileName", profileName);
         stats.put("profileEmail", profileEmail);
         stats.put("avatarInitials", avatarInitials);
+        stats.put("trialExpired", trialExpired);
 
         for (DashboardShellConfig c : configs) {
             stats.put(c.getConfigKey(), c.getConfigValue());

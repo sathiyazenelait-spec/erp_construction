@@ -109,7 +109,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         ValidationUtils.validateEmail(request.getChairmanEmail());
         ValidationUtils.validateNotNull(request.getChairmanPassword(), "chairmanPassword");
 
-        String username = request.getChairmanEmail().split("@")[0];
+        String username = (request.getChairmanUsername() != null && !request.getChairmanUsername().trim().isEmpty())
+            ? request.getChairmanUsername().trim()
+            : request.getChairmanEmail().split("@")[0];
         
         if (chairmanRepository.existsByUsername(username)) {
             throw new CustomValidationException("Error: Chairman username '" + username + "' is already taken!");
@@ -141,6 +143,21 @@ public class OrganizationServiceImpl implements OrganizationService {
             encoder.encode(request.getChairmanPassword()),
             org.getId()
         );
+        chairman.setName(request.getChairmanName());
+        chairman.setPhone(request.getChairmanPhone());
+        
+        String nameForInitials = (request.getChairmanName() != null && !request.getChairmanName().trim().isEmpty())
+            ? request.getChairmanName() : username;
+        String initials = java.util.Arrays.stream(nameForInitials.split(" "))
+            .filter(n -> !n.isEmpty())
+            .map(n -> String.valueOf(n.charAt(0)))
+            .collect(java.util.stream.Collectors.joining(""))
+            .toUpperCase();
+        if (initials.length() > 2) {
+            initials = initials.substring(0, 2);
+        }
+        chairman.setAvatarInitials(initials.isEmpty() ? "CH" : initials);
+        
         chairmanRepository.save(chairman);
 
         return org;

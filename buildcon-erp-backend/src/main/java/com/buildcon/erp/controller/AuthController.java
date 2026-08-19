@@ -53,6 +53,9 @@ public class AuthController {
     @Autowired
     private JwtUtils jwtUtils;
 
+    @Autowired
+    private com.buildcon.erp.repository.OrganizationRepository organizationRepository;
+
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
@@ -67,12 +70,32 @@ public class AuthController {
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(new JwtResponse(jwt,
+        boolean trialExpired = false;
+        if (userDetails.getOrganizationId() != null) {
+            var orgOpt = organizationRepository.findById(userDetails.getOrganizationId());
+            if (orgOpt.isPresent()) {
+                var org = orgOpt.get();
+                if ("Trial".equalsIgnoreCase(org.getSubscriptionTier()) || "0".equals(org.getSubscriptionTier())) {
+                    boolean expired = org.getCreatedAt() != null && org.getCreatedAt().plusDays(3).isBefore(java.time.LocalDateTime.now());
+                    if (expired) {
+                        boolean isChairman = roles.contains("ROLE_CHAIRMAN");
+                        if (!isChairman) {
+                            return ResponseEntity.status(403).body(new MessageResponse("Error: Your organization's 3-day free trial has expired. Please contact your Chairman."));
+                        }
+                        trialExpired = true;
+                    }
+                }
+            }
+        }
+
+        JwtResponse response = new JwtResponse(jwt,
                 userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getEmail(),
                 userDetails.getOrganizationId(),
-                roles));
+                roles);
+        response.setTrialExpired(trialExpired);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/signup")

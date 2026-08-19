@@ -52,4 +52,14 @@ public class JwtResponse {
     public Long getOrganizationId() {
         return organizationId;
     }
+
+    private boolean trialExpired;
+
+    public boolean isTrialExpired() {
+        return trialExpired;
+    }
+
+    public void setTrialExpired(boolean trialExpired) {
+        this.trialExpired = trialExpired;
+    }
 }
