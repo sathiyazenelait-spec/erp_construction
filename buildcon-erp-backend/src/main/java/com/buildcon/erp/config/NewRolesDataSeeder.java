@@ -6,6 +6,7 @@ import com.buildcon.erp.service.QaQcEngineerService;
 import com.buildcon.erp.service.StoreManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -48,12 +49,25 @@ public class NewRolesDataSeeder implements CommandLineRunner {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Override
     public void run(String... args) throws Exception {
+        // Expand roles.name column size if needed
+        try {
+            jdbcTemplate.execute("ALTER TABLE roles MODIFY COLUMN name VARCHAR(60) NOT NULL");
+        } catch (Exception ignored) {
+        }
+
         // 1. Ensure all roles in ERole exist in database
         Arrays.stream(ERole.values()).forEach(roleName -> {
-            if (roleRepository.findByName(roleName).isEmpty()) {
-                roleRepository.save(new Role(roleName));
+            try {
+                if (roleRepository.findByName(roleName).isEmpty()) {
+                    roleRepository.save(new Role(roleName));
+                }
+            } catch (Exception ex) {
+                // Role already exists or length issue handled
             }
         });
 
