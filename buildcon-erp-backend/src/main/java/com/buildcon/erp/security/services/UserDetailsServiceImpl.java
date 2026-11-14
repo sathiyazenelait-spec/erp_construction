@@ -76,6 +76,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
     private AdminUserRepository adminUserRepository;
 
+    @Autowired
+    private QaQcEngineerRepository qaQcEngineerRepository;
+
+    @Autowired
+    private StoreManagerRepository storeManagerRepository;
+
+    @Autowired
+    private CustomerUserRepository customerUserRepository;
+
+    @Autowired
+    private VendorSupplierRepository vendorSupplierRepository;
+
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -243,6 +255,38 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             var a = au.get();
             return new UserDetailsImpl(a.getId(), a.getUsername(), a.getEmail(), a.getPassword(), null,
                 List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority(a.getRoleName())));
+        }
+
+        // 22. QA/QC Engineer check
+        var qa = qaQcEngineerRepository.findByUsername(username).or(() -> qaQcEngineerRepository.findByEmail(username));
+        if (qa.isPresent()) {
+            var q = qa.get();
+            return new UserDetailsImpl(q.getId(), q.getUsername(), q.getEmail(), q.getPassword(), q.getOrganizationId(),
+                List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority(q.getRoleName())));
+        }
+
+        // 23. Store Manager check
+        var stm = storeManagerRepository.findByUsername(username).or(() -> storeManagerRepository.findByEmail(username));
+        if (stm.isPresent()) {
+            var s = stm.get();
+            return new UserDetailsImpl(s.getId(), s.getUsername(), s.getEmail(), s.getPassword(), s.getOrganizationId(),
+                List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority(s.getRoleName())));
+        }
+
+        // 24. Customer User check
+        var cu = customerUserRepository.findByUsername(username).or(() -> customerUserRepository.findByEmail(username));
+        if (cu.isPresent()) {
+            var c = cu.get();
+            return new UserDetailsImpl(c.getId(), c.getUsername(), c.getEmail(), c.getPassword(), c.getOrganizationId(),
+                List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority(c.getRoleName())));
+        }
+
+        // 25. Vendor Supplier check
+        var vs = vendorSupplierRepository.findByUsername(username).or(() -> vendorSupplierRepository.findByEmail(username));
+        if (vs.isPresent()) {
+            var v = vs.get();
+            return new UserDetailsImpl(v.getId(), v.getUsername(), v.getEmail(), v.getPassword(), v.getOrganizationId(),
+                List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority(v.getRoleName())));
         }
 
         throw new UsernameNotFoundException("User Not Found with username: " + username);

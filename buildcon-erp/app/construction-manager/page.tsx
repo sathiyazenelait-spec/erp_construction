@@ -790,36 +790,51 @@ export default function ConstructionManagerDashboard() {
           </div>
         </div>
 
-        {/* Equipment Monitoring */}
-        <div className="bg-[#111C30] border border-slate-800 rounded-xl p-5 flex items-center justify-between">
-          <div className="flex-1">
-            <h3 className="text-xs font-semibold text-slate-200 uppercase tracking-wide mb-4">Equipment Monitoring</h3>
-            <div className="space-y-2 text-[10px]">
-              {equipmentData.map((eq) => (
-                <div key={eq.name} className="flex items-center justify-between text-slate-350">
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: eq.color }} />
-                    <span>{eq.name}</span>
-                  </div>
-                  <span className="font-bold text-white font-mono">{eq.value} ({totalEquipment > 0 ? Math.round(eq.value/totalEquipment*100) : 0}%)</span>
-                </div>
-              ))}
+        {/* Equipment Monitoring & Preventative Maintenance Fleet Register */}
+        <div className="bg-[#111C30] border border-slate-800 rounded-xl p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <h3 className="text-xs font-semibold text-slate-200 uppercase tracking-wide mb-1">Equipment Monitoring & Fleet Maintenance</h3>
+              <p className="text-[10px] text-slate-400">Real-time status, running hours, and fuel consumption across site machinery.</p>
+            </div>
+            <div className="h-28 w-28 relative shrink-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={equipmentData} dataKey="value" nameKey="name" innerRadius={22} outerRadius={38} paddingAngle={2}>
+                    {equipmentData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-sm font-bold text-white font-mono">{totalEquipment}</span>
+                <span className="text-[7px] text-slate-400 uppercase">Units</span>
+              </div>
             </div>
           </div>
-          <div className="h-32 w-32 relative">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={equipmentData} dataKey="value" nameKey="name" innerRadius={24} outerRadius={42} paddingAngle={2}>
-                  {equipmentData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-lg font-bold text-white font-mono">{totalEquipment}</span>
-              <span className="text-[7px] text-slate-400 uppercase">Total Units</span>
-            </div>
+
+          {/* FLEET LOG TABLE */}
+          <div className="space-y-2 pt-1 border-t border-slate-800">
+            {[
+              { code: "TC-01", name: "Potain Tower Crane (50m Jib)", hours: "1,420 hrs", fuel: "Electric", nextService: "In 48 hrs", status: "Operational", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" },
+              { code: "EX-03", name: "Komatsu PC210 Excavator", hours: "2,180 hrs", fuel: "18.5 L/hr", nextService: "In 12 hrs (Filter)", status: "Operational", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" },
+              { code: "BP-02", name: "Schwing Stetter Batching Plant", hours: "3,890 hrs", fuel: "Electric", nextService: "Routine Cleared", status: "Operational", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" },
+              { code: "DG-01", name: "Cummins 125kVA Diesel Generator", hours: "840 hrs", fuel: "14.2 L/hr", nextService: "Lubricant Change Due", status: "Maintenance", color: "text-amber-400 bg-amber-500/10 border-amber-500/30" }
+            ].map((mach, i) => (
+              <div key={i} className="p-2.5 bg-[#0e1628] border border-slate-850 rounded-lg flex items-center justify-between text-xs">
+                <div>
+                  <div className="font-semibold text-white flex items-center gap-2">
+                    <span className="font-mono text-yellow-400 text-[11px] font-bold">{mach.code}</span>
+                    <span>{mach.name}</span>
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">Meter: {mach.hours} | Fuel/Power: {mach.fuel} | Service: <strong className="text-slate-300">{mach.nextService}</strong></div>
+                </div>
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${mach.color}`}>
+                  {mach.status}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 

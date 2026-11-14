@@ -23,7 +23,11 @@ const ROLES_MAP = {
   "ROLE_DIGITAL_MARKETING_EXECUTIVE": "Digital Marketing Executive",
   "ROLE_SALES_EXECUTIVE": "Sales Executive",
   "ROLE_MARKETING_MANAGER": "Marketing Manager",
-  "ROLE_HR_MANAGER": "HR Manager"
+  "ROLE_HR_MANAGER": "HR Manager",
+  "ROLE_QA_QC_ENGINEER": "QA/QC Engineer",
+  "ROLE_STORE_MANAGER": "Store Manager",
+  "ROLE_CUSTOMER": "Customer / Client Portal",
+  "ROLE_VENDOR": "Vendor / Material Supplier"
 };
 
 export default function Signup() {

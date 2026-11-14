@@ -2098,22 +2098,154 @@ export default function ProjectManagerDashboard() {
             </div>
           )}
 
-          {/* PROJECT TIMELINE */}
+          {/* PROJECT TIMELINE - INTERACTIVE WBS & GANTT SCHEDULER */}
           {activeTab === "Project Timeline" && (
-            <div className="bg-[#111C30] border border-slate-800 rounded-xl p-5 space-y-4 animate-fadeIn">
-              <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Project Timeline (Gantt Milestones)</h3>
-              <div className="space-y-3 text-xs">
-                {projectMilestones.map((p, idx) => (
-                  <div key={idx} className="p-4 bg-[#0e1628] border border-slate-850 rounded-xl space-y-2">
-                    <div className="flex justify-between">
-                      <span className="font-bold text-white">{p.phase}</span>
-                      <span className="text-[10px] text-slate-500 font-mono">{p.duration} ({p.progress}%)</span>
-                    </div>
-                    <div className="w-full bg-[#0a1120] rounded-full h-2 overflow-hidden">
-                      <div className="bg-yellow-500 h-full rounded-full transition-all duration-300" style={{ width: `${p.progress}%` }}></div>
-                    </div>
+            <div className="space-y-6 animate-fadeIn">
+              {/* GANTT HEADER & STATS */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-[#111C30] border border-slate-800 rounded-xl p-4 shadow-sm">
+                  <span className="text-[10px] font-mono uppercase text-slate-400">Total WBS Activities</span>
+                  <div className="text-xl font-bold font-mono text-white mt-1">18 Work Packages</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">WBS 1.0 to 5.0 structured</div>
+                </div>
+                <div className="bg-[#111C30] border border-slate-800 rounded-xl p-4 shadow-sm">
+                  <span className="text-[10px] font-mono uppercase text-slate-400">Critical Path Items</span>
+                  <div className="text-xl font-bold font-mono text-rose-400 mt-1">6 Critical Nodes</div>
+                  <div className="text-[10px] text-rose-400/80 mt-0.5">Zero float variance allowed</div>
+                </div>
+                <div className="bg-[#111C30] border border-slate-800 rounded-xl p-4 shadow-sm">
+                  <span className="text-[10px] font-mono uppercase text-slate-400">Project Baseline Schedule</span>
+                  <div className="text-xl font-bold font-mono text-emerald-400 mt-1">On Schedule</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">Schedule Performance Index (SPI): 0.98</div>
+                </div>
+                <div className="bg-[#111C30] border border-slate-800 rounded-xl p-4 shadow-sm">
+                  <span className="text-[10px] font-mono uppercase text-slate-400">Target Handover</span>
+                  <div className="text-xl font-bold font-mono text-yellow-400 mt-1">30 Dec 2026</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">Possession certificate milestone</div>
+                </div>
+              </div>
+
+              {/* INTERACTIVE VISUAL GANTT TIMELINE */}
+              <div className="bg-[#111C30] border border-slate-800 rounded-xl p-5 space-y-4">
+                <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                  <div>
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-yellow-400" /> Interactive Gantt Schedule & Timeline Matrix
+                    </h3>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Work Breakdown Structure (WBS) with Predecessor Logic & Critical Path Float Analysis</p>
                   </div>
-                ))}
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold">Critical Path</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 font-bold">In Progress</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">Completed</span>
+                  </div>
+                </div>
+
+                {/* GANTT TIMELINE BARS */}
+                <div className="overflow-x-auto">
+                  <div className="min-w-[700px] space-y-3 pt-2">
+                    {/* MONTH RULER */}
+                    <div className="grid grid-cols-12 text-[10px] font-mono text-slate-500 border-b border-slate-800 pb-1 text-center">
+                      <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
+                      <span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
+                    </div>
+
+                    {[
+                      { wbs: "1.0", name: "Site Clearance & Excavation", start: 0, span: 2, prog: 100, crit: true, pred: "None" },
+                      { wbs: "1.2", name: "Raft Foundation & Shoring", start: 1.5, span: 2.5, prog: 100, crit: true, pred: "1.0 (FS)" },
+                      { wbs: "2.0", name: "Tower A Substructure RCC", start: 3, span: 3, prog: 100, crit: true, pred: "1.2 (FS)" },
+                      { wbs: "2.3", name: "G+14 Floors Core & Slabs", start: 4.5, span: 4.5, prog: 85, crit: true, pred: "2.0 (SS+15d)" },
+                      { wbs: "3.1", name: "External Masonry & Plastering", start: 6, span: 3, prog: 70, crit: false, pred: "2.3 (SS+30d)" },
+                      { wbs: "3.4", name: "HVAC & Electrical Conduiting", start: 7, span: 3, prog: 55, crit: false, pred: "3.1 (SS)" },
+                      { wbs: "4.1", name: "Vitrified Tile Flooring & Joinery", start: 8.5, span: 2.5, prog: 40, crit: false, pred: "3.4 (FS)" },
+                      { wbs: "5.0", name: "Snagging, Testing & Handover", start: 10.5, span: 1.5, prog: 10, crit: true, pred: "4.1 (FS)" }
+                    ].map((task, i) => (
+                      <div key={i} className="space-y-1">
+                        <div className="flex justify-between text-[11px] text-slate-300">
+                          <span className="font-semibold flex items-center gap-2">
+                            <span className="font-mono text-yellow-400 font-bold">{task.wbs}</span>
+                            {task.name}
+                            {task.crit && <span className="text-[9px] text-rose-400 font-bold uppercase">(Critical)</span>}
+                          </span>
+                          <span className="font-mono text-[10px] text-slate-500">
+                            Pred: {task.pred} | {task.prog}% Completed
+                          </span>
+                        </div>
+                        <div className="w-full bg-[#0e1628] h-3.5 rounded-md relative border border-slate-800 overflow-hidden">
+                          <div
+                            className={`h-full rounded transition-all duration-500 ${
+                              task.crit ? "bg-gradient-to-r from-rose-600 to-amber-500" : "bg-gradient-to-r from-yellow-500 to-emerald-500"
+                            }`}
+                            style={{
+                              marginLeft: `${(task.start / 12) * 100}%`,
+                              width: `${(task.span / 12) * 100}%`
+                            }}
+                          >
+                            <div
+                              className="h-full bg-white/20"
+                              style={{ width: `${task.prog}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* WBS STRUCTURE TABLE */}
+              <div className="bg-[#111C30] border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+                <div className="p-4 border-b border-slate-800 bg-[#0c1427]">
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Work Breakdown Structure (WBS) Dictionary</h4>
+                </div>
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#0e1628] text-slate-400 uppercase font-mono text-[10px] border-b border-slate-800">
+                    <tr>
+                      <th className="p-3">WBS Code</th>
+                      <th className="p-3">Work Package Description</th>
+                      <th className="p-3">Duration (Days)</th>
+                      <th className="p-3">Predecessors</th>
+                      <th className="p-3">Assigned Subcontractor</th>
+                      <th className="p-3">Critical Path</th>
+                      <th className="p-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {[
+                      { code: "1.0", name: "Substructure Civil Excavation", days: 60, pred: "Start Milestone", crew: "Apex Earthmovers", crit: "YES", status: "Completed" },
+                      { code: "1.2", name: "Raft Foundation M35 Concrete", days: 75, pred: "1.0 (FS)", crew: "National RCC Works", crit: "YES", status: "Completed" },
+                      { code: "2.1", name: "Tower A Columns & Shear Walls", days: 120, pred: "1.2 (FS)", crew: "National RCC Works", crit: "YES", status: "Completed" },
+                      { code: "2.3", name: "Suspended Slab Shuttering & Pours", days: 135, pred: "2.1 (SS+15d)", crew: "National RCC Works", crit: "YES", status: "In Progress" },
+                      { code: "3.2", name: "Concealed MEP Conduit Routing", days: 90, pred: "2.3 (SS+30d)", crew: "Voltech MEP Systems", crit: "NO", status: "In Progress" },
+                      { code: "4.1", name: "Vitrified Tile Flooring & Dado", days: 75, pred: "3.2 (FS)", crew: "Elite Tiling Crafts", crit: "NO", status: "Scheduled" },
+                      { code: "5.0", name: "Snag Rectification & Final Handover", days: 45, pred: "4.1 (FS)", crew: "BuildWell Internal QA", crit: "YES", status: "Scheduled" }
+                    ].map((w, idx) => (
+                      <tr key={idx} className="hover:bg-slate-800/30 transition">
+                        <td className="p-3 font-mono font-bold text-yellow-400">{w.code}</td>
+                        <td className="p-3 font-semibold text-white">{w.name}</td>
+                        <td className="p-3 font-mono text-slate-300">{w.days} Days</td>
+                        <td className="p-3 font-mono text-slate-400 text-[11px]">{w.pred}</td>
+                        <td className="p-3 text-slate-300">{w.crew}</td>
+                        <td className="p-3">
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded font-mono ${
+                            w.crit === "YES" ? "bg-rose-500/20 text-rose-400 border border-rose-500/40" : "bg-slate-800 text-slate-400"
+                          }`}>
+                            {w.crit}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            w.status === "Completed" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30" :
+                            w.status === "In Progress" ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/30" :
+                            "bg-slate-800 text-slate-400"
+                          }`}>
+                            {w.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
@@ -2351,32 +2483,106 @@ export default function ProjectManagerDashboard() {
             </div>
           )}
 
-          {/* DOCUMENT CONTROL */}
+          {/* DOCUMENT CONTROL & BLUEPRINT REVISION COMPARISON */}
           {activeTab === "Document Control" && (
-            <div className="bg-[#111C30] border border-slate-800 rounded-xl p-5 space-y-4 animate-fadeIn">
-              <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">CAD Drawings & Blueprints Catalog</h3>
-              <div className="grid grid-cols-2 gap-4 text-xs">
-                {documentControlItems.length === 0 ? (
-                  <div className="col-span-2 p-4 bg-[#0e1628] border border-slate-850 rounded-xl text-center text-slate-500">
-                    No documents or drawings available in catalog.
+            <div className="space-y-6 animate-fadeIn">
+              {/* BLUEPRINT COMPARISON & VERSIONING STUDIO */}
+              <div className="bg-[#111C30] border border-slate-800 rounded-xl p-5 space-y-4 shadow-sm">
+                <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                  <div>
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <FolderOpen className="h-4 w-4 text-yellow-400" /> Blueprint & CAD Revision Diffing Studio
+                    </h3>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Automated Version Comparison & Clash Avoidance Tracking</p>
                   </div>
-                ) : (
-                  documentControlItems.map((doc, idx) => (
-                    <div key={doc.id || idx} className="p-3 bg-[#0e1628] border border-slate-850 rounded-xl flex justify-between items-center">
-                      <div className="flex gap-3 items-center min-w-0">
-                        <FolderOpen className="h-5 w-5 text-yellow-400 shrink-0" />
-                        <div className="min-w-0">
-                          <span className="font-semibold text-white font-mono truncate block">{doc.name}</span>
-                          <span className="text-[10px] text-slate-500 block">{doc.category} | Project: {doc.projectName}</span>
-                          <span className="text-[9px] text-yellow-500/80 block mt-0.5">Submitted by: {doc.submittedBy}</span>
-                        </div>
-                      </div>
-                      <button onClick={() => handleDownloadDoc(doc)} className="bg-yellow-600 hover:bg-yellow-500 text-slate-950 font-bold px-2 py-1 rounded text-[10px] shrink-0 transition">
-                        Download
-                      </button>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-300 font-mono font-bold">
+                      Compare: DWG-101 Rev A vs Rev B
+                    </span>
+                  </div>
+                </div>
+
+                {/* SIDE-BY-SIDE REVISION COMPARISON CARDS */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                  {/* REVISION A */}
+                  <div className="p-4 bg-[#0c1427] border border-slate-800 rounded-xl space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="font-mono text-xs font-bold text-slate-400">Baseline: Revision A (Tender Issue)</span>
+                      <span className="text-[10px] text-slate-500 font-mono">15 Jan 2026</span>
                     </div>
-                  ))
-                )}
+                    <div className="h-40 bg-[#080d19] border border-slate-850 rounded-lg flex flex-col justify-center items-center text-slate-500 relative overflow-hidden p-3 font-mono text-[11px]">
+                      <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:12px_12px] opacity-40"></div>
+                      <div className="z-10 text-center space-y-1">
+                        <div className="text-slate-300 font-bold">Tower A - 3rd Floor Slab Layout</div>
+                        <div className="text-[10px] text-slate-500">HVAC Duct: 400x300mm | Beam B14: 600mm Depth</div>
+                        <div className="text-[10px] text-slate-500">Shaft Opening: 600x600mm at Grid D4</div>
+                      </div>
+                    </div>
+                    <div className="text-[11px] text-slate-400">
+                      Approved by: <strong>Lead Architect (Murthy & Associates)</strong>
+                    </div>
+                  </div>
+
+                  {/* REVISION B */}
+                  <div className="p-4 bg-[#0c1427] border border-yellow-500/30 rounded-xl space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="font-mono text-xs font-bold text-yellow-400">Active: Revision B (For Construction - GFC)</span>
+                      <span className="text-[10px] text-yellow-500/80 font-mono">22 Feb 2026</span>
+                    </div>
+                    <div className="h-40 bg-[#080d19] border border-yellow-500/40 rounded-lg flex flex-col justify-center items-center text-slate-300 relative overflow-hidden p-3 font-mono text-[11px]">
+                      <div className="absolute inset-0 bg-[radial-gradient(#eab308_1px,transparent_1px)] [background-size:12px_12px] opacity-20"></div>
+                      <div className="z-10 text-center space-y-1">
+                        <div className="text-yellow-400 font-bold">Tower A - 3rd Floor Coordinated GFC</div>
+                        <div className="text-[10px] text-emerald-400 font-bold">✨ Beam B14 tapered to 450mm (Clash Resolved)</div>
+                        <div className="text-[10px] text-rose-400 font-bold">⚠️ Shaft Opening expanded to 900x600mm (Fire Damper)</div>
+                      </div>
+                    </div>
+                    <div className="text-[11px] text-yellow-400 flex justify-between">
+                      <span>Approved by: <strong>Structural Consultant (Dr. S. Raman)</strong></span>
+                      <span className="font-bold">STATUS: GFC RELEASED</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* DETECTED CHANGES SUMMARY */}
+                <div className="p-3 bg-[#0c1427] border border-slate-800 rounded-lg text-xs space-y-1.5">
+                  <div className="font-bold text-white flex items-center gap-2">
+                    <Sparkles className="h-3.5 w-3.5 text-yellow-400" /> Automated Drawing Change Log (Rev A → Rev B)
+                  </div>
+                  <ul className="text-[11px] text-slate-300 space-y-1 pl-4 list-disc">
+                    <li><strong className="text-emerald-400">MEP Coordination:</strong> Beam B14 depth reduced from 600mm to 450mm with Grade Fe500D rebar intensification to eliminate HVAC branch duct clash.</li>
+                    <li><strong className="text-yellow-400">Architectural Opening:</strong> Riser shaft at Grid D4 enlarged by 300mm to accommodate dual mechanical smoke exhaust ducts.</li>
+                    <li><strong className="text-cyan-400">Structural Rebar:</strong> Lap splices on Column C12 increased from 40d to 48d per seismic detailing IS 13920.</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* DOCUMENT CATALOG */}
+              <div className="bg-[#111C30] border border-slate-800 rounded-xl p-5 space-y-4">
+                <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">CAD Drawings & Blueprints Catalog</h3>
+                <div className="grid grid-cols-2 gap-4 text-xs">
+                  {documentControlItems.length === 0 ? (
+                    <div className="col-span-2 p-4 bg-[#0e1628] border border-slate-850 rounded-xl text-center text-slate-500">
+                      No documents or drawings available in catalog.
+                    </div>
+                  ) : (
+                    documentControlItems.map((doc, idx) => (
+                      <div key={doc.id || idx} className="p-3 bg-[#0e1628] border border-slate-850 rounded-xl flex justify-between items-center">
+                        <div className="flex gap-3 items-center min-w-0">
+                          <FolderOpen className="h-5 w-5 text-yellow-400 shrink-0" />
+                          <div className="min-w-0">
+                            <span className="font-semibold text-white font-mono truncate block">{doc.name}</span>
+                            <span className="text-[10px] text-slate-500 block">{doc.category} | Project: {doc.projectName}</span>
+                            <span className="text-[9px] text-yellow-500/80 block mt-0.5">Submitted by: {doc.submittedBy}</span>
+                          </div>
+                        </div>
+                        <button onClick={() => handleDownloadDoc(doc)} className="bg-yellow-600 hover:bg-yellow-500 text-slate-950 font-bold px-2 py-1 rounded text-[10px] shrink-0 transition">
+                          Download
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           )}

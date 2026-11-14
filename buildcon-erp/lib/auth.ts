@@ -1,6 +1,6 @@
 "use client";
 
-export type Role = "chairman" | "md" | "project-director" | "business-director" | "finance-director" | "super-admin" | "admin" | "construction-manager" | "marketing-manager" | "hr-manager" | "digital-marketing-tl" | "digital-marketing-executive" | "sales-executive" | "project-manager" | "quantity-surveyor" | "procurement-manager" | "finance-accounts" | "site-management" | "workforce-manager" | "subcontractor" | "senior-site-engineer";
+export type Role = "chairman" | "md" | "project-director" | "business-director" | "finance-director" | "super-admin" | "admin" | "construction-manager" | "marketing-manager" | "hr-manager" | "digital-marketing-tl" | "digital-marketing-executive" | "sales-executive" | "project-manager" | "quantity-surveyor" | "procurement-manager" | "finance-accounts" | "site-management" | "workforce-manager" | "subcontractor" | "senior-site-engineer" | "qa-qc-engineer" | "store-manager" | "customer" | "vendor" | "client-portal" | "vendor-portal";
 
 export interface Session { email: string; role: Role; name: string; organizationId?: number; userId?: number; trialExpired?: boolean; }
 
@@ -79,5 +79,11 @@ export function homeForRole(role: Role): string {
     case "subcontractor": return "/subcontractor";
     case "senior-site-engineer": return "/senior-site-engineer";
     case "hr-manager": return "/hr-manager";
+    case "qa-qc-engineer": return "/qa-qc-engineer";
+    case "store-manager": return "/store-manager";
+    case "customer":
+    case "client-portal": return "/client-portal";
+    case "vendor":
+    case "vendor-portal": return "/vendor-portal";
   }
 }

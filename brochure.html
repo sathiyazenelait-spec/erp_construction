@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zenelait InfoTech - BuildCon ERP Brochure</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap');
+        
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            color: #1a202c;
+            background-color: #f7fafc;
+            -webkit-print-color-adjust: exact;
+        }
+
+        .page {
+            position: relative;
+            width: 210mm;
+            height: 297mm;
+            background: #ffffff;
+            page-break-after: always;
+            overflow: hidden;
+        }
+
+        /* Red & Black Header Corner styling */
+        .page-header-decor {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 120mm;
+            height: 12mm;
+            background: #ef4444;
+            clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%);
+        }
+
+        /* Red & Black Footer Corner styling */
+        .page-footer-decor-red {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100mm;
+            height: 12mm;
+            background: #ef4444;
+            clip-path: polygon(0 0, 85% 0, 100% 100%, 0 100%);
+        }
+
+        .page-footer-decor-black {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 70mm;
+            height: 10mm;
+            background: #0f172a;
+            clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%);
+        }
+
+        /* Outer Frame Border */
+        .border-container {
+            position: absolute;
+            top: 15mm;
+            left: 15mm;
+            right: 15mm;
+            bottom: 15mm;
+            border: 1px solid #1a202c;
+            padding: 10mm 12mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        /* Branding Logo */
+        .logo-area {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 6mm;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 4mm;
+        }
+
+        .logo-main {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #0f172a;
+            line-height: 1.1;
+        }
+
+        .logo-sub {
+            font-size: 9px;
+            color: #ef4444;
+            letter-spacing: 5px;
+            font-weight: 600;
+            margin-left: 2px;
+            margin-top: 2px;
+        }
+
+        /* Typography & Layout elements */
+        h1 {
+            font-family: 'Inter', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 0;
+            margin-bottom: 4mm;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        h2 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 3mm;
+            margin-bottom: 2mm;
+            border-left: 3px solid #ef4444;
+            padding-left: 2mm;
+            text-transform: uppercase;
+        }
+
+        p, li {
+            font-size: 11.5px;
+            line-height: 1.5;
+            color: #334155;
+            margin-top: 0;
+            margin-bottom: 2.5mm;
+        }
+
+        ul {
+            margin-top: 0;
+            margin-bottom: 3mm;
+            padding-left: 5mm;
+        }
+
+        .bold-lead {
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 4mm;
+            font-size: 12.5px;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2mm;
+        }
+
+        .service-item {
+            margin-bottom: 2mm;
+        }
+
+        .service-title {
+            font-weight: 700;
+            font-size: 12px;
+            color: #0f172a;
+            margin-bottom: 0.5mm;
+        }
+
+        .service-desc {
+            font-size: 11px;
+            color: #475569;
+            margin: 0;
+        }
+
+        .mission-vision-box {
+            margin-top: auto;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 4mm;
+        }
+
+        /* Table of Contents & Analysis (Page 2) */
+        .toc-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 4mm;
+        }
+
+        .toc-table td {
+            padding: 1.5mm 0;
+            font-size: 11px;
+            border-bottom: 1px dashed #cbd5e1;
+        }
+
+        .toc-page {
+            text-align: right;
+            font-weight: 600;
+            color: #ef4444;
+        }
+
+        .analysis-text {
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2mm 0;
+        }
+
+        .tech-table th, .tech-table td {
+            border: 1px solid #cbd5e1;
+            padding: 1.5mm;
+            font-size: 10px;
+            text-align: left;
+        }
+
+        .tech-table th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+
+        /* Role Tiers styling (Page 3 & 4) */
+        .tier-section {
+            margin-bottom: 3mm;
+        }
+        
+        .tier-badge {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1mm 2.5mm;
+            border-radius: 3px;
+            display: inline-block;
+            margin-bottom: 2mm;
+            text-transform: uppercase;
+        }
+
+        .tier-badge.growth { background-color: #16a34a; }
+        .tier-badge.premium { background-color: #2563eb; }
+        .tier-badge.enterprise { background-color: #7c3aed; }
+
+        .roles-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2mm;
+        }
+
+        .role-card {
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 1.5mm;
+        }
+
+        .role-name {
+            font-weight: 700;
+            font-size: 11px;
+            color: #0f172a;
+            margin-bottom: 0.5mm;
+        }
+
+        .role-resp {
+            font-size: 10px;
+            color: #475569;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        /* Intern Letter (Page 5) */
+        .intern-letter-content {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .policy-section {
+            margin-bottom: 4mm;
+        }
+
+        .policy-title {
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1mm;
+        }
+
+        .policy-text {
+            color: #334155;
+            margin-bottom: 2mm;
+        }
+
+        .signature-area {
+            margin-top: 6mm;
+            padding-top: 4mm;
+            border-top: 1px solid #cbd5e1;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-top: 4mm;
+            font-weight: 600;
+        }
+
+        .checkbox-box {
+            width: 4mm;
+            height: 4mm;
+            border: 2px solid #1a202c;
+            margin-right: 2.5mm;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PAGE 1: ZENELAIT INFOTECH OVERVIEW -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Zenelait InfoTech</h1>
+            <div class="bold-lead">Transforming Business Through Innovative Software Solutions</div>
+            
+            <p>Zenelait InfoTech is a product-based software development company dedicated to delivering innovative, scalable, and user-friendly digital solutions for businesses across various industries. We specialize in designing, developing, and implementing customized software products that help organizations streamline operations, improve productivity, and accelerate growth.</p>
+            
+            <h2>Our Products & Services</h2>
+            <div class="services-grid">
+                <div class="service-item">
+                    <div class="service-title">CRM Software (Customer Relationship Management)</div>
+                    <p class="service-desc">Our CRM solutions help businesses manage customer interactions, sales pipelines, lead tracking, customer support, and marketing activities efficiently.</p>
+                </div>
+                <div class="service-item">
+                    <div class="service-title">Billing & Accounting Software</div>
+                    <p class="service-desc">We develop smart billing solutions that simplify invoicing, payment tracking, expense management, GST compliance, and financial reporting.</p>
+                </div>
+                <div class="service-item">
+                    <div class="service-title">LMS Software (Learning Management System)</div>
+                    <p class="service-desc">Our LMS platforms enable educational institutions and organizations to manage online learning, student progress, assessments, course content, and certifications.</p>
+                </div>
+                <div class="service-item">
+                    <div class="service-title">ERP Software (Enterprise Resource Planning)</div>
+                    <p class="service-desc">We provide integrated ERP solutions that connect various business processes including HR, Finance, Inventory, Procurement, Sales, and Operations in a single platform.</p>
+                </div>
+                <div class="service-item">
+                    <div class="service-title">Website Development</div>
+                    <p class="service-desc">We create modern, responsive, and SEO-friendly websites tailored to business requirements, ensuring a strong online presence and enhanced customer engagement.</p>
+                </div>
+            </div>
+
+            <div class="mission-vision-box">
+                <div class="service-title">Our Mission</div>
+                <p class="service-desc" style="margin-bottom: 2mm;">To empower businesses with innovative software products that simplify operations, enhance efficiency, and drive sustainable growth through technology.</p>
+                
+                <div class="service-title">Our Vision</div>
+                <p class="service-desc">To become a trusted global software solutions provider by delivering high-quality products, continuous innovation, and exceptional customer service.</p>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- PAGE 2: TABLE OF CONTENTS & PROJECT ANALYSIS -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>ERP Construction Project Analysis</h1>
+            
+            <h2>Table of Contents</h2>
+            <table class="toc-table">
+                <tr>
+                    <td>1. Zenelait InfoTech Corporate Profile</td>
+                    <td class="toc-page">Page 1</td>
+                </tr>
+                <tr>
+                    <td>2. Project Summary: BuildCon ERP Architecture & Analysis</td>
+                    <td class="toc-page">Page 2</td>
+                </tr>
+                <tr>
+                    <td>3. Growth & Premium Tier Roles & Responsibilities</td>
+                    <td class="toc-page">Page 3</td>
+                </tr>
+                <tr>
+                    <td>4. Enterprise Tier Roles & Responsibilities</td>
+                    <td class="toc-page">Page 4</td>
+                </tr>
+                <tr>
+                    <td>5. Code of Conduct Policy & Intern Offer acceptance</td>
+                    <td class="toc-page">Page 5</td>
+                </tr>
+            </table>
+
+            <h2>Project Summary & Analysis</h2>
+            <p class="analysis-text"><strong>BuildCon ERP</strong> is a state-of-the-art enterprise construction management platform. It enables real-time collaboration between corporate managers, site engineers, finance departments, subcontractors, and HR personnel. The platform scopes all operations per organization, offering a highly responsive multi-tenant SaaS environment.</p>
+
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th>Architecture Layer</th>
+                        <th>Technology Stack</th>
+                        <th>Core Functionality</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Frontend</strong></td>
+                        <td>Next.js 14, TS, Tailwind CSS</td>
+                        <td>Dynamic multi-dashboard portal, real-time OTP lookup, charts, dark mode UI.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Backend</strong></td>
+                        <td>Spring Boot 3, Java 17, Security</td>
+                        <td>Enterprise REST APIs, JWT token authorization, role-based access control.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AI Engine</strong></td>
+                        <td>FastAPI Python, LangChain</td>
+                        <td>Automated post-project performance audits, site delay diagnosis, cash flow forecasting.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Database</strong></td>
+                        <td>MySQL 8.x</td>
+                        <td>Relational structure tracking user credentials, ledger balances, materials, and workforce.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Key Pipelines</h2>
+            <ul style="margin-bottom: 0;">
+                <li><strong>OTP Gate:</strong> Deterministic time-based 4-digit code generated dynamically for safe tenant selection.</li>
+                <li><strong>Progress Claims Flow:</strong> <code>Subcontractor Requisition</code> ➔ <code>Quantity Surveyor Verification</code> ➔ <code>Finance Release (Paid / Hold)</code>.</li>
+                <li><strong>Delay Alert Pipeline:</strong> Site delays uploaded by engineers trigger real-time critical banners on the Chairman portal.</li>
+            </ul>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- PAGE 3: TIER-WISE ROLES & RESPONSIBILITIES (GROWTH & PREMIUM) -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Role Matrices by Tier (Growth & Premium)</h1>
+            
+            <div class="tier-section">
+                <div class="tier-badge growth">Growth Tier (Field Operations & Site Execution)</div>
+                <div class="roles-list">
+                    <div class="role-card">
+                        <div class="role-name">Project Manager (PM)</div>
+                        <div class="role-resp">Manages project milestones, schedules tasks via Gantt charts, drafts progress claims, reports site delays, and creates material requisitions.</div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-name">Construction Manager (CM)</div>
+                        <div class="role-resp">Audits site execution logs, oversees concrete compression (cube) testing, tracks heavy equipment (cranes, machinery), and records daily diary logs.</div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-name">Senior Site Engineer (SSE)</div>
+                        <div class="role-resp">Performs site measurements, handles daily engineer log entries, registers safety issues, and raises site delay alerts to trigger executive warnings.</div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-name">Subcontractor / Labour</div>
+                        <div class="role-resp">Subcontractors file monthly work progress claims and upload invoices. Workers / Labour provide on-site manpower for direct execution.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tier-section" style="margin-top: 2mm;">
+                <div class="tier-badge premium">Premium Tier (Financial Auditing & Support)</div>
+                <p style="font-size: 10px; margin-bottom: 2mm;">Includes all Growth Tier features, plus professional support portals:</p>
+                <div class="roles-list">
+                    <div class="role-card">
+                        <div class="role-name">Finance & Accounts Manager</div>
+                        <div class="role-resp">Controls the ledger, adds receivables, manages payables, generates cash flow forecasts, releases approved subcontractor payouts, and monitors tax compliance.</div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-name">Quantity Surveyor (QS)</div>
+                        <div class="role-resp">Maintains Bill of Quantities (BOQ), performs material measurements, reviews progress claims to approve or reject them, and reports cost variances.</div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-name">HR Manager</div>
+                        <div class="role-resp">Manages employee profiles, schedules recruitments/interviews, processes payroll/deductions, performs appraisals, and monitors labor law compliance.</div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-name">Procurement Manager</div>
+                        <div class="role-resp">Handles purchase requisitions, triggers RFQs to verified vendors, creates Purchase Orders, tracks deliveries, and controls raw materials inventory.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- PAGE 4: TIER-WISE ROLES & RESPONSIBILITIES (ENTERPRISE) -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Role Matrices by Tier (Enterprise)</h1>
+            
+            <div class="tier-section">
+                <div class="tier-badge enterprise">Enterprise Tier (Executive Portals & Marketing)</div>
+                <p style="font-size: 10px; margin-bottom: 2mm;">Unlocks full platform features, including executive-level overview and growth tools:</p>
+                <div class="roles-list">
+                    <div class="role-card">
+                        <div class="role-name">Chairman</div>
+                        <div class="role-resp">Monitors organization KPIs (budget value, active staff, cash flow), receives critical safety and delay alerts, reviews board documents, and queries the AI Strategy Assistant.</div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-name">Managing Director (MD)</div>
+                        <div class="role-resp">Oversees operations, reviews department performance reports, runs approval queues, and performs high-level audits.</div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-name">Directors (Project / Business / Finance)</div>
+                        <div class="role-resp">Review broad portfolio progress, strategic partner relationships, business sales pipelines, and financial budgets.</div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-name">Marketing & Sales Team (Manager / TL / Exec)</div>
+                        <div class="role-resp">Marketing Managers track ROI; Digital Marketing leads handle campaigns and social channels; Sales Executives manage client proposals and CRM leads.</div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-name">Workforce Manager</div>
+                        <div class="role-resp">Audits daily manpower headcount, verifies subcontractor Aadhaar profiles, and coordinates crew payouts with accounting.</div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-name">Super Admin</div>
+                        <div class="role-resp">Platform-level administrator managing database instances, creating organization tenants, mapping subscriptions, and configuring dynamic AI modules.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- PAGE 5: JOB INTERN LETTER -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Job Intern Letter</h1>
+            
+            <div class="intern-letter-content">
+                <div class="policy-section">
+                    <div class="policy-title">Professional Conduct & Misuse Policy</div>
+                    <p class="policy-text">Employees are expected to maintain the highest standards of professional and ethical conduct. Any misuse of company resources, leads, client information, or involvement in malpractice of any kind will be treated as a serious violation.</p>
+                    <p class="policy-text">In such cases, the company reserves the right to impose penalties, including salary deductions, recovery of losses, or other disciplinary actions, depending on the severity of the misconduct.</p>
+                </div>
+                
+                <div class="policy-section">
+                    <div class="policy-title">Code of Conduct Violations</div>
+                    <p class="policy-text">Any violation of company policies or code of conduct may result in disciplinary action, which may include warning, suspension, or termination, depending on the severity of the misconduct.</p>
+                </div>
+                
+                <div class="policy-section">
+                    <div class="policy-title">Governing Law / Jurisdiction</div>
+                    <p class="policy-text">“This agreement is governed by the laws of India, and disputes will fall under Chennai jurisdiction.”</p>
+                </div>
+                
+                <p>We warmly welcome you to the <strong>Zenelait InfoTech</strong> family and look forward to your valuable contributions.</p>
+                
+                <div class="signature-area">
+                    <p>Please confirm acceptance by replying,</p>
+                    <div class="checkbox-container">
+                        <div class="checkbox-box"></div>
+                        <span>“I accept the offer”</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+</body>
+</html>

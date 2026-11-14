@@ -1,0 +1,2373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zenelait InfoTech - BuildCon ERP 50 Page Manual</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap');
+        
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            color: #1a202c;
+            background-color: #f7fafc;
+            -webkit-print-color-adjust: exact;
+        }
+
+        .page {
+            position: relative;
+            width: 210mm;
+            height: 297mm;
+            background: #ffffff;
+            page-break-after: always;
+            overflow: hidden;
+        }
+
+        /* Red & Black Header Corner styling */
+        .page-header-decor {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 120mm;
+            height: 12mm;
+            background: #ef4444;
+            clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%);
+        }
+
+        /* Red & Black Footer Corner styling */
+        .page-footer-decor-red {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100mm;
+            height: 12mm;
+            background: #ef4444;
+            clip-path: polygon(0 0, 85% 0, 100% 100%, 0 100%);
+        }
+
+        .page-footer-decor-black {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 70mm;
+            height: 10mm;
+            background: #0f172a;
+            clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%);
+        }
+
+        /* Outer Frame Border */
+        .border-container {
+            position: absolute;
+            top: 15mm;
+            left: 15mm;
+            right: 15mm;
+            bottom: 15mm;
+            border: 1px solid #1a202c;
+            padding: 10mm 12mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        /* Branding Logo */
+        .logo-area {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 4mm;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 2mm;
+        }
+
+        .logo-main {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #0f172a;
+            line-height: 1.1;
+        }
+
+        .logo-sub {
+            font-size: 8px;
+            color: #ef4444;
+            letter-spacing: 4px;
+            font-weight: 600;
+            margin-left: 2px;
+            margin-top: 1px;
+        }
+
+        /* Typography & Layout elements */
+        h1 {
+            font-family: 'Inter', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 0;
+            margin-bottom: 2mm;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        h2 {
+            font-size: 11px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 2.5mm;
+            margin-bottom: 1.5mm;
+            border-left: 3px solid #ef4444;
+            padding-left: 2mm;
+            text-transform: uppercase;
+        }
+
+        p, li {
+            font-size: 10.5px;
+            line-height: 1.45;
+            color: #334155;
+            margin-top: 0;
+            margin-bottom: 2mm;
+        }
+
+        ul {
+            margin-top: 0;
+            margin-bottom: 2mm;
+            padding-left: 4mm;
+        }
+
+        .bold-lead {
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 3mm;
+            font-size: 11.5px;
+        }
+
+        /* Table of Contents & Analysis (Page 2) */
+        .toc-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 3mm;
+        }
+
+        .toc-table td {
+            padding: 1.2mm 0;
+            font-size: 10px;
+            border-bottom: 1px dashed #cbd5e1;
+        }
+
+        .toc-page {
+            text-align: right;
+            font-weight: 600;
+            color: #ef4444;
+        }
+
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2mm 0;
+        }
+
+        .tech-table th, .tech-table td {
+            border: 1px solid #cbd5e1;
+            padding: 1.2mm;
+            font-size: 9.5px;
+            text-align: left;
+        }
+
+        .tech-table th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+
+        /* Role Tiers styling */
+        .tier-section {
+            margin-bottom: 2mm;
+        }
+        
+        .tier-badge {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 0.8mm 2mm;
+            border-radius: 2px;
+            display: inline-block;
+            margin-bottom: 1.5mm;
+            text-transform: uppercase;
+        }
+
+        .tier-badge.growth { background-color: #16a34a; }
+        .tier-badge.premium { background-color: #2563eb; }
+        .tier-badge.enterprise { background-color: #7c3aed; }
+
+        .roles-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5mm;
+        }
+
+        .role-card {
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 1mm;
+        }
+
+        .role-name {
+            font-weight: 700;
+            font-size: 10px;
+            color: #0f172a;
+            margin-bottom: 0.5mm;
+        }
+
+        .role-resp {
+            font-size: 9.5px;
+            color: #475569;
+            line-height: 1.35;
+            margin: 0;
+        }
+
+        /* Intern Letter */
+        .intern-letter-content {
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .policy-section {
+            margin-bottom: 3mm;
+        }
+
+        .policy-title {
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5mm;
+        }
+
+        .policy-text {
+            color: #334155;
+            margin-bottom: 1.5mm;
+        }
+
+        .signature-area {
+            margin-top: 4mm;
+            padding-top: 2mm;
+            border-top: 1px solid #cbd5e1;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-top: 3mm;
+            font-weight: 600;
+        }
+
+        .checkbox-box {
+            width: 3.5mm;
+            height: 3.5mm;
+            border: 2px solid #1a202c;
+            margin-right: 2mm;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PAGE 1 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Zenelait InfoTech</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Corporate Brochure & BuildCon ERP Manual</p>
+            
+            
+            <div style="text-align: center; margin-top: 15mm; margin-bottom: 10mm;">
+                <h1 style="font-size: 36px; letter-spacing: 4px; font-family: 'Playfair Display', serif; color: #0f172a; margin-bottom: 6mm; line-height: 1.2;">BUILDCON ERP</h1>
+                <p style="font-size: 16px; letter-spacing: 2px; color: #ef4444; font-weight: 700; text-transform: uppercase;">Comprehensive Role-Based Enterprise Manual</p>
+                <div style="width: 40mm; height: 1.5px; background-color: #ef4444; margin: 6mm auto;"></div>
+                <p style="font-size: 12.5px; color: #475569; max-width: 160mm; margin: 4mm auto; line-height: 1.7;">
+                    An all-inclusive, tier-scoped platform designed for modern construction enterprises. Built by Zenelait InfoTech Private Limited to streamline workflows from site logistics to boardroom strategic analytics.
+                </p>
+            </div>
+            
+            <div style="margin-top: 10mm; border-top: 1px solid #cbd5e1; padding-top: 6mm; display: grid; grid-template-columns: 1fr 1fr; gap: 6mm;">
+                <div>
+                    <h3 style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 2mm; text-transform: uppercase;">Corporate Profile</h3>
+                    <p style="font-size: 10.5px; line-height: 1.6; color: #334155; text-align: justify;">
+                        Zenelait InfoTech is a leading software engineering firm dedicated to building next-generation enterprise applications. We specialize in designing customizable SaaS platforms that integrate CRM, HRMS, and supply chain networks into unified hubs.
+                    </p>
+                </div>
+                <div>
+                    <h3 style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 2mm; text-transform: uppercase;">BuildCon ERP Vision</h3>
+                    <p style="font-size: 10.5px; line-height: 1.6; color: #334155; text-align: justify;">
+                        BuildCon ERP enables multi-tenant organizations to achieve 100% data transparency. Our platform bridges the gap between manual site operations and corporate auditing, delivering automated compliance checks and AI-driven predictive insights.
+                    </p>
+                </div>
+            </div>
+
+            <div style="margin-top: 10mm; border-top: 1px solid #e2e8f0; padding-top: 5mm;">
+                <h3 style="font-size: 11px; font-weight: 700; color: #0f172a; margin-bottom: 2mm; text-transform: uppercase;">Official Contact & Security Notice</h3>
+                <p style="font-size: 10px; line-height: 1.5; color: #64748b;">
+                    This document is proprietary information of Zenelait InfoTech Private Limited. Unauthorized reproduction or distribution of this manual is strictly prohibited. All system configurations, database connections, and REST API paths are subject to security audits.
+                </p>
+            </div>
+            
+            <div style="margin-top: auto; padding-bottom: 5mm; display: flex; justify-content: space-between; font-size: 9px; color: #64748b;">
+                <span>v2.5 Enterprise Edition</span>
+                <span>© 2026 Zenelait InfoTech Pvt. Ltd.</span>
+            </div>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 1 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 2 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Table of Contents</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Document Navigation Index</p>
+            
+            
+            <p class="bold-lead" style="margin-bottom: 3mm;">Detailed page distribution index mapping all sections and roles within the BuildCon ERP ecosystem:</p>
+            <table class="toc-table">
+                <tr><td>1. System Architecture & Multi-Tenant Databases</td><td class="toc-page">Pages 3 - 4</td></tr>
+                <tr><td>2. Landing Page, OTP Gateway & Login Portals</td><td class="toc-page">Page 5</td></tr>
+                <tr><td>3. Chairman Portal (Authentication, Executive Stats & Alerts)</td><td class="toc-page">Pages 6 - 7</td></tr>
+                <tr><td>4. Chairman Portal (Approval Center & Client Insights Mappings)</td><td class="toc-page">Pages 8 - 9</td></tr>
+                <tr><td>5. Managing Director (Operational Approvals & MD Cockpit)</td><td class="toc-page">Pages 10 - 11</td></tr>
+                <tr><td>6. Project Director (Portfolio Control & Gantt Schedulers)</td><td class="toc-page">Pages 12 - 13</td></tr>
+                <tr><td>7. Business Director & Finance Director (Treasury & Sales)</td><td class="toc-page">Pages 14 - 15</td></tr>
+                <tr><td>8. Finance & Accounts (General Ledger, Receivables & Vouchers)</td><td class="toc-page">Pages 16 - 17</td></tr>
+                <tr><td>9. Workforce Manager (Worker Directory, Headcount & Aadhaar)</td><td class="toc-page">Pages 18 - 19</td></tr>
+                <tr><td>10. HR Manager (Directories, Recruitment, Payroll & Appraisals)</td><td class="toc-page">Pages 20 - 21</td></tr>
+                <tr><td>11. Project Manager (Milestones, Claims, Site Delay Logs)</td><td class="toc-page">Pages 22 - 23</td></tr>
+                <tr><td>12. Quantity Surveyor (BOQ Management & Claims Auditing)</td><td class="toc-page">Pages 24 - 25</td></tr>
+                <tr><td>13. Construction Manager (Daily Diaries, Equipment & Cube Tests)</td><td class="toc-page">Pages 26 - 27</td></tr>
+                <tr><td>14. Procurement Manager (RFQs, Vendor Directories & POs)</td><td class="toc-page">Pages 28 - 29</td></tr>
+                <tr><td>15. Senior Site Engineer (Site Logs, Concrete Records, NCRs)</td><td class="toc-page">Pages 30 - 31</td></tr>
+                <tr><td>16. Subcontractor Portal (Claim Submissions & Crew Headcounts)</td><td class="toc-page">Pages 32 - 33</td></tr>
+                <tr><td>17. Labour & Workers (Aadhaar Verification & Trade Skills)</td><td class="toc-page">Pages 34 - 35</td></tr>
+                <tr><td>18. Site Management (Live Heatmaps & Equipment Logs)</td><td class="toc-page">Pages 36 - 37</td></tr>
+                <tr><td>19. Digital Marketing TL & Executive (SEO & Campaign Logs)</td><td class="toc-page">Pages 38 - 41</td></tr>
+                <tr><td>20. Sales Executive & Marketing Manager (CRM & Brand ROI)</td><td class="toc-page">Pages 42 - 45</td></tr>
+                <tr><td>21. Super Admin Portal (Tenant Configurations & Health)</td><td class="toc-page">Pages 46 - 47</td></tr>
+                <tr><td>22. AI Engine, Intern Letter & Corporate Compliance Policies</td><td class="toc-page">Pages 48 - 50</td></tr>
+            </table>
+            <div style="margin-top: 6mm; background-color: #f8fafc; padding: 4mm; border-left: 3px solid #ef4444; border-radius: 4px;">
+                <p style="font-size: 10px; font-style: italic; color: #475569; margin: 0; line-height: 1.5;">
+                    Security Note: User role configurations are validated dynamically at database query compile-time. Any route modifications are blocked by client side Auth guards.
+                </p>
+            </div>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 2 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 3 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>System Architecture</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Backend REST APIs, Frontend Routing, and AI Pipelines</p>
+            
+            
+            <p>BuildCon ERP employs a highly scalable, decoupled client-server architecture model. The client-side dashboard framework runs on Next.js 14, connecting to a multi-threaded Spring Boot 3 enterprise application and a dedicated FastAPI service for running generative AI models.</p>
+            
+            <h2>Technical Stack Details</h2>
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th>Layer</th>
+                        <th>Technology</th>
+                        <th>Responsibility</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Frontend Client</strong></td>
+                        <td>Next.js 14, React, TS, Tailwind CSS</td>
+                        <td>Role Dashboards, Real-time Charts, Responsive Layouts</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Java Backend</strong></td>
+                        <td>Spring Boot 3, Java 17, Hibernate JPA</td>
+                        <td>Business Logic, Multi-tenant Data APIs, Security Filter Chains</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Python AI Backend</strong></td>
+                        <td>FastAPI, Uvicorn (Port 8001)</td>
+                        <td>Project Performance Audits, Cost Variances, Cash Flow AI</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Database</strong></td>
+                        <td>MySQL 8.x</td>
+                        <td>Transactional Ledgers, User Accounts, Tenant Registry</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Security Filter Chain & Decoupling</h2>
+            <p style="font-size: 11px; line-height: 1.6; text-align: justify;">
+                All network interactions use JSON-encoded requests. Spring Security handles endpoint protection, verifying signature validation keys encoded in client-header HTTP bearer authentication tokens on every dispatch.
+            </p>
+            <p style="font-size: 11px; line-height: 1.6; text-align: justify;">
+                The backend employs database connection pools (HikariCP) to interact with relational schemas, ensuring fast transactional speeds during heavy construction logs updates.
+            </p>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 3 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 4 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Subscription Tier System</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Modular Control and Pricing Tiers</p>
+            
+            
+            <p>To provide flexible SaaS packages, BuildCon ERP employs a subscription mapping engine. The features, dashboards, and role dropdowns rendered on login screens are toggled dynamically based on the active client subscription tier.</p>
+            
+            <h2>Tiers Mapping</h2>
+            <div style="margin: 3mm 0;">
+                <div style="display: flex; margin-bottom: 3.5mm; align-items: flex-start; border-bottom: 1px solid #f1f5f9; padding-bottom: 2mm;">
+                    <span class="tier-badge growth" style="min-width: 25mm; text-align: center; margin-right: 3mm;">Growth</span>
+                    <p style="font-size: 10.5px; margin: 0; color: #334155; line-height: 1.5;">Designed for field execution. Unlocks Project Manager, Construction Manager, Senior Site Engineer, and Subcontractor portals. Limits business and financial controls.</p>
+                </div>
+                <div style="display: flex; margin-bottom: 3.5mm; align-items: flex-start; border-bottom: 1px solid #f1f5f9; padding-bottom: 2mm;">
+                    <span class="tier-badge premium" style="min-width: 25mm; text-align: center; margin-right: 3mm;">Premium</span>
+                    <p style="font-size: 10.5px; margin: 0; color: #334155; line-height: 1.5;">Adds back-office control. Unlocks Finance & Accounts ledgers, Quantity Surveyor BOQ audits, Procurement RFQ matching, and HR managers.</p>
+                </div>
+                <div style="display: flex; align-items: flex-start; padding-bottom: 2mm;">
+                    <span class="tier-badge enterprise" style="min-width: 25mm; text-align: center; margin-right: 3mm;">Enterprise</span>
+                    <p style="font-size: 10.5px; margin: 0; color: #334155; line-height: 1.5;">Full platform access. Enables the Chairman Portal, Managing Director cockpit, all Director roles, Sales CRMs, and Digital Marketing campaigns.</p>
+                </div>
+            </div>
+            
+            <h2>Database Configuration & Verification</h2>
+            <p style="font-size: 11px; line-height: 1.6;">
+                The <code>organizations</code> table stores subscription levels under the <code>subscription_tier</code> column. When an employee logs in, the authentication handler queries <code>GET /api/organizations</code> to fetch their tenant context, parsing the subscription tier to lock or open pages.
+            </p>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 4 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 5 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Access Security</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Landing Page OTP Verification Gate</p>
+            
+            
+            <p>Access control starts at the landing page. Before hitting the authentication pages, the portal selection panel remains locked behind an OTP verification modal. This acts as a primary firewall gate for organization tenants.</p>
+            
+            <h2>OTP Lifecycle</h2>
+            <ul>
+                <li>The user selects their corresponding organization dropdown on the landing page, calling <code>GET /api/organizations</code>.</li>
+                <li>Clicking "Send OTP" calls the backend to generate a deterministic 4-digit code using a time-sensitive algorithm.</li>
+                <li>The modal displays a 30-second countdown timer. For security, the verification route accepts the current window code plus two previous windows to prevent minor clock drifts.</li>
+                <li>On verification, organization configurations (Org ID, Tier, Domain) are committed to client <code>localStorage</code>, unlocking role portals.</li>
+            </ul>
+
+            <h2>Login Gateways</h2>
+            <p style="font-size: 11px; line-height: 1.6; text-align: justify;">
+                Once unlocked, users are directed to role-specific login interfaces: `/login/chairman`, `/login/director`, or `/login/manager`. All forms submit username and password details, returning JWT bearer tokens which authorize subsequent API fetches.
+            </p>
+            
+            <div style="background-color: #fffbeb; border: 1px solid #fef3c7; padding: 3mm; border-radius: 4px; margin-top: 4mm;">
+                <p style="font-size: 10px; color: #b45309; margin: 0; font-weight: 600;">
+                    Warning: Organization sessions expire after 24 hours. Local storage configurations are cleared on logout transactions.
+                </p>
+            </div>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 5 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 6 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Chairman Portal</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Step-by-Step Login Flow & Menus</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <p>To access this executive dashboard, the Chairman must follow a secured dual-stage login pipeline:</p>
+            <ul>
+                <li><strong>Organization Unlocking:</strong> On the landing page, select the Enterprise organization and click "Send OTP". Verify using the 4-digit token code to unlock the Executive portal access.</li>
+                <li><strong>Role Verification:</strong> Navigate to the `/login/chairman` route. Enter the Chairman's unique username and password credentials. On success, a JWT token is committed to client localStorage.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <p>Once authenticated, the Chairman sees the complete Enterprise navigation tree on the sidebar:</p>
+            <table class="tech-table" style="margin-top: 1mm;">
+                <tr>
+                    <td><strong>Executive Summary</strong></td>
+                    <td>Financial KPIs, overall project audits, and delay alerts.</td>
+                </tr>
+                <tr>
+                    <td><strong>Portfolio & Financial</strong></td>
+                    <td>Multi-project ledger summaries and budgets.</td>
+                </tr>
+                <tr>
+                    <td><strong>Safety & Approvals</strong></td>
+                    <td>Live site safety audits and strategic change-orders.</td>
+                </tr>
+                <tr>
+                    <td><strong>Investments & Sales</strong></td>
+                    <td>Capital expenditures and CRM lead aggregation reports.</td>
+                </tr>
+            </table>
+
+            <h2 style="margin-top: 4mm;">3. Navigation & Local Storage Security</h2>
+            <p style="font-size: 11px; line-height: 1.5; color: #475569;">
+                The sidebar menu items are dynamically populated by fetching <code>DashboardShellConfig</code> settings. If the user session contains a JWT token with insufficient scope, the AuthGuard intercepts access, redirecting to the login portal.
+            </p>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 6 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 7 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Chairman Portal: Executive Summary Data Origin</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Dynamic DB Queries vs Frontend Static Datasets</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            <p class="bold-lead">Here is the technical data mapping for the Executive Summary Dashboard cards and trends:</p>
+            
+            <h2>Dynamic Database-Driven Metrics</h2>
+            <ul>
+                <li><strong>Total Projects (11 Projects):</strong> Mapped to the <code>projects</code> table, counted dynamically by organization ID in <code>getDashboardStatsUnified</code>. Statuses are parsed as 5 Active, 0 Delayed, 6 Planning. These projects are created by the Chairman and Project Directors in the enterprise organization.</li>
+                <li><strong>Total Budget Value (₹ 52.00 Cr):</strong> Sum of all project budgets updated directly by the <strong>Project Director</strong> or <strong>Managing Director</strong> in the database (calls <code>project.getBudget()</code>).</li>
+                <li><strong>Claims Expense MTD (₹ 0.00 Cr):</strong> Calculated dynamically in the backend by querying the <code>progress_claims</code> table, summing up the <code>amount_requested</code> values where status is <code>APPROVED</code> or <code>PAID</code>.</li>
+                <li><strong>Active Staff (27):</strong> Calculated using a simulated formula in the Java backend: <code>12 + (pmCount * 3)</code> where <code>pmCount</code> is the number of project managers in the organization.</li>
+            </ul>
+
+            <h2>Static Frontend Datasets</h2>
+            <ul>
+                <li><strong>Equipment Status (94%):</strong> Static display value shown directly in the client component code, which logs "2 cranes under service" as details.</li>
+                <li><strong>Revenue & Profit Trends (Last 6 Months):</strong> Static chart arrays (Jan–Jun) stored directly in the frontend component.</li>
+                <li><strong>Projects by Status:</strong> Hardcoded to show 18 Total Projects (12 On Track, 4 Delayed, and 2 Critical) in the client-side donut chart.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 7 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 8 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Chairman Portal: Approval Center Data Mapping</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">AI Project Launch & General Request Tracking</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>1. Pending AI-Powered Project Launch Approvals</h2>
+            <p>Lists new project proposals created by Project Directors. The data is fetched dynamically from the <code>projects</code> table with a status of <code>Planning</code> or <code>Pending</code>:</p>
+            <ul>
+                <li><strong>Proposals Listed:</strong> <em>skyvilla guesthouse</em> (ECR Road, PM Target: ₹ 3.5 Cr), <em>Residential Tower A 1</em> (PM Target: ₹ 1.0 Cr), <em>Coastal Bridge Piers 3</em> (PM Target: ₹ 3.1 Cr), and <em>Commercial Plazas Phase 3 5</em> (PM Target: ₹ 5.2 Cr).</li>
+                <li><strong>Actions:</strong> Clicking "Approve & Launch Project" sends a <code>POST</code> request to <code>/api/projects/{id}/approve</code> to transition the status from <code>Planning</code> to <code>Active</code> in the database.</li>
+            </ul>
+
+            <h2>2. General Pending Approvals List (6 Requests)</h2>
+            <p>Shows a list of pending transactions. This is a client-side mockup array (<code>INITIAL_PENDING</code>) representing various corporate approval types:</p>
+            <ul>
+                <li><strong>PO:</strong> Steel Procurement - Rajesh Kumar (₹ 75.0 Lakhs - High Priority).</li>
+                <li><strong>Investment:</strong> Coimbatore Branch Opening - Board (₹ 1.5 Cr - High Priority).</li>
+                <li><strong>Capex & Opex:</strong> Tower Crane - Karthik R (₹ 1.2 Cr); Subcontractor Invoice - Amit Kumar (₹ 15.0 Lakhs).</li>
+                <li><strong>Actions:</strong> Approving or rejecting moves items dynamically to <code>Approved</code> or <code>Rejected</code> arrays.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 8 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 9 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Chairman Portal: Client Insights Data Origin</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Client Satisfaction and Revenue Analytics</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            <p class="bold-lead">The Client Insights Dashboard tracks user loyalty, ratings, and revenue contributions:</p>
+            
+            <h2>Client Metrics & Loyalty (Static Datasets)</h2>
+            <ul>
+                <li><strong>Overall Satisfaction (4.8 / 5):</strong> Stored directly as a static value in the client component <code>ClientInsights</code>.</li>
+                <li><strong>Client Counts:</strong> Total clients (128), repeat clients (78), and client retention rate (85%) are hardcoded values.</li>
+                <li><strong>Feedback Summary:</strong> A pie chart showing 128 positive, 12 neutral, and 4 negative feedbacks.</li>
+                <li><strong>Satisfaction Trend:</strong> A line chart visualizing satisfaction ratings from Jan (4.5) to Jun (4.8).</li>
+            </ul>
+
+            <h2>Top Clients & Quotes</h2>
+            <ul>
+                <li><strong>Top Clients by Revenue:</strong> Loaded from a static array listing top contributors: <em>ABC Developers</em> (₹ 78.5 Cr), <em>XYZ Constructions</em> (₹ 52.0 Cr), and <em>PQR Builders</em> (₹ 38.2 Cr).</li>
+                <li><strong>Recent Client Feedback Quotes:</strong> Static quotes displayed directly in the client panel.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 9 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 10 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Managing Director</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & Dashboard Menus</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>Unlocking Step:</strong> Select the organization on the root page and complete the OTP verification.</li>
+                <li><strong>MD Login Step:</strong> Navigate to the `/login/director` portal and select the "Managing Director" role from the dropdown menu, entering credentials. On success, the portal redirects to `/md`.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <p>The MD's vertical navigation menu includes:</p>
+            <ul>
+                <li><strong>Overview & Executive Summary:</strong> Operational performance metrics across branches.</li>
+                <li><strong>Portfolio Management:</strong> Gantt baselines and milestone progress tracks.</li>
+                <li><strong>Team Performance Cockpit:</strong> Interactive grading for HR, Finance, and Site managers.</li>
+                <li><strong>Approvals Queue:</strong> Central queue for high-value requisition change-orders.</li>
+            </ul>
+
+            <h2 style="margin-top: 4mm;">3. Operational Governance Role</h2>
+            <p style="font-size: 11px; line-height: 1.5; color: #475569;">
+                The Managing Director supervises executive workflows, bridging the gap between site development details and boardroom evaluations.
+            </p>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 10 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 11 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Managing Director</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">What the MD Sees & Operational Actions</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>3. What the Managing Director Sees</h2>
+            <ul>
+                <li><strong>Operations Performance Indexes:</strong> Aggregated KPI charts indicating department efficiency.</li>
+                <li><strong>Pending High-Value Requisitions:</strong> Lists materials requisitions exceeding PM limits.</li>
+                <li><strong>Subcontractor Billing Holds:</strong> Displays payment claims marked as "HOLD" by QS audits.</li>
+            </ul>
+
+            <h2>4. What the Managing Director Posts</h2>
+            <ul>
+                <li><strong>Approval Releases:</strong> Submits approvals for change-orders, updating claim statuses.</li>
+                <li><strong>Operational Overrides:</strong> Overrides payment holds, changing claim status back to "APPROVED" to enable disbursement by accounts.</li>
+                <li><strong>Profile Updates:</strong> Updates name and email details on settings tab.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 11 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 12 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Project Director</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication & Navigation Menus</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>OTP Entry:</strong> Select the corporate tenant on the landing page and enter the time-based OTP.</li>
+                <li><strong>Director Login:</strong> Navigate to the `/login/director` interface, choose "Project Director" and input authentication credentials to log in.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <p>The Project Director's layout contains the following navigational controls:</p>
+            <ul>
+                <li><strong>Project Registry:</strong> Directory of active and completed developments.</li>
+                <li><strong>Gantt Timeline Engine:</strong> Gantt-based scheduling tools for tracking dependencies.</li>
+                <li><strong>Resource Loading Indicators:</strong> Manpower and machinery deployment boards.</li>
+                <li><strong>Settings Page:</strong> Personal profile update configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 12 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 13 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Project Director</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Project Creation & Budget Controls</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>3. What the Project Director Sees</h2>
+            <ul>
+                <li><strong>Project Lists:</strong> A list of all construction projects mapped to the active organization.</li>
+                <li><strong>Cost Tracking Charts:</strong> Compares original cost budgets with real-time actuals from QS logs.</li>
+                <li><strong>Timeline Variance:</strong> Highlights delays between scheduled milestones and daily logs.</li>
+            </ul>
+
+            <h2>4. What the Project Director Posts</h2>
+            <ul>
+                <li><strong>Project Initializer Form:</strong> Submits the name, code, start date, and budget limit to create new project records (queries <code>POST /api/projects</code>).</li>
+                <li><strong>Budget Update Form:</strong> Edits existing project budgets, triggering changes to the overall budget totals on the Chairman's dashboard.</li>
+                <li><strong>Gantt Dependencies:</strong> Saves dependency updates to schedule timelines.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 13 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 14 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Business Director</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">CRM Portfolios & Strategic Agreements</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>1. Authentication & Navigation Menus</h2>
+            <p><strong>Login Flow:</strong> Unlocks org dropdown on landing, inputs credentials at `/login/director` under "Business Director" role. Displays tabs for: Client CRM, Tenders & Bids, and Pipeline Analytics.</p>
+
+            <h2>2. What the Business Director Sees</h2>
+            <ul>
+                <li><strong>Active Tender Lists:</strong> Statuses of corporate bids for public and private infrastructure contracts.</li>
+                <li><strong>CRM Interaction Logs:</strong> Details of customer contact histories and satisfaction scores.</li>
+                <li><strong>Sales Pipeline Analytics:</strong> Projected target sales revenues vs actual closed contracts.</li>
+            </ul>
+
+            <h2>3. What the Business Director Posts</h2>
+            <ul>
+                <li><strong>Tender Initializer:</strong> Submits contract details and pricing metrics.</li>
+                <li><strong>Client Registry Form:</strong> Adds new customer developer records to the database.</li>
+                <li><strong>Director Profile Update:</strong> Modifies personal name and contact details.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 14 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 15 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Finance Director</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Treasury Views & Fiscal Actions</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>1. Authentication & Navigation Menus</h2>
+            <p><strong>Login Flow:</strong> OTP verification followed by selection of "Finance Director" role on `/login/director`. Displays tabs for: Corporate Treasury, Budget Contingency, and Audits Dashboard.</p>
+
+            <h2>2. What the Finance Director Sees</h2>
+            <ul>
+                <li><strong>Treasury Overviews:</strong> Aggregated cash positions, inflow receipts, and outflow payments.</li>
+                <li><strong>Contingency Variances:</strong> Identifies project sites exceeding allocated contingency budgets.</li>
+                <li><strong>Audit Trails:</strong> Real-time ledger records of all accounts payable/receivable.</li>
+            </ul>
+
+            <h2>3. What the Finance Director Posts</h2>
+            <ul>
+                <li><strong>Capital Allocation Forms:</strong> Allocates funding for new property development or machinery.</li>
+                <li><strong>Budget Adjustments:</strong> Adjusts capital allocations across active project sites.</li>
+                <li><strong>FD Profile updates:</strong> Updates name and email details on the settings page.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 15 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 16 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Finance & Accounts</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & Ledger Menus</p>
+            
+            
+            <span class="tier-badge premium">Premium Tier</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>OTP Entry:</strong> Select the premium organization on the root page and complete the OTP verification.</li>
+                <li><strong>Manager Login:</strong> Navigate to `/login/manager`, choose "Finance & Accounts Manager" from the role dropdown, and enter credentials to log in.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <ul>
+                <li><strong>Finance Ledger:</strong> Comprehensive table of transactions with auto-generated TX IDs.</li>
+                <li><strong>Accounts Receivables:</strong> Manages invoice schedules and registers client payments.</li>
+                <li><strong>Accounts Payables:</strong> Tracks vendor and subcontractor payouts.</li>
+                <li><strong>Cash Flow Forecast:</strong> Graphs inflow receipts against outflow payments.</li>
+                <li><strong>Payout Approvals:</strong> List of approved progress claims.</li>
+                <li><strong>Settings:</strong> Personal profile update configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 16 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 17 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Finance & Accounts</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Payout Release Workflow & Invoicing</p>
+            
+            
+            <span class="tier-badge premium">Premium Tier</span>
+            
+            <h2>3. What the Finance Manager Sees</h2>
+            <ul>
+                <li><strong>General Transaction Ledger:</strong> Displays transaction records containing TX ID, party name, transaction type, amount, due date, and status.</li>
+                <li><strong>Approved Progress Claims Queue:</strong> Lists claims with status `APPROVED` from QS audits.</li>
+                <li><strong>Area Chart Metrics:</strong> Area chart comparing Inflow Receipts (green) and Outflow Payments (blue).</li>
+            </ul>
+
+            <h2>4. What the Finance Manager Posts</h2>
+            <ul>
+                <li><strong>Add Receivable Form:</strong> Registers client invoices (debtor, amount), calling <code>POST /api/finance-accounts/transaction</code>.</li>
+                <li><strong>Payout Release:</strong> Clicks "Release" to disburse funds via <code>POST /api/progress-claims/{id}/pay?paymentReference=PAY-TXN-{random}</code>, changing claim status to `PAID`.</li>
+                <li><strong>Payment Hold:</strong> Clicks "Hold" to flag claims, changing status to `HOLD`.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 17 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 18 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Workforce Manager</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & Workforce Menus</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>OTP Stage:</strong> Complete the time-sensitive OTP verification on the landing page.</li>
+                <li><strong>Manager Login:</strong> Open `/login/manager`, select "Workforce Manager" from the dropdown, and enter your credentials.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <ul>
+                <li><strong>Workforce Overview:</strong> Displays key metrics such as active laborers, subcontractor crews, and Aadhaar verification rates.</li>
+                <li><strong>Worker Database:</strong> Main register of site workers.</li>
+                <li><strong>Headcount Audits:</strong> Logs subcontractor headcount audits.</li>
+                <li><strong>Payroll Integration:</strong> Payroll rules and guidelines.</li>
+                <li><strong>AI Planner:</strong> AI-powered assistant for labor allocations.</li>
+                <li><strong>Settings:</strong> Personal profile configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 18 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 19 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Workforce Manager</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Worker Directory & Headcount Auditing</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>3. What the Workforce Manager Sees</h2>
+            <ul>
+                <li><strong>Active Labourers:</strong> Real-time counts of active worker profiles.</li>
+                <li><strong>Weekly Attendance Trends:</strong> Attendance trends for Masons, Carpenters, and Helpers.</li>
+                <li><strong>Identity Statuses:</strong> Tracks worker verification status (Verified, Pending Verification, Unverified).</li>
+            </ul>
+
+            <h2>4. What the Workforce Manager Posts</h2>
+            <ul>
+                <li><strong>Register Worker Form:</strong> Registers new workers (Name, Contact, Aadhaar), calling <code>POST /api/workforce-manager/workers</code>.</li>
+                <li><strong>Headcount Audit logs:</strong> Logs daily headcount check-ins by subcontractor crew.</li>
+                <li><strong>WM Profile updates:</strong> Updates name and email details on the settings page.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 19 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 20 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>HR Manager</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & HR Menus</p>
+            
+            
+            <span class="tier-badge premium">Premium Tier</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>Landing OTP:</strong> Verify the time-sensitive code on the landing page.</li>
+                <li><strong>Manager Login:</strong> Open `/login/manager`, choose the "HR Manager" role, and input your credentials to log in.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <p>The HR Manager sidebar contains folders for employee management:</p>
+            <ul>
+                <li><strong>Overview:</strong> Total active employees and leave counts.</li>
+                <li><strong>Employees:</strong> Employee directory and registration form.</li>
+                <li><strong>Recruitment:</strong> Manage job openings and applicants.</li>
+                <li><strong>Payroll:</strong> Tracks monthly employee payroll.</li>
+                <li><strong>Performance:</strong> Employee appraisal records.</li>
+                <li><strong>Leaves & Training:</strong> Leave applications and training schedules.</li>
+                <li><strong>Settings:</strong> Personal profile configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 20 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 21 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>HR Manager</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Employee Onboarding & Performance Auditing</p>
+            
+            
+            <span class="tier-badge premium">Premium Tier</span>
+            
+            <h2>3. What the HR Manager Sees</h2>
+            <ul>
+                <li><strong>Employee Table Directory:</strong> Lists name, role, department, salary, and status of employees.</li>
+                <li><strong>Job Applicants:</strong> Displays open positions, applicants, and interview feedback.</li>
+                <li><strong>Leave Applications:</strong> Lists pending leave requests from employee portals.</li>
+            </ul>
+
+            <h2>4. What the HR Manager Posts</h2>
+            <ul>
+                <li><strong>Employee Registration Form:</strong> Adds new employees, assigning usernames and base roles.</li>
+                <li><strong>Job Creation Form:</strong> Registers open roles and sets applicant requirements.</li>
+                <li><strong>Leave Decider:</strong> Approves or rejects leave applications.</li>
+                <li><strong>HR profile update:</strong> Updates name and email details on the settings page.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 21 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 22 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Project Manager</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & Project Menus</p>
+            
+            
+            <span class="tier-badge growth">Growth Tier</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>OTP Step:</strong> Complete the organization OTP verification step on the landing page.</li>
+                <li><strong>Manager Login:</strong> Open `/login/manager`, select "Project Manager" from the dropdown, and enter your credentials.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <ul>
+                <li><strong>Milestones:</strong> Gantt schedulers for tracking tasks and dependencies.</li>
+                <li><strong>Progress Claims:</strong> Submits claims and monitors payment statuses.</li>
+                <li><strong>Site Delays:</strong> Reports delays to trigger warnings on the Chairman dashboard.</li>
+                <li><strong>Material Requisitions:</strong> Requests materials from procurement.</li>
+                <li><strong>AI Planner:</strong> AI-powered assistant for project planning.</li>
+                <li><strong>Settings:</strong> Personal profile configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 22 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 23 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Project Manager</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Gantt Timeline Modifications & Progress Claims</p>
+            
+            
+            <span class="tier-badge growth">Growth Tier</span>
+            
+            <h2>3. What the Project Manager Sees</h2>
+            <ul>
+                <li><strong>Gantt Timeline Chart:</strong> Dynamic visualization of scheduled tasks, milestones, and progress percentages.</li>
+                <li><strong>Material Inventory Summaries:</strong> Stock levels of sand, steel, and cement from procurement.</li>
+                <li><strong>Claim Verification Status:</strong> Real-time status of progress claims (Pending, Approved, Paid, Hold).</li>
+            </ul>
+
+            <h2>4. What the Project Manager Posts</h2>
+            <ul>
+                <li><strong>Progress Claim Builder:</strong> Submits work completion metrics to start the progress claim workflow.</li>
+                <li><strong>Site Delay Form:</strong> Logs delay details (weather, labor shortage, material delays), triggering alerts on the Chairman portal.</li>
+                <li><strong>Requisition Requests:</strong> Submits material requests to procurement.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 23 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 24 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Quantity Surveyor</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & BOQ Menus</p>
+            
+            
+            <span class="tier-badge premium">Premium Tier</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>Landing OTP:</strong> Complete the OTP verification step on the landing page.</li>
+                <li><strong>Manager Login:</strong> Open `/login/manager`, select "Quantity Surveyor" from the dropdown, and enter your credentials.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <ul>
+                <li><strong>BOQ Management:</strong> Bill of Quantities items, estimated quantities, and unit prices.</li>
+                <li><strong>Progress Claim Verification:</strong> Review subcontractor claims.</li>
+                <li><strong>Cost Variance:</strong> Cost variance analysis models.</li>
+                <li><strong>Material Measurements:</strong> Records of actual material quantities on-site.</li>
+                <li><strong>Settings:</strong> Personal profile configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 24 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 25 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Quantity Surveyor</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Claim Verification & BOQ Matching</p>
+            
+            
+            <span class="tier-badge premium">Premium Tier</span>
+            
+            <h2>3. What the Quantity Surveyor Sees</h2>
+            <ul>
+                <li><strong>BOQ Estimates:</strong> Estimated quantities vs actuals for concrete, sand, and steel.</li>
+                <li><strong>Subcontractor Claim Queue:</strong> Lists claims with status `PENDING` submitted by subcontractors.</li>
+                <li><strong>Actual Site Material Receipts:</strong> Material delivery and intake logs.</li>
+            </ul>
+
+            <h2>4. What the Quantity Surveyor Posts</h2>
+            <ul>
+                <li><strong>Claim Approval:</strong> Approves subcontractor claims (calls <code>PUT /api/progress-claims/{id}/approve</code>), sending them to accounts for payout.</li>
+                <li><strong>Claim Rejection:</strong> Rejects claims, logging reasons and returning them to the subcontractor.</li>
+                <li><strong>BOQ Form:</strong> Updates estimated material quantities and costs.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 25 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 26 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Construction Manager</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & Site Menus</p>
+            
+            
+            <span class="tier-badge growth">Growth Tier</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>OTP Entry:</strong> Select the organization and complete the OTP verification step.</li>
+                <li><strong>Manager Login:</strong> Open `/login/manager`, select "Construction Manager" from the dropdown, and enter your credentials.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <ul>
+                <li><strong>Daily Site Diary:</strong> Registers daily site activities, worker logs, and weather conditions.</li>
+                <li><strong>Equipment Utilization:</strong> Heavy machinery schedules and runtimes.</li>
+                <li><strong>Concrete Test Logs:</strong> Logs concrete cube compression tests.</li>
+                <li><strong>Material Inflows:</strong> Records deliveries at the warehouse.</li>
+                <li><strong>Settings:</strong> Personal profile configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 26 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 27 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Construction Manager</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Concrete Tests & Machinery Logs</p>
+            
+            
+            <span class="tier-badge growth">Growth Tier</span>
+            
+            <h2>3. What the Construction Manager Sees</h2>
+            <ul>
+                <li><strong>Equipment Allocation Schedules:</strong> Gantt-style charts of heavy machinery usage.</li>
+                <li><strong>Daily Diary Logs:</strong> Activity histories logged by site engineers.</li>
+                <li><strong>Concrete Compression test logs:</strong> Concrete cube test results.</li>
+            </ul>
+
+            <h2>4. What the Construction Manager Posts</h2>
+            <ul>
+                <li><strong>Concrete Test Form:</strong> Logs fresh concrete pour times, temperatures, and batch codes.</li>
+                <li><strong>Site Diary Form:</strong> Records daily activities, worker logs, and weather conditions.</li>
+                <li><strong>Machinery Schedule:</strong> Modifies equipment runtime and fuel logs.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 27 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 28 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Procurement Manager</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & Procurement Menus</p>
+            
+            
+            <span class="tier-badge premium">Premium Tier</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>Landing OTP:</strong> Complete the OTP verification step on the landing page.</li>
+                <li><strong>Manager Login:</strong> Open `/login/manager`, select "Procurement Manager" from the dropdown, and enter your credentials.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <ul>
+                <li><strong>Requisition Queue:</strong> Reviews material requests submitted by Project Managers.</li>
+                <li><strong>Vendor Directory:</strong> Verified supplier details and contact information.</li>
+                <li><strong>RFQ Panel:</strong> Requests bids from multiple vendors.</li>
+                <li><strong>Purchase Orders (PO):</strong> Generates and tracks POs.</li>
+                <li><strong>Inventory stock:</strong> Raw materials inventory database.</li>
+                <li><strong>Settings:</strong> Personal profile configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 28 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 29 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Procurement Manager</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Supplier Quotations & Purchase Orders</p>
+            
+            
+            <span class="tier-badge premium">Premium Tier</span>
+            
+            <h2>3. What the Procurement Manager Sees</h2>
+            <ul>
+                <li><strong>Requisition Requests:</strong> Lists material requests submitted by Project Managers.</li>
+                <li><strong>Supplier Bids:</strong> Pricing quotes submitted by vendors.</li>
+                <li><strong>Inventory Quantities:</strong> Stock levels of sand, steel, and cement.</li>
+            </ul>
+
+            <h2>4. What the Procurement Manager Posts</h2>
+            <ul>
+                <li><strong>PO Initializer:</strong> Generates and submits POs to selected vendors.</li>
+                <li><strong>Inventory Intake Form:</strong> Records actual quantities received against PO records.</li>
+                <li><strong>RFQ Form:</strong> Submits RFQs to verified vendors.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 29 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 30 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Senior Site Engineer</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & Engineering Menus</p>
+            
+            
+            <span class="tier-badge growth">Growth Tier</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>OTP Gate:</strong> Complete the organization OTP verification step on the landing page.</li>
+                <li><strong>Manager Login:</strong> Open `/login/manager`, select "Senior Site Engineer" from the dropdown, and enter your credentials.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <ul>
+                <li><strong>Daily Engineer Logs:</strong> Records daily site activities and progress.</li>
+                <li><strong>Drawing Registers:</strong> Architectural and structural blueprints.</li>
+                <li><strong>Delay Log Panels:</strong> Reports site delays to trigger executive alerts.</li>
+                <li><strong>Cube Test Logs:</strong> Logs concrete cube compression tests.</li>
+                <li><strong>Safety incident forms:</strong> Logs site accidents and safety violations.</li>
+                <li><strong>Settings:</strong> Personal profile configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 30 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 31 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Senior Site Engineer</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Site Diary & Real-Time Alerts</p>
+            
+            
+            <span class="tier-badge growth">Growth Tier</span>
+            
+            <h2>3. What the Senior Site Engineer Sees</h2>
+            <ul>
+                <li><strong>Site Diagrams:</strong> Interactive structural and electrical drawings.</li>
+                <li><strong>Daily Inspection Sheets:</strong> Quality control checklists.</li>
+                <li><strong>Concrete Compression test logs:</strong> Concrete cube test histories.</li>
+            </ul>
+
+            <h2>4. What the Senior Site Engineer Posts</h2>
+            <ul>
+                <li><strong>Daily Site Log Form:</strong> Records daily activities, worker logs, and weather conditions.</li>
+                <li><strong>Delay Alert:</strong> Logs delay details (weather, labor shortage, material delays), triggering alerts on the Chairman portal.</li>
+                <li><strong>Cube Test Form:</strong> Logs fresh concrete pour times and batch codes.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 31 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 32 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Subcontractor Portal</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & Billing Menus</p>
+            
+            
+            <span class="tier-badge growth">Growth Tier</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>OTP Verification:</strong> Complete the organization OTP verification step on the landing page.</li>
+                <li><strong>Manager Login:</strong> Open `/login/manager`, select "Subcontractor" from the dropdown, and enter your credentials.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <ul>
+                <li><strong>Claim Submissions:</strong> Submits progress claims based on milestones.</li>
+                <li><strong>Claim Tracker:</strong> Monitors claim status (Pending, Approved, Paid, Hold).</li>
+                <li><strong>Billing Invoices:</strong> Uploads tax invoices and progress reports.</li>
+                <li><strong>Crew Attendance:</strong> Logs daily crew counts by trade.</li>
+                <li><strong>Settings:</strong> Personal profile configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 32 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 33 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Subcontractor Portal</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Payment Verification & Crew Logs</p>
+            
+            
+            <span class="tier-badge growth">Growth Tier</span>
+            
+            <h2>3. What the Subcontractor Sees</h2>
+            <ul>
+                <li><strong>BOQ Templates:</strong> Estimated material quantities and pricing templates.</li>
+                <li><strong>Payment Status Summary:</strong> Real-time status of progress claims (Pending, Approved, Paid, Hold).</li>
+                <li><strong>Verified Headcounts:</strong> Headcount audits logged by the Workforce Manager.</li>
+            </ul>
+
+            <h2>4. What the Subcontractor Posts</h2>
+            <ul>
+                <li><strong>Progress Claim Builder:</strong> Submits work completion metrics to start the progress claim workflow.</li>
+                <li><strong>Crew Count Form:</strong> Logs worker counts by trade for the day.</li>
+                <li><strong>Invoice Uploader:</strong> Uploads tax invoices and progress reports.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 33 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 34 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Labour & Workers</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Identification Protocols</p>
+            
+            
+            <span class="tier-badge growth">Growth Tier</span>
+            
+            <h2>1. Verification & Identity Flow</h2>
+            <p>Laborers do not access dashboards directly. Their profiles are managed by the Workforce Manager:</p>
+            <ul>
+                <li><strong>Aadhaar Submission:</strong> Workers submit their Aadhaar cards, which are logged in the <code>workers</code> table.</li>
+                <li><strong>Aadhaar Verification:</strong> Workforce Managers check details to update status to "Verified".</li>
+            </ul>
+
+            <h2>2. Worker Allocations</h2>
+            <ul>
+                <li><strong>Direct Attendance Check-in:</strong> Workers scan in at gates to log actual hours worked.</li>
+                <li><strong>Trade Classifications:</strong> Masons, Carpenters, and Helpers.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 34 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 35 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Labour & Workers</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Skill Level Management & Payroll Logs</p>
+            
+            
+            <span class="tier-badge growth">Growth Tier</span>
+            
+            <h2>3. What the Labour / Workers Read</h2>
+            <p>Workers receive verification and wage details from their subcontractors:</p>
+            <ul>
+                <li><strong>Verification Statuses:</strong> Checks if Aadhaar profiles are approved.</li>
+                <li><strong>Wage Vouchers:</strong> Wage details based on logged attendance hours.</li>
+            </ul>
+
+            <h2>4. What is Posted on Behalf of Workers</h2>
+            <ul>
+                <li><strong>Check-in Logs:</strong> Gate scans log entry and exit times in attendance tables.</li>
+                <li><strong>Skill Level Adjustments:</strong> Workforce Managers update skill levels and trade classifications.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 35 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 36 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Site Management</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & Dashboard Menus</p>
+            
+            
+            <span class="tier-badge growth">Growth Tier</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>OTP Entry:</strong> Select the organization and complete the OTP verification step.</li>
+                <li><strong>Manager Login:</strong> Open `/login/manager`, select "Site Management" from the dropdown, and enter credentials.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <ul>
+                <li><strong>Live Site Heatmaps:</strong> Displays worker density across active construction zones.</li>
+                <li><strong>Equipment Utilization:</strong> Heavy machinery schedules and runtimes.</li>
+                <li><strong>Safety Inspection Lists:</strong> Pre-shift checks for safety compliance.</li>
+                <li><strong>Security Feeds:</strong> CCTV streams and access logs.</li>
+                <li><strong>Settings:</strong> Personal profile configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 36 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 37 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Site Management</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Operations Controls</p>
+            
+            
+            <span class="tier-badge growth">Growth Tier</span>
+            
+            <h2>3. What the Site Manager Sees</h2>
+            <ul>
+                <li><strong>Live Heatmaps:</strong> Real-time worker positions and densities.</li>
+                <li><strong>Security Logs:</strong> Gate access events and check-in status.</li>
+                <li><strong>Asset utilization:</strong> Runtime hours and maintenance schedules for heavy machinery.</li>
+            </ul>
+
+            <h2>4. What the Site Manager Posts</h2>
+            <ul>
+                <li><strong>Safety Checklist Form:</strong> Logs results of daily safety inspections.</li>
+                <li><strong>Gate Override Logs:</strong> Overrides gate access issues for worker check-ins.</li>
+                <li><strong>Maintenance Requests:</strong> Logs machinery service requests.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 37 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 38 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Digital Marketing TL</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & Marketing Menus</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>OTP Gate:</strong> Complete the organization OTP verification step on the landing page.</li>
+                <li><strong>Manager Login:</strong> Open `/login/manager`, select "Digital Marketing TL" from the dropdown, and enter credentials.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <ul>
+                <li><strong>Campaign Performance:</strong> Lead generation and click-through rates.</li>
+                <li><strong>Budget Allocation:</strong> Marketing budget allocations.</li>
+                <li><strong>Content Calendar:</strong> Scheduled marketing campaigns and posts.</li>
+                <li><strong>Task Distribution:</strong> Team task assignments.</li>
+                <li><strong>Settings:</strong> Personal profile configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 38 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 39 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Digital Marketing TL</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Task Allocation & Campaign Approvals</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>3. What the Marketing TL Sees</h2>
+            <ul>
+                <li><strong>Lead Generation Metrics:</strong> Cost per lead (CPL) and click-through rates (CTR).</li>
+                <li><strong>Campaign Calendar drafts:</strong> Proposed content calendars from Executives.</li>
+                <li><strong>Team Workloads:</strong> Active tasks assigned to Marketing Executives.</li>
+            </ul>
+
+            <h2>4. What the Marketing TL Posts</h2>
+            <ul>
+                <li><strong>Campaign Approvals:</strong> Approves and schedules draft campaigns.</li>
+                <li><strong>Task Distribution:</strong> Assigns campaigns and SEO tasks to Executives.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 39 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 40 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Digital Marketing Exec</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & SEO Menus</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>OTP Verification:</strong> Complete the organization OTP verification step on the landing page.</li>
+                <li><strong>Manager Login:</strong> Open `/login/manager`, select "Digital Marketing Executive" from the dropdown, and enter credentials.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <ul>
+                <li><strong>SEO Audits:</strong> Monitors page rankings and crawl errors.</li>
+                <li><strong>Metadata Config:</strong> Page titles and meta descriptions.</li>
+                <li><strong>Analytics:</strong> Traffic sources and session durations.</li>
+                <li><strong>Ad Campaigns:</strong> Search and social media ad creation.</li>
+                <li><strong>Settings:</strong> Personal profile configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 40 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 41 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Digital Marketing Exec</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">SEO Registers & Ad Campaigns</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>3. What the Marketing Executive Sees</h2>
+            <ul>
+                <li><strong>SEO Auditing Tables:</strong> Lists keyword rankings and traffic logs.</li>
+                <li><strong>Social Media Feeds:</strong> User comments and engagement metrics.</li>
+                <li><strong>Campaign performance:</strong> Click-through rates and impression counts.</li>
+            </ul>
+
+            <h2>4. What the Marketing Executive Posts</h2>
+            <ul>
+                <li><strong>SEO Metadata Form:</strong> Updates page titles and meta descriptions.</li>
+                <li><strong>Ad Creation Form:</strong> Drafts copy and selects assets for search and social ads.</li>
+                <li><strong>Content Draft:</strong> Submits content calendar drafts to the TL for approval.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 41 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 42 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Sales Executive</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & Sales Menus</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>OTP Entry:</strong> Select the organization and complete the OTP verification step.</li>
+                <li><strong>Manager Login:</strong> Open `/login/manager`, select "Sales Executive" from the dropdown, and enter credentials.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <ul>
+                <li><strong>CRM Pipelines:</strong> Tracks lead stages.</li>
+                <li><strong>Activity Logs:</strong> Logs client calls and meetings.</li>
+                <li><strong>Proposal Builders:</strong> Drafts client proposals and estimates.</li>
+                <li><strong>Target Monitors:</strong> Monthly sales target trackers.</li>
+                <li><strong>Settings:</strong> Personal profile configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 42 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 43 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Sales Executive</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">CRM Pipeline & Client Proposals</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>3. What the Sales Executive Sees</h2>
+            <ul>
+                <li><strong>Lead Pipeline:</strong> Client status (Contacted, Qualified, Proposal Sent, Negotiation, Closed).</li>
+                <li><strong>Active BOQ Pricing:</strong> Cost estimates from the Quantity Surveyor.</li>
+                <li><strong>Quota Targets:</strong> Monthly closed sales quotas vs actual progress.</li>
+            </ul>
+
+            <h2>4. What the Sales Executive Posts</h2>
+            <ul>
+                <li><strong>Lead Creator Form:</strong> Registers new leads, logging contact details.</li>
+                <li><strong>Proposal Draft:</strong> Drafts client proposals and submits them to the Director for approval.</li>
+                <li><strong>Sales Activity Form:</strong> Logs client meetings and discussion records.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 43 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 44 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Marketing Manager</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & Budget Menus</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>OTP Gate:</strong> Complete the organization OTP verification step on the landing page.</li>
+                <li><strong>Manager Login:</strong> Open `/login/manager`, select "Marketing Manager" from the dropdown, and enter credentials.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <ul>
+                <li><strong>Marketing Budget:</strong> Tracks expenditure against monthly budgets.</li>
+                <li><strong>ROI Analysis:</strong> Compares acquisition costs to client value.</li>
+                <li><strong>Brand Asset Library:</strong> Corporate logos and design templates.</li>
+                <li><strong>Campaign Planners:</strong> Brand campaign performance trackers.</li>
+                <li><strong>Settings:</strong> Personal profile configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 44 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 45 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Marketing Manager</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Brand Budgets & Marketing ROI</p>
+            
+            
+            <span class="tier-badge enterprise">Enterprise Tier Only</span>
+            
+            <h2>3. What the Marketing Manager Sees</h2>
+            <ul>
+                <li><strong>CPL/ROI Dashboards:</strong> Charts showing cost per lead and acquisition costs.</li>
+                <li><strong>Monthly Brand Spending:</strong> Spending records against allocated budgets.</li>
+                <li><strong>Lead Quality Audits:</strong> Lead conversion rates from sales logs.</li>
+            </ul>
+
+            <h2>4. What the Marketing Manager Posts</h2>
+            <ul>
+                <li><strong>Budget Allocation Form:</strong> Sets monthly marketing budgets across departments.</li>
+                <li><strong>Asset Register:</strong> Uploads corporate logos, brochures, and promotional materials.</li>
+                <li><strong>Strategy Updates:</strong> Saves brand campaigns and targeting parameters.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 45 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 46 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Super Admin Portal</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Authentication Flow & Portal Menus</p>
+            
+            
+            <span class="tier-badge enterprise">Platform Administration Only</span>
+            
+            <h2>1. Verification & Authentication Flow</h2>
+            <ul>
+                <li><strong>OTP Stage:</strong> Complete the OTP verification step on the landing page.</li>
+                <li><strong>Admin Login:</strong> Open `/login/super-admin`, enter your credentials, and access the portal.</li>
+            </ul>
+
+            <h2>2. Dashboard Sidebar Menus</h2>
+            <ul>
+                <li><strong>Organization Registry:</strong> Registers and onboard organizations.</li>
+                <li><strong>Modules Toggle:</strong> Configures active modules for tenants.</li>
+                <li><strong>Subscription Registry:</strong> Maps subscription tiers to organizations.</li>
+                <li><strong>System Health:</strong> Monitors database and server metrics.</li>
+                <li><strong>Settings:</strong> Personal profile configurations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 46 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 47 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Super Admin Portal</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Multi-Tenant Onboarding & Settings</p>
+            
+            
+            <span class="tier-badge enterprise">Platform Administration Only</span>
+            
+            <h2>3. What the Super Admin Sees</h2>
+            <ul>
+                <li><strong>Tenant List:</strong> All registered organizations, domains, and subscription tiers.</li>
+                <li><strong>Active Modules:</strong> Shows active modules (HR, CRM, AI Engine) by tenant.</li>
+                <li><strong>Health Monitor:</strong> Database connection status and API response times.</li>
+            </ul>
+
+            <h2>4. What the Super Admin Posts</h2>
+            <ul>
+                <li><strong>Tenant Creator Form:</strong> Adds new organizations, domains, and database connection details.</li>
+                <li><strong>Tier Adjuster:</strong> Modifies subscription tiers for active organizations.</li>
+                <li><strong>Module Toggle:</strong> Enables or disables modules (e.g. HR, CRM, AI Engine) for organizations.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 47 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 48 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>AI Strategy Integration</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Generative Assistants & Analytics</p>
+            
+            
+            <p class="bold-lead">BuildCon ERP integrates generative AI models to provide real-time strategic assistance and automation.</p>
+            
+            <h2>AI Modules</h2>
+            <ul>
+                <li><strong>Executive Strategy Assistant:</strong> Analyzes raw financial records to predict cash flows.</li>
+                <li><strong>Expense Auditor:</strong> Flags transactional anomalies and checks subcontractor tax compliance.</li>
+                <li><strong>Workforce Planner:</strong> Optimizes labor allocation based on project schedules.</li>
+                <li><strong>Project Planner:</strong> Recommends construction schedules and logs project delays.</li>
+            </ul>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 48 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 49 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Job Intern Letter</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">Corporate Policy & Intern Acceptance Offer</p>
+            
+            
+            <div class="intern-letter-content" style="font-size: 11px; line-height: 1.45;">
+                <div class="policy-section">
+                    <div class="policy-title" style="font-size: 11px;">Professional Conduct & Misuse Policy</div>
+                    <p class="policy-text" style="font-size: 10px; margin-bottom: 1.5mm;">Employees are expected to maintain the highest standards of professional and ethical conduct. Any misuse of company resources, leads, client information, or involvement in malpractice of any kind will be treated as a serious violation.</p>
+                    <p class="policy-text" style="font-size: 10px; margin-bottom: 1.5mm;">In such cases, the company reserves the right to impose penalties, including salary deductions, recovery of losses, or other disciplinary actions, depending on the severity of the misconduct.</p>
+                </div>
+                
+                <div class="policy-section">
+                    <div class="policy-title" style="font-size: 11px;">Code of Conduct Violations</div>
+                    <p class="policy-text" style="font-size: 10px; margin-bottom: 1.5mm;">Any violation of company policies or code of conduct may result in disciplinary action, which may include warning, suspension, or termination, depending on the severity of the misconduct.</p>
+                </div>
+                
+                <div class="policy-section">
+                    <div class="policy-title" style="font-size: 11px;">Governing Law / Jurisdiction</div>
+                    <p class="policy-text" style="font-size: 10px; margin-bottom: 1.5mm;">“This agreement is governed by the laws of India, and disputes will fall under Chennai jurisdiction.”</p>
+                </div>
+                
+                <p style="font-size: 10px; margin-bottom: 2mm;">We warmly welcome you to the <strong>Zenelait InfoTech</strong> family and look forward to your valuable contributions.</p>
+                
+                <div class="signature-area" style="margin-top: 4mm; padding-top: 2mm;">
+                    <p style="font-size: 10px; margin-bottom: 1mm;">Please confirm acceptance by replying,</p>
+                    <div class="checkbox-container" style="font-size: 10px; margin-top: 1mm;">
+                        <div class="checkbox-box" style="width: 3.5mm; height: 3.5mm; border-width: 1.5px; margin-right: 2mm;"></div>
+                        <span>“I accept the offer”</span>
+                    </div>
+                </div>
+            </div>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 49 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+    <!-- PAGE 50 -->
+    <div class="page">
+        <div class="page-header-decor"></div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">ZENELAIT</div>
+                <div class="logo-sub">INFO TECH</div>
+            </div>
+            
+            <h1>Zenelait InfoTech</h1>
+            <p style="font-size: 10px; color: #ef4444; font-weight: 600; text-transform: uppercase; margin-top: -3mm; margin-bottom: 4mm; letter-spacing: 1px;">System Platform Reference Manual</p>
+            
+            
+            <div style="text-align: center; margin-top: 30mm;">
+                <h1 style="font-size: 24px; letter-spacing: 2px; font-family: 'Playfair Display', serif; color: #0f172a; margin-bottom: 3mm;">BUILDCON ERP</h1>
+                <p style="font-size: 11px; letter-spacing: 1px; color: #ef4444; font-weight: 600; text-transform: uppercase;">Technical Operations Manual</p>
+                <div style="width: 15mm; height: 1px; background-color: #ef4444; margin: 5mm auto;"></div>
+                <p style="font-size: 11px; color: #64748b; margin-top: 10mm; line-height: 1.6;">
+                    For platform technical assistance or inquiries:
+                </p>
+                <p style="font-size: 11.5px; color: #0f172a; font-weight: 600;">
+                    support@zenelait.com
+                </p>
+                <p style="font-size: 10px; color: #64748b; margin-top: 2mm;">
+                    Zenelait InfoTech Private Limited<br/>
+                    Chennai, India
+                </p>
+            </div>
+            
+            <div style="margin-top: auto; padding-bottom: 5mm; text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 5mm;">
+                This concludes the 50-page official roles, views, and dashboards specification document for the BuildCon ERP Multi-Tenant SaaS platform.
+            </div>
+        
+            
+            <div style="position: absolute; bottom: 4mm; left: 12mm; right: 12mm; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 2mm;">
+                <span>BuildCon ERP Enterprise Reference Manual</span>
+                <span style="font-weight: 700; color: #ef4444;">Page 50 of 50</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+    
+</body>
+</html>

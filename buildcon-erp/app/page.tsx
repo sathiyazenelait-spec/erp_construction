@@ -130,10 +130,11 @@ export default function Home() {
       }
       // Enterprise or default
       return [
-        "Project Manager", "Construction Manager", "Quantity Surveyor", "Procurement Manager",
-        "Finance Manager", "HR Manager", "Business Development Manager", "Site Engineer",
+        "Project Manager", "Construction Manager", "Quantity Surveyor", "Procurement Manager", "Store Manager",
+        "QA/QC Engineer", "Finance Manager", "HR Manager", "Business Development Manager", "Site Engineer",
         "Contractor", "Subcontractor", "Workforce Supervisor", "Labour",
-        "Digital Marketing TL", "Digital Marketing Executive", "Sales Executive", "Marketing Manager"
+        "Digital Marketing TL", "Digital Marketing Executive", "Sales Executive", "Marketing Manager",
+        "Vendor / Supplier Portal", "Client / Customer Portal"
       ];
     }
     return [];

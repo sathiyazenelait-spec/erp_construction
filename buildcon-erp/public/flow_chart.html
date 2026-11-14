@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BuildCon ERP - Role-Based Workflow Flowcharts</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap');
+        
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            background-color: #f8fafc;
+            -webkit-print-color-adjust: exact;
+        }
+
+        .page {
+            position: relative;
+            width: 210mm;
+            height: 297mm;
+            background: #ffffff;
+            page-break-after: always;
+            overflow: hidden;
+        }
+
+        /* Top Header Corner styling */
+        .page-header-decor {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 130mm;
+            height: 14mm;
+            background: #1e293b;
+            clip-path: polygon(10% 0, 100% 0, 100% 100%, 0% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15mm;
+        }
+
+        .page-header-decor-text {
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Bottom Footer Corner styling */
+        .page-footer-decor-red {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 110mm;
+            height: 12mm;
+            background: #ef4444;
+            clip-path: polygon(0 0, 90% 0, 100% 100%, 0 100%);
+        }
+
+        .page-footer-decor-black {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 80mm;
+            height: 10mm;
+            background: #0f172a;
+            clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%);
+        }
+
+        /* Outer Frame Border */
+        .border-container {
+            position: absolute;
+            top: 15mm;
+            left: 15mm;
+            right: 15mm;
+            bottom: 15mm;
+            border: 1px solid #cbd5e1;
+            padding: 8mm 10mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        /* Branding Logo */
+        .logo-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 5mm;
+            border-bottom: 2px solid #ef4444;
+            padding-bottom: 2mm;
+        }
+
+        .logo-main {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #0f172a;
+            line-height: 1.1;
+        }
+
+        .logo-main span {
+            color: #ef4444;
+        }
+
+        .logo-sub {
+            font-size: 9px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Cover Page Styling */
+        .cover-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 10mm;
+        }
+
+        .cover-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 38px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 15mm;
+            margin-bottom: 4mm;
+            line-height: 1.2;
+        }
+
+        .cover-subtitle {
+            font-size: 14px;
+            color: #ef4444;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8mm;
+        }
+
+        .cover-divider {
+            width: 50mm;
+            height: 3px;
+            background: #ef4444;
+            margin: 4mm auto 10mm;
+        }
+
+        .cover-desc {
+            font-size: 12px;
+            line-height: 1.7;
+            color: #475569;
+            max-width: 150mm;
+            margin-bottom: 15mm;
+        }
+
+        .cover-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6mm;
+            width: 100%;
+            margin-top: 10mm;
+            margin-bottom: 15mm;
+        }
+
+        .cover-grid-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 4mm;
+            text-align: center;
+        }
+
+        .cover-grid-card h3 {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin: 0 0 2mm 0;
+        }
+
+        .cover-grid-card.growth h3 { color: #f59e0b; }
+        .cover-grid-card.premium h3 { color: #10b981; }
+        .cover-grid-card.enterprise h3 { color: #8b5cf6; }
+
+        .cover-grid-card p {
+            font-size: 9.5px;
+            line-height: 1.5;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .cover-footer {
+            margin-top: auto;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 6mm;
+            width: 100%;
+            font-size: 9.5px;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Tier Overview Table of Contents */
+        .toc-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4mm;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .toc-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 6mm;
+        }
+
+        .toc-table th {
+            text-align: left;
+            font-size: 10px;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 2mm;
+        }
+
+        .toc-table td {
+            font-size: 10.5px;
+            padding: 2.2mm 0;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+
+        .toc-table tr:hover td {
+            color: #0f172a;
+        }
+
+        .toc-page {
+            text-align: right;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        /* Page Layout & Split Panels */
+        .page-title-sec {
+            margin-bottom: 4mm;
+        }
+
+        .page-title-sec h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .page-title-sec p {
+            font-size: 10.5px;
+            color: #64748b;
+            margin: 1mm 0 0 0;
+        }
+
+        .role-section {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 4mm 5mm;
+            margin-bottom: 5mm;
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .role-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .role-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1.5px solid #f1f5f9;
+            padding-bottom: 2mm;
+            margin-bottom: 3mm;
+        }
+
+        .role-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .tier-badge {
+            font-size: 8.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.6mm 2mm;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .tier-badge.growth { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+        .tier-badge.premium { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .tier-badge.enterprise { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+
+        .role-body {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 5mm;
+            flex-grow: 1;
+        }
+
+        .role-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .role-desc {
+            font-size: 10px;
+            line-height: 1.45;
+            color: #475569;
+            margin: 0 0 3mm 0;
+            text-align: justify;
+        }
+
+        .role-list {
+            margin: 0 0 3mm 0;
+            padding-left: 4.5mm;
+        }
+
+        .role-list li {
+            font-size: 9.5px;
+            line-height: 1.45;
+            color: #334155;
+            margin-bottom: 1mm;
+        }
+
+        .list-title {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #0f172a;
+            margin: 0 0 1mm 0;
+            letter-spacing: 0.3px;
+        }
+
+        /* Flowchart styling */
+        .flowchart-container {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 3mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .flow-node {
+            width: 100%;
+            background: #1e293b;
+            color: #ffffff;
+            border-radius: 4px;
+            padding: 1.8mm 2.2mm;
+            text-align: center;
+            font-size: 9px;
+            line-height: 1.25;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            border-left: 3px solid #ef4444;
+        }
+
+        .flow-node.highlight {
+            background: #ef4444;
+            border-left: 3px solid #1e293b;
+        }
+
+        .flow-arrow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 5mm;
+            margin: 0.5mm 0;
+        }
+
+        .flow-arrow svg {
+            overflow: visible;
+        }
+
+        /* General text class */
+        .text-accent-growth { color: #d97706; font-weight: 600; }
+        .text-accent-premium { color: #059669; font-weight: 600; }
+        .text-accent-enterprise { color: #7c3aed; font-weight: 600; }
+
+        .footer-line {
+            margin-top: auto;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 2.5mm;
+            display: flex;
+            justify-content: space-between;
+            font-size: 8.5px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================= PAGE 1: COVER PAGE ================= -->
+    <div class="page">
+        <div class="page-header-decor">
+            <span class="page-header-decor-text">Zenelait InfoTech</span>
+        </div>
+        <div class="border-container">
+            <div class="cover-content">
+                <div style="font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: #0f172a;">
+                    ZENELAIT <span>INFOTECH</span>
+                </div>
+                <div style="width: 25mm; height: 1.5px; background: #ef4444; margin: 2mm 0;"></div>
+                
+                <h1 class="cover-title">BUILDCON ERP</h1>
+                <p class="cover-subtitle">Role-Based Workflow Flowcharts</p>
+                <div class="cover-divider"></div>
+                
+                <p class="cover-desc">
+                    A comprehensive, tier-scoped operational manual mapping the system access, dynamic data views, structural actions, and backend APIs for every role in the BuildCon ERP ecosystem. Engineered to streamline operations from field logistics to executive boardrooms.
+                </p>
+                
+                <div class="cover-grid">
+                    <div class="cover-grid-card growth">
+                        <h3>Growth Tier</h3>
+                        <p>Field execution & site operations. Unlocks PM, Construction, Site Engineering & Subcontractor gates.</p>
+                    </div>
+                    <div class="cover-grid-card premium">
+                        <h3>Premium Tier</h3>
+                        <p>Adds back-office ledgers, Quantity Surveyor audits, Procurement matchmaking, and HR management.</p>
+                    </div>
+                    <div class="cover-grid-card enterprise">
+                        <h3>Enterprise Tier</h3>
+                        <p>Full suite access. Enables Chairman, MD, all Director cockpits, Sales CRMs, and Digital Marketing TL tools.</p>
+                    </div>
+                </div>
+
+                <div class="cover-footer">
+                    <span>Reference Manual: Flowcharts & Workflows v2.5</span>
+                    <span>© 2026 Zenelait InfoTech Private Limited</span>
+                </div>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- ================= PAGE 2: TABLE OF CONTENTS ================= -->
+    <div class="page">
+        <div class="page-header-decor">
+            <span class="page-header-decor-text">Reference Index</span>
+        </div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">BUILDCON <span>ERP</span></div>
+                <div class="logo-sub">Table of Contents & Tiers</div>
+            </div>
+            
+            <h2 class="toc-title">Platform Role Distribution</h2>
+            <table class="toc-table">
+                <thead>
+                    <tr>
+                        <th>Package / Subscription Tier</th>
+                        <th>Associated Roles Covered</th>
+                        <th class="toc-page">Manual Page</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong class="text-accent-growth">1. Growth Tier (Field Execution)</strong></td>
+                        <td>Project Manager, Construction Manager</td>
+                        <td class="toc-page">Page 3</td>
+                    </tr>
+                    <tr>
+                        <td><strong class="text-accent-growth">1. Growth Tier (Field Execution)</strong></td>
+                        <td>Senior Site Engineer, Subcontractor</td>
+                        <td class="toc-page">Page 4</td>
+                    </tr>
+                    <tr>
+                        <td><strong class="text-accent-growth">1. Growth Tier (Field Execution)</strong></td>
+                        <td>Labour & Workers, Site Management Overview</td>
+                        <td class="toc-page">Page 5</td>
+                    </tr>
+                    <tr>
+                        <td><strong class="text-accent-premium">2. Premium Tier (Back-Office)</strong></td>
+                        <td>Finance & Accounts Manager, Quantity Surveyor (QS)</td>
+                        <td class="toc-page">Page 6</td>
+                    </tr>
+                    <tr>
+                        <td><strong class="text-accent-premium">2. Premium Tier (Back-Office)</strong></td>
+                        <td>Procurement Manager, HR Manager</td>
+                        <td class="toc-page">Page 7</td>
+                    </tr>
+                    <tr>
+                        <td><strong class="text-accent-enterprise">3. Enterprise Tier (Corporate Strategy)</strong></td>
+                        <td>Chairman, Managing Director (MD)</td>
+                        <td class="toc-page">Page 8</td>
+                    </tr>
+                    <tr>
+                        <td><strong class="text-accent-enterprise">3. Enterprise Tier (Corporate Strategy)</strong></td>
+                        <td>Project Director, Business Director</td>
+                        <td class="toc-page">Page 9</td>
+                    </tr>
+                    <tr>
+                        <td><strong class="text-accent-enterprise">3. Enterprise Tier (Corporate Strategy)</strong></td>
+                        <td>Finance Director, Workforce Manager</td>
+                        <td class="toc-page">Page 10</td>
+                    </tr>
+                    <tr>
+                        <td><strong class="text-accent-enterprise">3. Enterprise Tier (Corporate Strategy)</strong></td>
+                        <td>Sales Executive, Marketing Manager</td>
+                        <td class="toc-page">Page 11</td>
+                    </tr>
+                    <tr>
+                        <td><strong class="text-accent-enterprise">3. Enterprise Tier (Corporate Strategy)</strong></td>
+                        <td>Digital Marketing TL, Digital Marketing Executive</td>
+                        <td class="toc-page">Page 12</td>
+                    </tr>
+                    <tr>
+                        <td><strong class="text-accent-enterprise">3. Enterprise Tier (Corporate Strategy)</strong></td>
+                        <td>Super Admin Portal, AI Operations & Security</td>
+                        <td class="toc-page">Page 13</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4.5mm; margin-top: 4mm;">
+                <h3 style="font-size: 11px; margin: 0 0 2mm 0; color: #0f172a; text-transform: uppercase;">Subscription Tier Controls</h3>
+                <p style="font-size: 9.8px; line-height: 1.5; color: #475569; margin: 0; text-align: justify;">
+                    BuildCon ERP maps system visibility dynamically. Upon OTP verification, the active subscription tier context is saved in client <code>localStorage</code>. On role login, routes and selection dropdowns are dynamically parsed. If a user bypasses client-side Auth guards with a direct URL modification, the backend JWT filter intercepts and blocks requests with an <code>HTTP 403 Forbidden</code> response.
+                </p>
+            </div>
+
+            <div class="footer-line">
+                <span>BuildCon ERP Reference Manual</span>
+                <span>Page 2 of 13</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- ================= PAGE 3: GROWTH TIER - PM & CM ================= -->
+    <div class="page">
+        <div class="page-header-decor">
+            <span class="page-header-decor-text">Growth Tier</span>
+        </div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">BUILDCON <span>ERP</span></div>
+                <div class="logo-sub">Field & Site Portals</div>
+            </div>
+            
+            <div class="page-title-sec">
+                <h1>Growth Plan Roles</h1>
+                <p>Operational workflow mappings for scheduling, material logistics, execution, and billing.</p>
+            </div>
+
+            <!-- Role 1: Project Manager -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Project Manager (PM)</h2>
+                    <span class="tier-badge growth">Growth Tier</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Controls project schedules and timelines via dynamic Gantt engines, coordinates material requisitions, and initiates Progress Claims based on milestones.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Gantt charts with scheduled milestones & progress percentages.</li>
+                                <li>Stock inventory levels (sand, steel, cement) from procurement.</li>
+                                <li>Real-time progress claims statuses (Pending, Approved, Paid, Hold).</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Claim Builder</b>: Logs completion metrics, starts claim workflows.</li>
+                                <li><b>Requisition Form</b>: Posts material requests to Procurement.</li>
+                                <li><b>Site Delay Logs</b>: Triggers delay warnings on Chairman portal.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Set Gantt Milestones</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Submit Requisition Request</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Log Site Delay (If occurs)</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Submit Progress Claim</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role 2: Construction Manager -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Construction Manager</h2>
+                    <span class="tier-badge growth">Growth Tier</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Manages active physical execution on site, logs concrete cube compression tests, coordinates heavy machinery schedules, and records material inflows.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Heavy machinery allocation schedules & overall site timelines.</li>
+                                <li>Logs of daily diaries submitted by site engineers.</li>
+                                <li>Delivered raw material inflows at the local warehouse.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Concrete Test Logs</b>: Records cube compression values.</li>
+                                <li><b>Daily Site Diary</b>: Submits weather, worker log, & activity forms.</li>
+                                <li><b>Machinery Schedule</b>: Updates equipment runtimes and fuel logs.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Log Warehouse Inflows</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Coordinate Heavy Machinery</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Log Concrete Cube Tests</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Submit Daily Site Diary</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-line">
+                <span>BuildCon ERP Reference Manual</span>
+                <span>Page 3 of 13</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- ================= PAGE 4: GROWTH TIER - SSE & SUBCONTRACTOR ================= -->
+    <div class="page">
+        <div class="page-header-decor">
+            <span class="page-header-decor-text">Growth Tier</span>
+        </div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">BUILDCON <span>ERP</span></div>
+                <div class="logo-sub">Engineering & Subcontractor</div>
+            </div>
+            
+            <div class="page-title-sec">
+                <h1>Growth Plan Roles (Cont.)</h1>
+                <p>Quality auditing, real-time site engineering delay triggers, and subcontractor progress claims.</p>
+            </div>
+
+            <!-- Role 3: Senior Site Engineer -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Senior Site Engineer (SSE)</h2>
+                    <span class="tier-badge growth">Growth Tier</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Audits blueprint quality, runs inspection checklists, and logs daily site logs. Triggers high-priority AI-driven delay alerts straight to the Chairman.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Site diagrams, structural blue-prints, & electrical CAD files.</li>
+                                <li>Quality control inspection sheets & concrete compression logs.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Daily Site Log Form</b>: Records work progress, worker counts, etc.</li>
+                                <li><b>Delay Alert</b>: Logs delay details (weather, labor shortage) which triggers dynamic alerts on the Chairman's cockpit.</li>
+                                <li><b>Cube Test Form</b>: Logs batch numbers, pour times, & temperatures.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Inspect CAD Site Diagrams</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Submit Daily Log Form</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Submit Delay Alert Form</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Trigger Chairman Warning Banner</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role 4: Subcontractor -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Subcontractor Portal</h2>
+                    <span class="tier-badge growth">Growth Tier</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Portal for external contractors to submit progress billings based on raw milestone achievements and upload verification documents.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Estimated Bill of Quantities (BOQ) pricing templates.</li>
+                                <li>Payment status of claims (Pending, Approved, Paid, Hold).</li>
+                                <li>Crew headcount audit logs compiled by the site manager.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Progress Claim Builder</b>: Submits work metrics for QS auditing.</li>
+                                <li><b>Crew Count Form</b>: Records daily workers by trade.</li>
+                                <li><b>Invoice Uploader</b>: Uploads official billing PDFs & tax receipts.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Log Trade-Wise Crew Counts</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Submit Progress Claim</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Upload Tax Invoices</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Track Payout Status</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-line">
+                <span>BuildCon ERP Reference Manual</span>
+                <span>Page 4 of 13</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- ================= PAGE 5: GROWTH TIER - LABOUR & SITE MANAGEMENT ================= -->
+    <div class="page">
+        <div class="page-header-decor">
+            <span class="page-header-decor-text">Growth Tier</span>
+        </div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">BUILDCON <span>ERP</span></div>
+                <div class="logo-sub">Labour & Site Operations</div>
+            </div>
+            
+            <div class="page-title-sec">
+                <h1>Growth Plan Roles (Cont.)</h1>
+                <p>Worker identity verifications, gate check-in systems, live site mapping, and safety audits.</p>
+            </div>
+
+            <!-- Role 5: Labour & Workers -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Labour & Workers</h2>
+                    <span class="tier-badge growth">Growth Tier</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Site laborers do not access dashboards directly. Instead, their identities are managed through local gates and their profiles are maintained by the Workforce Manager.</p>
+                        <div>
+                            <div class="list-title">What They Read/Receive:</div>
+                            <ul class="role-list">
+                                <li>Aadhaar verification status (Verified, Pending, Unverified).</li>
+                                <li>Wage vouchers detailing payment rates from subcontractors.</li>
+                            </ul>
+                            <div class="list-title">What is Posted on Their Behalf:</div>
+                            <ul class="role-list">
+                                <li><b>Check-in Logs</b>: Gates scan worker Aadhaar codes to record entry/exit times, logging actual hours worked.</li>
+                                <li><b>Skill Adjustments</b>: Workforce Manager updates trade classifications (Masons, Carpenters, Helpers).</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Submit Aadhaar Card</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Scan QR Code at Gates</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Log Entry & Exit Times</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Release Wage Voucher</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role 6: Site Management -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Site Management Overview</h2>
+                    <span class="tier-badge growth">Growth Tier</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Direct control interface for field monitors. Track live worker placement density heatmaps, safety audits, and machinery maintenance requests.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li><b>Live Heatmap</b>: Worker location densities across active zones.</li>
+                                <li>Security logs, CCTV gate feeds, and heavy machinery utilization.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Safety Inspection Form</b>: Submits safety check compliance logs.</li>
+                                <li><b>Gate Override Logs</b>: Overrides access blocks for worker checks.</li>
+                                <li><b>Maintenance Request</b>: Logs immediate service calls for heavy assets.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Monitor Live Worker Heatmap</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Submit Safety Checklist</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Log Gate Access Override</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Post Machine Maintenance</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-line">
+                <span>BuildCon ERP Reference Manual</span>
+                <span>Page 5 of 13</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- ================= PAGE 6: PREMIUM TIER - FINANCE & QS ================= -->
+    <div class="page">
+        <div class="page-header-decor">
+            <span class="page-header-decor-text">Premium Tier</span>
+        </div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">BUILDCON <span>ERP</span></div>
+                <div class="logo-sub">Finance & Auditing Portals</div>
+            </div>
+            
+            <div class="page-title-sec">
+                <h1>Premium Plan Roles</h1>
+                <p>Accounts payable/receivable ledgers, cash flow forecasting, and quantity auditing structures.</p>
+            </div>
+
+            <!-- Role 7: Finance & Accounts Manager -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Finance & Accounts Manager</h2>
+                    <span class="tier-badge premium">Premium Tier</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Controls corporate accounts, registers client receivables, cash flow forecasting charts, and handles the release of payment vouchers for approved claims.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>General ledger transaction history (Receivables & Payables).</li>
+                                <li>Cash flow trends comparing inflows against outflows.</li>
+                                <li>Progress claim queue showing status <code>APPROVED</code> from QS.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Add Receivable Form</b>: Registers new client debtor invoice totals.</li>
+                                <li><b>Payout Release</b>: Clicks release to disburse progress claims (POSTs to `/api/progress-claims/{id}/pay`), changing status to <code>PAID</code>.</li>
+                                <li><b>Payment Hold</b>: Places claims on hold, setting status to <code>HOLD</code>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Audit General Ledger</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Register Accounts Receivable</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Disburse Payment Voucher</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Mark Claim Status "PAID"</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role 8: Quantity Surveyor -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Quantity Surveyor (QS)</h2>
+                    <span class="tier-badge premium">Premium Tier</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Manages estimated quantities, audits Bill of Quantities (BOQ), and acts as the gatekeeper for subcontractor claim validations.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Estimated BOQ vs actual quantity measurements on-site.</li>
+                                <li>Pending subcontractor progress claims queue.</li>
+                                <li>Actual deliveries & local site material intake records.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Claim Verification</b>: Approves claims (PUTs `/api/progress-claims/{id}/approve`) to push them to the Finance manager's release queue.</li>
+                                <li><b>Claim Rejection</b>: Rejects claims, logging reasons for subcontractors.</li>
+                                <li><b>BOQ Form Updates</b>: Edits material quantity and cost estimates.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Review Subcontractor Claim</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Compare Claim with BOQ Limits</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Approve Progress Claim</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Push Claim to Finance Queue</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-line">
+                <span>BuildCon ERP Reference Manual</span>
+                <span>Page 6 of 13</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- ================= PAGE 7: PREMIUM TIER - PROCUREMENT & HR ================= -->
+    <div class="page">
+        <div class="page-header-decor">
+            <span class="page-header-decor-text">Premium Tier</span>
+        </div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">BUILDCON <span>ERP</span></div>
+                <div class="logo-sub">Procurement & HR Portals</div>
+            </div>
+            
+            <div class="page-title-sec">
+                <h1>Premium Plan Roles (Cont.)</h1>
+                <p>Material requisitions, supplier quotes comparison, vendor PO generation, and HR pipelines.</p>
+            </div>
+
+            <!-- Role 9: Procurement Manager -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Procurement Manager</h2>
+                    <span class="tier-badge premium">Premium Tier</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Manages material requests from site project managers, conducts supplier bidding, issues Purchase Orders (PO), and updates raw inventory stock levels.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Requisition queue containing material requests from PMs.</li>
+                                <li>Quotes and pricing bids submitted by external suppliers.</li>
+                                <li>Stock levels ledger (quantities in stock vs minimum limits).</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>RFQ Form</b>: Sends Requests for Quotations to suppliers.</li>
+                                <li><b>PO Initializer</b>: Generates Purchase Orders to selected vendors.</li>
+                                <li><b>Intake Record</b>: Logs actual quantities received against POs.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Review PM Material Requisitions</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Issue RFQ to Supplier List</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Generate Purchase Order (PO)</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Log Inventory Intake</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role 10: HR Manager -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">HR Manager</h2>
+                    <span class="tier-badge premium">Premium Tier</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Maintains employee registry, runs salary payroll logs, tracks appraisal scores, and manages leave approvals and compliance training programs.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Employee directories detailing salary, department, and status.</li>
+                                <li>Job applicants, open roles, and interview logs.</li>
+                                <li>Pending employee leave requests.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Employee Registry</b>: Adds new employees, assigns user credentials and system roles.</li>
+                                <li><b>Job Creation Form</b>: Registers recruitment requirements.</li>
+                                <li><b>Leave Decider</b>: Approves or rejects employee leave claims.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Post Job Requirements</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Process Recruitment Pipeline</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Onboard New Employee</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Update Employee Database</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-line">
+                <span>BuildCon ERP Reference Manual</span>
+                <span>Page 7 of 13</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- ================= PAGE 8: ENTERPRISE TIER - CHAIRMAN & MD ================= -->
+    <div class="page">
+        <div class="page-header-decor">
+            <span class="page-header-decor-text">Enterprise Tier</span>
+        </div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">BUILDCON <span>ERP</span></div>
+                <div class="logo-sub">Board & Strategy Cockpits</div>
+            </div>
+            
+            <div class="page-title-sec">
+                <h1>Enterprise Plan Roles</h1>
+                <p>Board-level executive summaries, AI-powered delay monitors, operational overrides, and compliance tracking.</p>
+            </div>
+
+            <!-- Role 11: Chairman -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Chairman</h2>
+                    <span class="tier-badge enterprise">Enterprise Tier Only</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Ultimate strategic cockpit. Monitors high-level financial health cards, reviews AI delay predictions, and acts on critical project launch approvals.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Dynamic KPIs: Total projects, budget value, active staff.</li>
+                                <li><b>AI Delay Alerts</b>: Warnings sent from site engineers.</li>
+                                <li>Client relationship indices & investment portfolios.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Project Launcher</b>: Approves new proposals, transitioning projects from <code>Planning</code> to <code>Active</code> in the database.</li>
+                                <li><b>Alert Resolver</b>: Resolves and dismisses alerts (PUTs `/api/alerts/{id}/resolve`).</li>
+                                <li><b>Board Docs</b>: Uploads minutes & strategic policy files.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Monitor Strategic Financial KPIs</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Receive AI Project Delay Alert</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Approve Project Launch Proposal</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Resolve Site Alert Messages</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role 12: Managing Director -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Managing Director (MD)</h2>
+                    <span class="tier-badge enterprise">Enterprise Tier Only</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Responsible for operational oversight across all corporate branches. Reviews division scorecards and manages payment override requests.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Operations performance indexes & team grading metrics.</li>
+                                <li>Pending high-value requisitions exceeding PM limits.</li>
+                                <li>Subcontractor billing holds marked <code>HOLD</code> by QS.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Approval Releases</b>: Releases pending change-order requests.</li>
+                                <li><b>Operational Overrides</b>: Bypasses payment holds, reverting claim status to <code>APPROVED</code> to trigger disbursement.</li>
+                                <li><b>Profile Updates</b>: Edits profile settings parameters.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Review Branch Efficiency Index</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Identify Billing Payment Holds</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Submit Operational Overrides</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Release Approved Change Orders</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-line">
+                <span>BuildCon ERP Reference Manual</span>
+                <span>Page 8 of 13</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- ================= PAGE 9: ENTERPRISE TIER - PROJECT DIR & BUSINESS DIR ================= -->
+    <div class="page">
+        <div class="page-header-decor">
+            <span class="page-header-decor-text">Enterprise Tier</span>
+        </div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">BUILDCON <span>ERP</span></div>
+                <div class="logo-sub">Director Mappings</div>
+            </div>
+            
+            <div class="page-title-sec">
+                <h1>Enterprise Plan Roles (Cont.)</h1>
+                <p>Portfolio initialization, budget allocations, public tenders bidding, and CRM operations.</p>
+            </div>
+
+            <!-- Role 13: Project Director -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Project Director</h2>
+                    <span class="tier-badge enterprise">Enterprise Tier Only</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Controls corporate development portfolios, baseline scheduling logic, project budget allocations, and timeline variances.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>List of active & completed projects within the organization.</li>
+                                <li>Cost tracking charts (comparing original budgets vs actuals).</li>
+                                <li>Timeline variance logs tracking daily milestones delays.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Project Initializer Form</b>: Submits details to create new records (queries POST `/api/projects`), setting status to <code>Planning</code>.</li>
+                                <li><b>Budget Form</b>: Edits overall budget values.</li>
+                                <li><b>Gantt Dependencies</b>: Updates milestone dependencies on Gantt.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node highlight">Submit Project Initializer Form</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Set Initial Project Budget Limit</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Configure Gantt Dependency Milestones</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Sync with Chairman Budget Stats</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role 14: Business Director -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Business Director</h2>
+                    <span class="tier-badge enterprise">Enterprise Tier Only</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Drives commercial growth. Reviews public infrastructure tender parameters, submits bid metrics, and logs customer relations in the CRM.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Tenders list (statuses of bids for public & private contracts).</li>
+                                <li>CRM customer interaction history and satisfaction logs.</li>
+                                <li>Sales revenue projections vs completed sales contracts.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Tender Initializer</b>: Registers new tender bid parameters.</li>
+                                <li><b>Client Registry Form</b>: Adds developer accounts to MySQL.</li>
+                                <li><b>Director Profile Updates</b>: Edits contact configurations.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Audit Active Bids & Tenders</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Submit Tender Initializer Form</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Register Client Developer Profile</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Track Sales Pipeline Analytics</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-line">
+                <span>BuildCon ERP Reference Manual</span>
+                <span>Page 9 of 13</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- ================= PAGE 10: ENTERPRISE TIER - FINANCE DIR & WORKFORCE MGR ================= -->
+    <div class="page">
+        <div class="page-header-decor">
+            <span class="page-header-decor-text">Enterprise Tier</span>
+        </div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">BUILDCON <span>ERP</span></div>
+                <div class="logo-sub">Treasury & Workforce Portals</div>
+            </div>
+            
+            <div class="page-title-sec">
+                <h1>Enterprise Plan Roles (Cont.)</h1>
+                <p>Treasury audit trails, project contingency funding, worker directories, and subcontractor headcount audits.</p>
+            </div>
+
+            <!-- Role 15: Finance Director -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Finance Director</h2>
+                    <span class="tier-badge enterprise">Enterprise Tier Only</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">High-level financial strategy supervisor. Audits accounts payable/receivable, monitors branch contingency variances, and oversees capital funding.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Treasury cash flow summaries, inflow receipts, and outflows.</li>
+                                <li>Contingency variances highlighting sites exceeding budgets.</li>
+                                <li>Real-time ledger audit trails for all accounts.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Capital Allocation Form</b>: Directs funding to specific projects or heavy machinery purchases.</li>
+                                <li><b>Budget Adjustments Form</b>: Updates project capital budgets.</li>
+                                <li><b>Director Profile Updates</b>: Edits contact configurations.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Audit Corporate Cash Positions</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Analyze Contingency Variances</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Submit Capital Allocations</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Process Project Budget Adjustments</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role 16: Workforce Manager -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Workforce Manager</h2>
+                    <span class="tier-badge enterprise">Enterprise Tier Only</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Maintains worker Aadhaar registrations, verifies subcontractor crew attendance, and checks wage guidelines integrations.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Active worker totals and registration statistics.</li>
+                                <li>Aadhaar verification status (Verified, Pending, Unverified).</li>
+                                <li>Expected crew counts vs actual present counts.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Worker Registry Form</b>: Registers worker profiles (POSTs to `/api/workforce-manager/workers`), setting status to <code>Pending Verification</code>.</li>
+                                <li><b>Headcount Audit Logs</b>: Submits attendance audit logs by contractor.</li>
+                                <li><b>WM Profile Updates</b>: Edits contact configurations.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node highlight">Submit Worker Registry Form</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Verify Worker Aadhaar Profiles</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Audit Daily Headcounts</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Submit Headcount Audit Logs</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-line">
+                <span>BuildCon ERP Reference Manual</span>
+                <span>Page 10 of 13</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- ================= PAGE 11: ENTERPRISE TIER - SALES & MARKETING ================= -->
+    <div class="page">
+        <div class="page-header-decor">
+            <span class="page-header-decor-text">Enterprise Tier</span>
+        </div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">BUILDCON <span>ERP</span></div>
+                <div class="logo-sub">Sales & Marketing Managers</div>
+            </div>
+            
+            <div class="page-title-sec">
+                <h1>Enterprise Plan Roles (Cont.)</h1>
+                <p>Qualifying client leads, proposal pipelines, marketing budget distributions, and ROI evaluations.</p>
+            </div>
+
+            <!-- Role 17: Sales Executive -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Sales Executive</h2>
+                    <span class="tier-badge enterprise">Enterprise Tier Only</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Manages CRM pipelines, qualifies leads, schedules customer follow-ups, and drafts commercial project proposals based on QS BOQ limits.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Inbound lead pipelines (stages from qualification to won).</li>
+                                <li>Bill of Quantities (BOQ) cost estimates from the QS.</li>
+                                <li>Monthly sales quota metrics and target progress.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Lead Creator Form</b>: Registers leads with contact information.</li>
+                                <li><b>Proposal Draft Form</b>: Drafts commercial contracts and submits them to the Director for approval.</li>
+                                <li><b>Activity Logs</b>: Logs call, email, and meeting schedules.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node highlight">Submit Lead Creator Form</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Log CRM Follow-up Meeting</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Review QS BOQ Cost Estimates</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Draft Commercial Proposal</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role 18: Marketing Manager -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Marketing Manager</h2>
+                    <span class="tier-badge enterprise">Enterprise Tier Only</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Oversees campaign budget limits, evaluates paid advertising acquisition costs, audits lead qualities, and manages brand assets.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Cost-per-Lead (CPL) and digital campaign ROI indexes.</li>
+                                <li>Monthly ad spends relative to allocated budgets.</li>
+                                <li>Inbound lead quality grades submitted by sales.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Budget Allocator</b>: Distributes marketing budgets by channel.</li>
+                                <li><b>Asset Register</b>: Uploads official logos and marketing brochures.</li>
+                                <li><b>Strategy Updates</b>: Configures target audience parameters.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Audit Campaign ROI Metrics</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Submit Budget Allocation Form</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Register Corporate Brand Assets</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Update Target Audience Strategy</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-line">
+                <span>BuildCon ERP Reference Manual</span>
+                <span>Page 11 of 13</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- ================= PAGE 12: ENTERPRISE TIER - MARKETING TL & EXEC ================= -->
+    <div class="page">
+        <div class="page-header-decor">
+            <span class="page-header-decor-text">Enterprise Tier</span>
+        </div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">BUILDCON <span>ERP</span></div>
+                <div class="logo-sub">Digital Marketing Pipeline</div>
+            </div>
+            
+            <div class="page-title-sec">
+                <h1>Enterprise Plan Roles (Cont.)</h1>
+                <p>Campaign calendars, team workloads assignments, search/social ads, and website SEO metadata.</p>
+            </div>
+
+            <!-- Role 19: Digital Marketing TL -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Digital Marketing TL</h2>
+                    <span class="tier-badge enterprise">Enterprise Tier Only</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Manages content calendars, reviews campaign creatives, and distributes lead generation tasks across marketing team members.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Campaign performance (click-through rates, impressions).</li>
+                                <li>Content drafts submitted by marketing executives.</li>
+                                <li>Team task backlogs and workload capacities.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Campaign Approver</b>: Approves ad drafts to start campaigns.</li>
+                                <li><b>Task Distributor Form</b>: Assigns SEO & ad copy tasks.</li>
+                                <li><b>TL Profile Updates</b>: Edits contact configurations.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Review Campaign Drafts</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Submit Campaign Approval</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Distribute SEO/Ad Assignments</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Track Team Workloads</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role 20: Digital Marketing Executive -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Digital Marketing Executive</h2>
+                    <span class="tier-badge enterprise">Enterprise Tier Only</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">Runs day-to-day marketing operations. Updates website titles and descriptions, registers ad copy, and drafts social content calendar inputs.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Search Engine Optimization (SEO) audit tables and crawlers.</li>
+                                <li>Social media comment threads and user engagement metrics.</li>
+                                <li>Task lists assigned by the marketing TL.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>SEO Metadata Form</b>: Updates page titles & descriptions.</li>
+                                <li><b>Ad Creation Form</b>: Registers ad creatives and drafts copy.</li>
+                                <li><b>Content Calendar Draft</b>: Submits drafts to TL for approval.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node">Audit SEO Crawl Rankings</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node highlight">Submit SEO Metadata Updates</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Draft Paid Ad Copy & Graphics</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Submit Content Draft to TL</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-line">
+                <span>BuildCon ERP Reference Manual</span>
+                <span>Page 12 of 13</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+    <!-- ================= PAGE 13: ENTERPRISE TIER - SUPER ADMIN & AI ================= -->
+    <div class="page">
+        <div class="page-header-decor">
+            <span class="page-header-decor-text">Platform Admin</span>
+        </div>
+        <div class="border-container">
+            <div class="logo-area">
+                <div class="logo-main">BUILDCON <span>ERP</span></div>
+                <div class="logo-sub">Administration & Compliance</div>
+            </div>
+            
+            <div class="page-title-sec">
+                <h1>Platform Management</h1>
+                <p>Multi-tenant configurations, platform telemetry checks, and AI Strategy assistants.</p>
+            </div>
+
+            <!-- Role 21: Super Admin -->
+            <div class="role-section">
+                <div class="role-header">
+                    <h2 class="role-name">Super Admin Portal</h2>
+                    <span class="tier-badge enterprise" style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1;">Platform Admin</span>
+                </div>
+                <div class="role-body">
+                    <div class="role-info">
+                        <p class="role-desc">System-wide platform administrator. Registers client organizations, maps active modules (HR, CRM, AI Engine), and manages database pools.</p>
+                        <div>
+                            <div class="list-title">What They View:</div>
+                            <ul class="role-list">
+                                <li>Organizations registry list, domains, and subscription tiers.</li>
+                                <li>Platform telemetry: DB response times & server health.</li>
+                                <li>AI engine tokens logs and call distributions.</li>
+                            </ul>
+                            <div class="list-title">What They Do/Post:</div>
+                            <ul class="role-list">
+                                <li><b>Tenant Creator Form</b>: Registers new client organizations.</li>
+                                <li><b>Module Toggles</b>: Enables or disables HR/CRM/AI modules.</li>
+                                <li><b>Tier Adjuster Form</b>: Modifies subscription tiers.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flowchart-container">
+                        <div class="flow-node highlight">Submit Tenant Onboarding Form</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Set Subscription Tier context</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Toggle Client Active Modules</div>
+                        <div class="flow-arrow">
+                            <svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 0 v20 M5 15 l5 5 l5-5" fill="none" stroke="#94a3b8" stroke-width="2.5"/></svg>
+                        </div>
+                        <div class="flow-node">Monitor Platform Telemetry Health</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Engine & Compliance Summary -->
+            <div class="role-section" style="background-color: #faf5ff; border: 1px dashed #d8b4fe;">
+                <div class="role-header" style="border-bottom: 1.5px solid #e9d5ff;">
+                    <h2 class="role-name" style="color: #6b21a8;">AI Strategy & Compliance Integration</h2>
+                    <span class="tier-badge enterprise">AI Pipeline</span>
+                </div>
+                <p style="font-size: 10px; line-height: 1.45; color: #581c87; margin: 0 0 2mm 0; text-align: justify;">
+                    BuildCon ERP connects its Spring Boot Rest APIs directly with a dedicated Python FastAPI service running generative AI models. This integrates advanced operational automation including:
+                </p>
+                <ul style="margin: 0; padding-left: 4.5mm; font-size: 9.2px; line-height: 1.4; color: #581c87;">
+                    <li><b>Executive Strategy</b>: Scans raw ledger transactions to forecast cash flows.</li>
+                    <li><b>Expense Audits</b>: Detects vendor invoice variances and checks TDS compliance.</li>
+                    <li><b>Workforce Planner</b>: Optimizes worker scheduling based on Gantt milestones.</li>
+                    <li><b>Project Quality</b>: Analyzes concrete compressive test histories for anomalies.</li>
+                </ul>
+            </div>
+
+            <div class="footer-line">
+                <span>BuildCon ERP Reference Manual</span>
+                <span>Page 13 of 13</span>
+            </div>
+        </div>
+        <div class="page-footer-decor-red"></div>
+        <div class="page-footer-decor-black"></div>
+    </div>
+
+</body>
+</html>

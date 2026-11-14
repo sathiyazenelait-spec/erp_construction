@@ -43,6 +43,10 @@ public class ForgotPasswordController {
     @Autowired private MarketingManagerRepository marketingManagerRepository;
     @Autowired private HRManagerRepository hrManagerRepository;
     @Autowired private AdminUserRepository adminUserRepository;
+    @Autowired private QaQcEngineerRepository qaQcEngineerRepository;
+    @Autowired private StoreManagerRepository storeManagerRepository;
+    @Autowired private CustomerUserRepository customerUserRepository;
+    @Autowired private VendorSupplierRepository vendorSupplierRepository;
 
     private static class FoundUser {
         String username;
@@ -159,6 +163,26 @@ public class ForgotPasswordController {
         if (au.isPresent()) {
             return Optional.of(new FoundUser(au.get().getUsername(), au.get().getEmail(), "ROLE_ADMIN", null));
         }
+        // 21. QA/QC Engineer
+        var qa = qaQcEngineerRepository.findByUsername(query).or(() -> qaQcEngineerRepository.findByEmail(query));
+        if (qa.isPresent()) {
+            return Optional.of(new FoundUser(qa.get().getUsername(), qa.get().getEmail(), "ROLE_QA_QC_ENGINEER", qa.get().getOrganizationId()));
+        }
+        // 22. Store Manager
+        var stm = storeManagerRepository.findByUsername(query).or(() -> storeManagerRepository.findByEmail(query));
+        if (stm.isPresent()) {
+            return Optional.of(new FoundUser(stm.get().getUsername(), stm.get().getEmail(), "ROLE_STORE_MANAGER", stm.get().getOrganizationId()));
+        }
+        // 23. Customer User
+        var cu = customerUserRepository.findByUsername(query).or(() -> customerUserRepository.findByEmail(query));
+        if (cu.isPresent()) {
+            return Optional.of(new FoundUser(cu.get().getUsername(), cu.get().getEmail(), "ROLE_CUSTOMER", cu.get().getOrganizationId()));
+        }
+        // 24. Vendor Supplier
+        var vs = vendorSupplierRepository.findByUsername(query).or(() -> vendorSupplierRepository.findByEmail(query));
+        if (vs.isPresent()) {
+            return Optional.of(new FoundUser(vs.get().getUsername(), vs.get().getEmail(), "ROLE_VENDOR", vs.get().getOrganizationId()));
+        }
 
         return Optional.empty();
     }
@@ -206,6 +230,14 @@ public class ForgotPasswordController {
                 return hrManagerRepository.findByUsername(username).map(u -> { u.setPassword(encoded); hrManagerRepository.save(u); return true; }).orElse(false);
             case "ROLE_ADMIN":
                 return adminUserRepository.findByUsername(username).map(u -> { u.setPassword(encoded); adminUserRepository.save(u); return true; }).orElse(false);
+            case "ROLE_QA_QC_ENGINEER":
+                return qaQcEngineerRepository.findByUsername(username).map(u -> { u.setPassword(encoded); qaQcEngineerRepository.save(u); return true; }).orElse(false);
+            case "ROLE_STORE_MANAGER":
+                return storeManagerRepository.findByUsername(username).map(u -> { u.setPassword(encoded); storeManagerRepository.save(u); return true; }).orElse(false);
+            case "ROLE_CUSTOMER":
+                return customerUserRepository.findByUsername(username).map(u -> { u.setPassword(encoded); customerUserRepository.save(u); return true; }).orElse(false);
+            case "ROLE_VENDOR":
+                return vendorSupplierRepository.findByUsername(username).map(u -> { u.setPassword(encoded); vendorSupplierRepository.save(u); return true; }).orElse(false);
             default:
                 return false;
         }

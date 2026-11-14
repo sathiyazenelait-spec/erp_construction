@@ -21,6 +21,10 @@ const ALL_ROLE_OPTIONS: RoleOption[] = [
   { value: "workforce-manager", label: "Workforce & Labour", group: "Post-Sales Operations" },
   { value: "quantity-surveyor", label: "Quantity Surveyor", group: "Post-Sales Operations" },
   { value: "procurement-manager", label: "Procurement Manager", group: "Post-Sales Operations" },
+  { value: "store-manager", label: "Store Manager", group: "Post-Sales Operations" },
+  { value: "qa-qc-engineer", label: "QA/QC Engineer", group: "Post-Sales Operations" },
+  { value: "vendor-portal", label: "Vendor / Supplier Portal", group: "Post-Sales Operations" },
+  { value: "client-portal", label: "Customer / Client Portal", group: "Sales & Marketing" },
   { value: "finance-accounts", label: "Finance & Accounts", group: "Post-Sales Operations" },
   { value: "digital-marketing-tl", label: "Digital Marketing TL", group: "Sales & Marketing" },
   { value: "digital-marketing-executive", label: "Digital Marketing Executive", group: "Sales & Marketing" },
@@ -63,7 +67,7 @@ export default function CentralizedManagerLogin() {
     }
     if (t === "premium") {
       return ALL_ROLE_OPTIONS.filter(o =>
-        ["project-manager", "construction-manager", "quantity-surveyor", "procurement-manager", "finance-accounts", "hr-manager", "sales-executive", "site-management", "subcontractor"].includes(o.value)
+        ["project-manager", "construction-manager", "quantity-surveyor", "procurement-manager", "store-manager", "qa-qc-engineer", "finance-accounts", "hr-manager", "sales-executive", "site-management", "subcontractor"].includes(o.value)
       );
     }
     return ALL_ROLE_OPTIONS;
