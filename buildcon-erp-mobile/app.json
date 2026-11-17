@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "BuildCon Mobile ERP",
+    "slug": "buildcon-erp-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#080E1A"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.buildcon.erp.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#080E1A"
+      },
+      "package": "com.buildcon.erp.mobile"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow BuildCon ERP to access your camera for site progress photos and barcode scanning."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow BuildCon ERP to verify your GPS location for on-site labor muster."
+        }
+      ]
+    ]
+  }
+}

@@ -659,6 +659,18 @@ export default function Home() {
                   <li>
                     <Link href="/login/manager" className="hover:text-white transition text-slate-400">Teams & Staff Login</Link>
                   </li>
+                  <li>
+                    <Link href="/audit-logs" className="hover:text-amber-400 transition text-slate-400">Audit Trail Ledger</Link>
+                  </li>
+                  <li>
+                    <Link href="/compliance" className="hover:text-cyan-400 transition text-slate-400">Statutory Compliance</Link>
+                  </li>
+                  <li>
+                    <Link href="/meetings" className="hover:text-violet-400 transition text-slate-400">Minutes of Meeting (MoM)</Link>
+                  </li>
+                  <li>
+                    <Link href="/notifications" className="hover:text-emerald-400 transition text-slate-400">WhatsApp & SMS Gateway</Link>
+                  </li>
                 </ul>
               </div>
 

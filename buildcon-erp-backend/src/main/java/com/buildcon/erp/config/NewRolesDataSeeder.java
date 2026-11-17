@@ -2,8 +2,7 @@ package com.buildcon.erp.config;
 
 import com.buildcon.erp.model.*;
 import com.buildcon.erp.repository.*;
-import com.buildcon.erp.service.QaQcEngineerService;
-import com.buildcon.erp.service.StoreManagerService;
+import com.buildcon.erp.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -45,6 +44,18 @@ public class NewRolesDataSeeder implements CommandLineRunner {
 
     @Autowired
     private StoreManagerService storeManagerService;
+
+    @Autowired
+    private AuditLogService auditLogService;
+
+    @Autowired
+    private ComplianceService complianceService;
+
+    @Autowired
+    private MeetingService meetingService;
+
+    @Autowired
+    private NotificationGatewayService notificationGatewayService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -148,6 +159,12 @@ public class NewRolesDataSeeder implements CommandLineRunner {
             clientTicketRepository.save(new ClientTicket("TCK-2026-01", "Dr. Rajesh K.", "Skyline Towers - Unit 402", "Snagging", "Balcony Tile Grouting Minor Void", "Tile joint near rainwater outlet requires epoxy re-grouting before monsoon.", "MEDIUM", "RESOLVED", LocalDate.now().minusDays(5), orgId));
             clientTicketRepository.save(new ClientTicket("TCK-2026-02", "Dr. Rajesh K.", "Skyline Towers - Unit 402", "DLP Warranty", "Master Bedroom Door Lock Catch Alignment", "Mortise lock latch sticks slightly during rainy humidity.", "LOW", "OPEN", LocalDate.now().minusDays(1), orgId));
         }
+
+        // 7. Seed Enterprise Extensions: Audit Logs, Compliance, Meetings, Notifications
+        auditLogService.seedInitialLogs(orgId);
+        complianceService.seedComplianceData(orgId);
+        meetingService.seedMeetingData(orgId);
+        notificationGatewayService.seedNotificationData(orgId);
     }
 }
 
