@@ -58,6 +58,12 @@ public class NewRolesDataSeeder implements CommandLineRunner {
     private NotificationGatewayService notificationGatewayService;
 
     @Autowired
+    private DrawingService drawingService;
+
+    @Autowired
+    private AiPredictionService aiPredictionService;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -165,6 +171,10 @@ public class NewRolesDataSeeder implements CommandLineRunner {
         complianceService.seedComplianceData(orgId);
         meetingService.seedMeetingData(orgId);
         notificationGatewayService.seedNotificationData(orgId);
+
+        // 8. Seed Blueprints, CAD Models & AI Predictive Reports
+        drawingService.seedDrawingData();
+        aiPredictionService.seedPredictionData();
     }
 }
 

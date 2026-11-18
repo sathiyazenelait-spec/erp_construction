@@ -660,6 +660,9 @@ export default function Home() {
                     <Link href="/login/manager" className="hover:text-white transition text-slate-400">Teams & Staff Login</Link>
                   </li>
                   <li>
+                    <Link href="/drawings" className="hover:text-sky-400 transition text-slate-400 font-medium">CAD / BIM Blueprints & AI Vision</Link>
+                  </li>
+                  <li>
                     <Link href="/audit-logs" className="hover:text-amber-400 transition text-slate-400">Audit Trail Ledger</Link>
                   </li>
                   <li>
