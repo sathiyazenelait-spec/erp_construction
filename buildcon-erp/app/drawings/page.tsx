@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { getSession, homeForRole } from "@/lib/auth";
 import {
   Layers, Compass, Eye, CheckCircle2, AlertTriangle, AlertOctagon,
   UploadCloud, Search, Filter, ArrowLeft, RefreshCw, X, ZoomIn,
@@ -448,18 +449,36 @@ export default function DrawingsPage() {
   const openClashesCount = clashes.filter(c => c.resolutionStatus === "OPEN").length;
   const underReviewCount = drawings.filter(d => d.status === "UNDER_REVIEW").length;
 
+  const handleBack = () => {
+    try {
+      const session = getSession();
+      if (session?.role) {
+        router.push(homeForRole(session.role));
+        return;
+      }
+    } catch (e) {
+      console.warn("Session retrieval failed", e);
+    }
+    if (typeof window !== "undefined" && window.history.length > 2) {
+      router.back();
+    } else {
+      router.push("/site-management");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       {/* Top Header */}
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40 px-6 py-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => router.back()}
-            className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 text-xs font-semibold"
-            title="Return to Previous Dashboard"
+            type="button"
+            onClick={handleBack}
+            className="px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg transition flex items-center gap-2 text-xs font-semibold cursor-pointer border border-slate-700 shadow-sm"
+            title="Return to Active Dashboard"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back</span>
+            <ArrowLeft className="w-4 h-4 text-sky-400" />
+            <span>Back to Dashboard</span>
           </button>
           <div>
             <div className="flex items-center gap-2">
