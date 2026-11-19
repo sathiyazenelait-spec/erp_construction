@@ -34,6 +34,18 @@ public class NewRolesDataSeeder implements CommandLineRunner {
     private CustomerUserRepository customerUserRepository;
 
     @Autowired
+    private com.buildcon.erp.repository.ChairmanRepository chairmanRepository;
+
+    @Autowired
+    private com.buildcon.erp.repository.MDRepository mdRepository;
+
+    @Autowired
+    private com.buildcon.erp.repository.SiteManagementRepository siteManagementRepository;
+
+    @Autowired
+    private com.buildcon.erp.repository.ProjectManagerRepository projectManagerRepository;
+
+    @Autowired
     private VendorBidRepository vendorBidRepository;
 
     @Autowired
@@ -107,6 +119,57 @@ public class NewRolesDataSeeder implements CommandLineRunner {
             defaultOrg = organizationRepository.findAll().get(0);
         }
         Long orgId = defaultOrg.getId();
+
+        // Ensure site@buildcon.com has site123 password
+        var siteOpt = siteManagementRepository.findByEmail("site@buildcon.com").or(() -> siteManagementRepository.findByUsername("site"));
+        if (siteOpt.isPresent()) {
+            var sm = siteOpt.get();
+            sm.setPassword(passwordEncoder.encode("site123"));
+            sm.setOrganizationId(orgId);
+            siteManagementRepository.save(sm);
+        } else {
+            var sm = new com.buildcon.erp.model.SiteManagement("site", "site@buildcon.com", passwordEncoder.encode("site123"));
+            sm.setOrganizationId(orgId);
+            siteManagementRepository.save(sm);
+        }
+
+        // Ensure pm@buildcon.com has pm123 password
+        var pmOpt = projectManagerRepository.findByEmail("pm@buildcon.com").or(() -> projectManagerRepository.findByUsername("pm"));
+        if (pmOpt.isPresent()) {
+            var pm = pmOpt.get();
+            pm.setPassword(passwordEncoder.encode("pm123"));
+            pm.setOrganizationId(orgId);
+            projectManagerRepository.save(pm);
+        } else {
+            var pm = new com.buildcon.erp.model.ProjectManager("pm", "pm@buildcon.com", passwordEncoder.encode("pm123"));
+            pm.setOrganizationId(orgId);
+            projectManagerRepository.save(pm);
+        }
+
+        // Ensure chairman has chairman123 password
+        var chOpt = chairmanRepository.findByEmail("chairman@buildcon.com").or(() -> chairmanRepository.findByUsername("chairman"));
+        if (chOpt.isPresent()) {
+            var ch = chOpt.get();
+            ch.setPassword(passwordEncoder.encode("chairman123"));
+            ch.setOrganizationId(orgId);
+            chairmanRepository.save(ch);
+        } else {
+            var ch = new com.buildcon.erp.model.Chairman("chairman", "chairman@buildcon.com", passwordEncoder.encode("chairman123"), orgId);
+            chairmanRepository.save(ch);
+        }
+
+        // Ensure md has md123 password
+        var mdOpt = mdRepository.findByEmail("md@buildcon.com").or(() -> mdRepository.findByUsername("mdbuildcon"));
+        if (mdOpt.isPresent()) {
+            var m = mdOpt.get();
+            m.setPassword(passwordEncoder.encode("md123"));
+            m.setOrganizationId(orgId);
+            mdRepository.save(m);
+        } else {
+            var m = new com.buildcon.erp.model.MD("mdbuildcon", "md@buildcon.com", passwordEncoder.encode("md123"));
+            m.setOrganizationId(orgId);
+            mdRepository.save(m);
+        }
 
         // 3. Seed QA/QC Engineer User
         if (qaQcEngineerRepository.findByOrganizationId(orgId).isEmpty()) {

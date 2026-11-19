@@ -8,13 +8,22 @@ const KEY = "buildcon_session";
 
 export async function login(email: string, password: string, allowedRoles: Role[]): Promise<Session | null> {
   try {
-    const res = await fetch("https://erp-construction.onrender.com/api/auth/signin", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: email, password }) // Username holds the identifier
-    });
+    let res: Response | null = null;
+    try {
+      res = await fetch("http://localhost:8081/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: email, password })
+      });
+    } catch {
+      res = await fetch("https://erp-construction.onrender.com/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: email, password })
+      });
+    }
     
-    if (res.ok) {
+    if (res && res.ok) {
       const data = await res.json();
       // Map returned roles (e.g. ROLE_CHAIRMAN) back to local role types
       let matchedRole: Role | null = null;

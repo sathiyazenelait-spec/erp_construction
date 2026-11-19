@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = "Continue"
+$ErrorActionPreference = "Continue"
 
 Write-Host "=======================================================================" -ForegroundColor Cyan
 Write-Host "       BUILDCON ERP: COMPREHENSIVE END-TO-END WORKFLOW TEST SUITE      " -ForegroundColor Cyan
