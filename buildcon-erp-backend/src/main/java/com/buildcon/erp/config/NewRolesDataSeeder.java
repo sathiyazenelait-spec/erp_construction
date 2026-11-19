@@ -46,6 +46,9 @@ public class NewRolesDataSeeder implements CommandLineRunner {
     private com.buildcon.erp.repository.ProjectManagerRepository projectManagerRepository;
 
     @Autowired
+    private com.buildcon.erp.repository.SeniorSiteEngineerRepository seniorSiteEngineerRepository;
+
+    @Autowired
     private VendorBidRepository vendorBidRepository;
 
     @Autowired
@@ -169,6 +172,19 @@ public class NewRolesDataSeeder implements CommandLineRunner {
             var m = new com.buildcon.erp.model.MD("mdbuildcon", "md@buildcon.com", passwordEncoder.encode("md123"));
             m.setOrganizationId(orgId);
             mdRepository.save(m);
+        }
+
+        // Ensure senior-eng@buildcon.com has eng123 password
+        var sseOpt = seniorSiteEngineerRepository.findByEmail("senior-eng@buildcon.com").or(() -> seniorSiteEngineerRepository.findByUsername("senior-eng"));
+        if (sseOpt.isPresent()) {
+            var sse = sseOpt.get();
+            sse.setPassword(passwordEncoder.encode("eng123"));
+            sse.setOrganizationId(orgId);
+            seniorSiteEngineerRepository.save(sse);
+        } else {
+            var sse = new com.buildcon.erp.model.SeniorSiteEngineer("senior-eng", "senior-eng@buildcon.com", passwordEncoder.encode("eng123"));
+            sse.setOrganizationId(orgId);
+            seniorSiteEngineerRepository.save(sse);
         }
 
         // 3. Seed QA/QC Engineer User

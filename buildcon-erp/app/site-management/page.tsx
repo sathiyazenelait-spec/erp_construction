@@ -5,7 +5,7 @@ import { logout } from "@/lib/auth";
 import {
   LayoutDashboard, ClipboardList, ShieldCheck, Thermometer, Construction,
   Bot, Settings, LogOut, Building2, Calendar, Filter, Plus, SendHorizontal, Check,
-  Sparkles, UploadCloud, MapPin
+  Sparkles, UploadCloud, MapPin, Layers
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend
@@ -300,6 +300,7 @@ export default function SiteManagementDashboard() {
 
   const sidebarItems = [
     { name: "Daily Logs", icon: <LayoutDashboard className="h-4 w-4" /> },
+    { name: "Drawings & Blueprints", icon: <Layers className="h-4 w-4 text-cyan-400" />, href: "/drawings" },
     { name: "Safety Audits", icon: <ShieldCheck className="h-4 w-4" /> },
     { name: "Productivity Index", icon: <Construction className="h-4 w-4" /> },
     { name: "On-site Materials Request", icon: <ClipboardList className="h-4 w-4" /> },
@@ -1007,6 +1008,10 @@ export default function SiteManagementDashboard() {
               <button
                 key={item.name}
                 onClick={() => {
+                  if (item.href) {
+                    router.push(item.href);
+                    return;
+                  }
                   setActiveTab(item.name);
                   if (item.name === "Productivity Index" && selectedProjectId) {
                     fetchProductivity(selectedProjectId);
