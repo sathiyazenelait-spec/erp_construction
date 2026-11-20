@@ -76,8 +76,30 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project approveProject(Long id) {
+        return approveProject(id, null);
+    }
+
+    @Override
+    public Project approveProject(Long id, String remarks) {
         Project project = getProjectById(id);
         project.setStatus("Active");
+        if (remarks != null && !remarks.isBlank()) {
+            project.setChairmanRemarks(remarks);
+        }
+        project.setApprovedBy("Chairman");
+        project.setApprovalDate(java.time.LocalDate.now());
+        return repository.save(project);
+    }
+
+    @Override
+    public Project rejectProject(Long id, String remarks) {
+        Project project = getProjectById(id);
+        project.setStatus("Rejected");
+        if (remarks != null && !remarks.isBlank()) {
+            project.setChairmanRemarks(remarks);
+        }
+        project.setApprovedBy("Chairman");
+        project.setApprovalDate(java.time.LocalDate.now());
         return repository.save(project);
     }
 }

@@ -11,4 +11,6 @@ public interface ProjectService {
     void deleteProject(Long id);
     Project updateProject(Long id, Project projectDetails);
     Project approveProject(Long id);
+    Project approveProject(Long id, String remarks);
+    Project rejectProject(Long id, String remarks);
 }

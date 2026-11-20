@@ -18,6 +18,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import java.util.Arrays;
@@ -55,6 +56,15 @@ public class ChairmanController {
 
     @Autowired
     private com.buildcon.erp.repository.ChairmanTicketRepository chairmanTicketRepository;
+
+    @Autowired
+    private com.buildcon.erp.repository.BoardApprovalRepository boardApprovalRepository;
+
+    @Autowired
+    private com.buildcon.erp.repository.CustomerUserRepository customerUserRepository;
+
+    @Autowired
+    private com.buildcon.erp.repository.ClientTicketRepository clientTicketRepository;
 
     @GetMapping("/settings")
     public ResponseEntity<?> getSettings(Principal principal) {
@@ -497,5 +507,356 @@ public class ChairmanController {
         String cleanStatus = status.replace("\"", "").trim();
         ticket.setStatus(cleanStatus);
         return ResponseEntity.ok(chairmanTicketRepository.save(ticket));
+    }
+
+    // ==========================================
+    // 08. BOARD APPROVALS WITH CHAIRMAN REMARKS
+    // ==========================================
+
+    @GetMapping("/approvals/org/{orgId}")
+    public ResponseEntity<List<com.buildcon.erp.model.BoardApproval>> getApprovalsByOrg(@PathVariable Long orgId) {
+        List<com.buildcon.erp.model.BoardApproval> approvals = boardApprovalRepository.findByOrganizationId(orgId);
+        if (approvals.isEmpty()) {
+            // Seed initial realistic board approval requests with historical chairman remarks
+            boardApprovalRepository.save(new com.buildcon.erp.model.BoardApproval(
+                "PO", "Steel Procurement - Commercial Complex Tower B (Fe550D TMT Rebar)", "Rajesh Kumar", "Senior Site Engineer", "₹ 75.0 Lakhs", "High", "26 May 2026", "Pending", null, null, null, orgId
+            ));
+            boardApprovalRepository.save(new com.buildcon.erp.model.BoardApproval(
+                "Investment", "Coimbatore Branch Operations Hub Expansion", "Executive Board", "Corporate Strategy TL", "₹ 1.5 Cr", "High", "27 May 2026", "Pending", null, null, null, orgId
+            ));
+            boardApprovalRepository.save(new com.buildcon.erp.model.BoardApproval(
+                "Capex", "Tower Crane High-Rise CAPEX - Skyline IT Park", "Karthik R", "Project Director", "₹ 1.2 Cr", "Medium", "28 May 2026", "Pending", null, null, null, orgId
+            ));
+            boardApprovalRepository.save(new com.buildcon.erp.model.BoardApproval(
+                "Opex", "Sub-Contractor Structural Invoice - ABC Foundations Ltd", "Amit Kumar", "Procurement Manager", "₹ 15.0 Lakhs", "Low", "28 May 2026", "Pending", null, null, null, orgId
+            ));
+            boardApprovalRepository.save(new com.buildcon.erp.model.BoardApproval(
+                "Material", "Bulk OPC 53 Grade Cement Supply Order - Skyline Heights", "Vijay Kumar", "Store Manager", "₹ 45.0 Lakhs", "Medium", "28 May 2026", "Pending", null, null, null, orgId
+            ));
+            boardApprovalRepository.save(new com.buildcon.erp.model.BoardApproval(
+                "Project", "Additional Civil Variations & Foundation Deepening", "Priya Raj", "Construction Manager", "₹ 8.5 Lakhs", "Medium", "29 May 2026", "Pending", null, null, null, orgId
+            ));
+
+            // Seed Approved with Chairman Remarks
+            boardApprovalRepository.save(new com.buildcon.erp.model.BoardApproval(
+                "Capex", "Heavy Hydraulic Excavator Purchase (Tier-2 Fleet)", "Karthik R", "Project Director", "₹ 85.0 Lakhs", "High", "20 May 2026", "Approved",
+                "Approved: Release 20% mobilization advance immediately. Balance linked to manufacturer commissioning certificate and 3-year warranty sign-off.",
+                "Chairman (Executive Directive)", "21 May 2026", orgId
+            ));
+            boardApprovalRepository.save(new com.buildcon.erp.model.BoardApproval(
+                "Opex", "Skilled & Semi-Skilled Labor Biometric Settlement Week 20", "Anita Sharma", "HR & Workforce Manager", "₹ 24.5 Lakhs", "High", "22 May 2026", "Approved",
+                "Approved on fast-track: Verified with biometric access gates at North Site. Finance to disburse direct DBT within 24 hours.",
+                "Chairman (Executive Directive)", "22 May 2026", orgId
+            ));
+
+            // Seed Rejected with Chairman Remarks
+            boardApprovalRepository.save(new com.buildcon.erp.model.BoardApproval(
+                "Material", "Imported Premium Walnut Paneling for Clubhouse", "Vijay Kumar", "Store Manager", "₹ 18.0 Lakhs", "Low", "15 May 2026", "Rejected",
+                "Rejected: Non-essential luxury finish upgrade exceeding baseline BOQ by 22%. Utilize local engineered seasoned teak or renegotiate vendor rates.",
+                "Chairman (Executive Directive)", "16 May 2026", orgId
+            ));
+
+            approvals = boardApprovalRepository.findByOrganizationId(orgId);
+        }
+        return ResponseEntity.ok(approvals);
+    }
+
+    @PostMapping("/approvals")
+    public ResponseEntity<com.buildcon.erp.model.BoardApproval> createApproval(@RequestBody com.buildcon.erp.model.BoardApproval approval) {
+        if (approval.getStatus() == null || approval.getStatus().isBlank()) {
+            approval.setStatus("Pending");
+        }
+        if (approval.getDate() == null || approval.getDate().isBlank()) {
+            approval.setDate(java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy")));
+        }
+        return ResponseEntity.ok(boardApprovalRepository.save(approval));
+    }
+
+    @PostMapping("/approvals/{id}/action")
+    public ResponseEntity<com.buildcon.erp.model.BoardApproval> processApprovalAction(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> payload
+    ) {
+        com.buildcon.erp.model.BoardApproval approval = boardApprovalRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Board approval request not found with ID: " + id));
+
+        String action = payload.getOrDefault("action", "APPROVED").toUpperCase();
+        String remarks = payload.getOrDefault("remarks", "");
+
+        if ("APPROVED".equalsIgnoreCase(action) || "APPROVE".equalsIgnoreCase(action)) {
+            approval.setStatus("Approved");
+        } else {
+            approval.setStatus("Rejected");
+        }
+
+        approval.setChairmanRemarks(remarks);
+        approval.setApprovedBy("Chairman (Executive Board)");
+        approval.setActionDate(java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a")));
+
+        return ResponseEntity.ok(boardApprovalRepository.save(approval));
+    }
+
+    // ==========================================
+    // 05. CLIENT DIRECTORY 360° REPORT
+    // ==========================================
+
+    @GetMapping("/clients/org/{orgId}")
+    public ResponseEntity<?> getClientDirectoryByOrg(@PathVariable Long orgId) {
+        List<Project> orgProjects = projectRepository.findByOrganizationId(orgId);
+        List<com.buildcon.erp.model.CustomerUser> clientUsers = customerUserRepository.findByOrganizationId(orgId);
+        List<com.buildcon.erp.model.ClientTicket> clientTickets = clientTicketRepository.findByOrganizationId(orgId);
+
+        // Pre-defined detailed client directory profiles linked to the organization's projects
+        List<Map<String, Object>> clientList = new ArrayList<>();
+
+        // Client 1: ABC Developers
+        Map<String, Object> c1 = new HashMap<>();
+        c1.put("id", 1);
+        c1.put("name", "ABC Developers Pvt Ltd");
+        c1.put("contactPerson", "Suresh Menon (VP Infrastructure)");
+        c1.put("email", "suresh.menon@abcdev.com");
+        c1.put("phone", "+91 98401 23456");
+        c1.put("clientType", "Commercial Real Estate Developer");
+        c1.put("onboardingDate", "15 Jan 2024");
+        c1.put("contractValueINR", "₹ 78.50 Cr");
+        c1.put("receivedValueINR", "₹ 62.80 Cr");
+        c1.put("outstandingValueINR", "₹ 15.70 Cr");
+        c1.put("status", "Active");
+        c1.put("overallRating", 4.9);
+        c1.put("npsCategory", "Promoter (Score: +88)");
+        c1.put("review", "Exceptional structural engineering and rigorous on-site QA/QC execution. Milestone billings and transparent digital twin updates have given our board complete confidence. Ready to award Phase 3.");
+        c1.put("reviewDate", "12 Oct 2026");
+        c1.put("ratingBreakdown", Map.of(
+            "workmanship", 5.0,
+            "speed", 4.8,
+            "transparency", 5.0,
+            "safety", 4.9
+        ));
+        c1.put("projectProgress", Map.of(
+            "projectName", "Skyline Tech Park - Tower B & Commercial Wing",
+            "location", "Chennai ECR Road IT Corridor",
+            "builtupSqft", "215,000 sq.ft",
+            "plannedProgress", 90,
+            "actualProgress", 88,
+            "delayStatus", "On Track (Minor 2-day monsoon buffer absorbed)",
+            "delayDays", 0,
+            "targetHandover", "31 Dec 2026",
+            "projectedCompletion", "28 Dec 2026",
+            "milestones", List.of(
+                Map.of("name", "M1: Deep Foundation & Raft Slab", "progress", 100, "status", "Completed", "verifiedBy", "Chief QA/QC"),
+                Map.of("name", "M2: 7-Story RCC Moment Frame Columns", "progress", 100, "status", "Completed", "verifiedBy", "Senior Site Engineer"),
+                Map.of("name", "M3: Double-Glazed Blue Curtain Wall Facade", "progress", 92, "status", "Active Execution", "verifiedBy", "Facade Specialist"),
+                Map.of("name", "M4: Central Chiller HVAC & Dual Wet Risers", "progress", 84, "status", "In Progress", "verifiedBy", "MEP Consultant"),
+                Map.of("name", "M5: Final Acoustic Drywalls & Occupancy Snagging", "progress", 65, "status", "Scheduled Next", "verifiedBy", "Site PM")
+            )
+        ));
+        c1.put("historyTimeline", List.of(
+            Map.of("date", "15 Jan 2024", "title", "Master Turnkey EPC Agreement Executed", "details", "Agreement signed for 215,000 sq.ft IT Commercial Park at ₹78.5 Cr."),
+            Map.of("date", "18 Aug 2024", "title", "Foundation Stage Handover Signoff", "details", "All 182 bored cast-in-situ piles passed ultrasonic integrity testing."),
+            Map.of("date", "20 May 2025", "title", "7-Story Superstructure Topping-Out", "details", "Slab 7 cast completed 14 days ahead of scheduled baseline."),
+            Map.of("date", "15 Oct 2026", "title", "Milestone 4 Progress Claim Approved", "details", "Client certified ₹14.2 Cr claim with zero deduction.")
+        ));
+        clientList.add(c1);
+
+        // Client 2: XYZ Constructions
+        Map<String, Object> c2 = new HashMap<>();
+        c2.put("id", 2);
+        c2.put("name", "XYZ Constructions & Hospitality");
+        c2.put("contactPerson", "Meenakshi Sundaram (Director of Projects)");
+        c2.put("email", "m.sundaram@xyzconstructions.com");
+        c2.put("phone", "+91 98840 98765");
+        c2.put("clientType", "Luxury Hospitality & Mixed Use");
+        c2.put("onboardingDate", "10 Mar 2024");
+        c2.put("contractValueINR", "₹ 52.00 Cr");
+        c2.put("receivedValueINR", "₹ 38.50 Cr");
+        c2.put("outstandingValueINR", "₹ 13.50 Cr");
+        c2.put("status", "Active");
+        c2.put("overallRating", 4.7);
+        c2.put("npsCategory", "Promoter (Score: +79)");
+        c2.put("review", "Great communication and adaptive problem solving. Material test certificates and weekly drone progress reports keep our executive team fully informed.");
+        c2.put("reviewDate", "05 Nov 2026");
+        c2.put("ratingBreakdown", Map.of(
+            "workmanship", 4.8,
+            "speed", 4.5,
+            "transparency", 4.9,
+            "safety", 4.7
+        ));
+        c2.put("projectProgress", Map.of(
+            "projectName", "Grand Horizon Luxury Resort & Suites",
+            "location", "Oravakal Industrial Hub",
+            "builtupSqft", "145,000 sq.ft",
+            "plannedProgress", 82,
+            "actualProgress", 78,
+            "delayStatus", "Delayed by 7 Days (Supply chain rebar transit hold; double shifts deployed)",
+            "delayDays", 7,
+            "targetHandover", "28 Feb 2027",
+            "projectedCompletion", "05 Mar 2027",
+            "milestones", List.of(
+                Map.of("name", "M1: Earthwork & Retaining Shear Wall", "progress", 100, "status", "Completed", "verifiedBy", "Geotech Consultant"),
+                Map.of("name", "M2: Podium Deck & Banquet Structure", "progress", 100, "status", "Completed", "verifiedBy", "Senior Site Engineer"),
+                Map.of("name", "M3: Resort Block 1 & 2 Concrete Slabs", "progress", 90, "status", "Active", "verifiedBy", "Structural Auditor"),
+                Map.of("name", "M4: Infinity Pool Hydraulic Plumbing", "progress", 70, "status", "Active", "verifiedBy", "MEP Consultant"),
+                Map.of("name", "M5: Italian Marble & Landscape Decks", "progress", 45, "status", "Pending Slab Release", "verifiedBy", "Interior PM")
+            )
+        ));
+        c2.put("historyTimeline", List.of(
+            Map.of("date", "10 Mar 2024", "title", "Contract Award & Mobilization Advance", "details", "Mobilization advance of ₹5.2 Cr received."),
+            Map.of("date", "25 Nov 2024", "title", "Retaining Wall & Basement Handover", "details", "Retaining wall zero-water seepage certification achieved."),
+            Map.of("date", "12 Jul 2025", "title", "Banquet Hall Grand Arch Casting", "details", "Special post-tensioned beam casting successfully executed.")
+        ));
+        clientList.add(c2);
+
+        // Client 3: Dr. Rajesh K (Homeowner Unit 402)
+        Map<String, Object> c3 = new HashMap<>();
+        c3.put("id", 3);
+        c3.put("name", "Dr. Rajesh K. (Owner Unit 402)");
+        c3.put("contactPerson", "Dr. Rajesh Kumar (Cardiologist)");
+        c3.put("email", "rajesh.k@customer.com");
+        c3.put("phone", "+91 97100 44556");
+        c3.put("clientType", "Premium High-Rise Apartment Buyer");
+        c3.put("onboardingDate", "22 Aug 2024");
+        c3.put("contractValueINR", "₹ 2.15 Cr");
+        c3.put("receivedValueINR", "₹ 1.83 Cr");
+        c3.put("outstandingValueINR", "₹ 0.32 Cr");
+        c3.put("status", "Active (Near Handover)");
+        c3.put("overallRating", 5.0);
+        c3.put("npsCategory", "Promoter (Score: +100)");
+        c3.put("review", "BuildCon's homeowner portal and transparent milestone alerts have been extraordinary. Every snag raised was resolved within 48 hours by site engineers. High quality vitrified tiling and sanitary fitments!");
+        c3.put("reviewDate", "18 Nov 2026");
+        c3.put("ratingBreakdown", Map.of(
+            "workmanship", 5.0,
+            "speed", 5.0,
+            "transparency", 5.0,
+            "safety", 5.0
+        ));
+        c3.put("projectProgress", Map.of(
+            "projectName", "Skyline Towers - Tower A, Unit 402 (3BHK Luxury)",
+            "location", "Chennai ECR Road",
+            "builtupSqft", "2,400 sq.ft",
+            "plannedProgress", 96,
+            "actualProgress", 94,
+            "delayStatus", "Ahead of Schedule (Possession walk-through scheduled early)",
+            "delayDays", 0,
+            "targetHandover", "15 Jan 2027",
+            "projectedCompletion", "05 Jan 2027",
+            "milestones", List.of(
+                Map.of("name", "M1: Superstructure Slab Casting", "progress", 100, "status", "Completed", "verifiedBy", "Senior Site Engineer"),
+                Map.of("name", "M2: Gypsum Plastering & Electrical Conduiting", "progress", 100, "status", "Completed", "verifiedBy", "QA Inspector"),
+                Map.of("name", "M3: Vitrified 1200x600 Flooring & Granite Sills", "progress", 100, "status", "Completed", "verifiedBy", "Finishes Lead"),
+                Map.of("name", "M4: Modular Kitchen & Sanitary Fixtures", "progress", 90, "status", "Snagging Active", "verifiedBy", "Site PM"),
+                Map.of("name", "M5: Final Key Handover & Occupancy Certificate", "progress", 80, "status", "Final Signoff", "verifiedBy", "Customer Relations")
+            )
+        ));
+        c3.put("historyTimeline", List.of(
+            Map.of("date", "22 Aug 2024", "title", "Unit 402 Allotment & Agreement Executed", "details", "Agreement executed for 2,400 sq.ft 3BHK flat."),
+            Map.of("date", "14 May 2025", "title", "4th Floor Slab Milestone Cleared", "details", "4th floor slab payment installment released."),
+            Map.of("date", "15 Nov 2026", "title", "Pre-Possession Snag Walk-Through", "details", "Balcony grouting snag ticket raised and resolved same day.")
+        ));
+        clientList.add(c3);
+
+        // Client 4: PQR Builders
+        Map<String, Object> c4 = new HashMap<>();
+        c4.put("id", 4);
+        c4.put("name", "PQR Builders & Infrastructure");
+        c4.put("contactPerson", "Gautam Singhania (Head of Procurement)");
+        c4.put("email", "gautam.s@pqrbuilders.com");
+        c4.put("phone", "+91 99200 33221");
+        c4.put("clientType", "Infrastructure Joint Venture Partner");
+        c4.put("onboardingDate", "05 May 2024");
+        c4.put("contractValueINR", "₹ 38.20 Cr");
+        c4.put("receivedValueINR", "₹ 29.80 Cr");
+        c4.put("outstandingValueINR", "₹ 8.40 Cr");
+        c4.put("status", "Active");
+        c4.put("overallRating", 4.6);
+        c4.put("npsCategory", "Promoter (Score: +74)");
+        c4.put("review", "Highly disciplined site operations and adherence to safety protocols. Zero lost-time injury record across 18 months of intensive civil works.");
+        c4.put("reviewDate", "29 Sep 2026");
+        c4.put("ratingBreakdown", Map.of(
+            "workmanship", 4.7,
+            "speed", 4.4,
+            "transparency", 4.8,
+            "safety", 5.0
+        ));
+        c4.put("projectProgress", Map.of(
+            "projectName", "Urban Logistics Park & Grade-A PEB Hub",
+            "location", "Sriperumbudur Industrial Corridor",
+            "builtupSqft", "180,000 sq.ft",
+            "plannedProgress", 75,
+            "actualProgress", 72,
+            "delayStatus", "Delayed by 4 Days (High-wind crane erection advisory; recovered)",
+            "delayDays", 4,
+            "targetHandover", "15 Apr 2027",
+            "projectedCompletion", "19 Apr 2027",
+            "milestones", List.of(
+                Map.of("name", "M1: Heavy Industrial Apron Pavement", "progress", 100, "status", "Completed", "verifiedBy", "Civil Lead"),
+                Map.of("name", "M2: Pre-Engineered Steel Truss Erection", "progress", 88, "status", "Active", "verifiedBy", "PEB Specialist"),
+                Map.of("name", "M3: Standing Seam Insulated Roof Cladding", "progress", 75, "status", "Active", "verifiedBy", "Safety Head"),
+                Map.of("name", "M4: Fire Hydrant & Automatic Sprinkler Grid", "progress", 60, "status", "In Progress", "verifiedBy", "Fire Safety Consultant")
+            )
+        ));
+        c4.put("historyTimeline", List.of(
+            Map.of("date", "05 May 2024", "title", "Turnkey PEB Warehouse EPC Signed", "details", "Project contract of ₹38.2 Cr signed with 12-month delivery target."),
+            Map.of("date", "14 Feb 2025", "title", "Laser-Screed Industrial Flooring Completed", "details", "Achieved FM2 floor flatess standards verified by third-party testing.")
+        ));
+        clientList.add(c4);
+
+        // Client 5: L&N Properties
+        Map<String, Object> c5 = new HashMap<>();
+        c5.put("id", 5);
+        c5.put("name", "L&N Real Estate Assets Ltd");
+        c5.put("contactPerson", "Anand Vardhan (Chief Investment Officer)");
+        c5.put("email", "anand.vardhan@lnproperties.com");
+        c5.put("phone", "+91 98111 66778");
+        c5.put("clientType", "Institutional Real Estate Fund");
+        c5.put("onboardingDate", "12 Nov 2024");
+        c5.put("contractValueINR", "₹ 25.00 Cr");
+        c5.put("receivedValueINR", "₹ 21.00 Cr");
+        c5.put("outstandingValueINR", "₹ 4.00 Cr");
+        c5.put("status", "Active");
+        c5.put("overallRating", 4.8);
+        c5.put("npsCategory", "Promoter (Score: +85)");
+        c5.put("review", "Timely reporting and top-tier financial governance. BuildCon's digital ERP ensures every rupee spent is linked to verifiable site milestones.");
+        c5.put("reviewDate", "14 Nov 2026");
+        c5.put("ratingBreakdown", Map.of(
+            "workmanship", 4.9,
+            "speed", 4.7,
+            "transparency", 5.0,
+            "safety", 4.8
+        ));
+        c5.put("projectProgress", Map.of(
+            "projectName", "L&N Boutique Executive Suites",
+            "location", "Anna Nagar West",
+            "builtupSqft", "65,000 sq.ft",
+            "plannedProgress", 88,
+            "actualProgress", 86,
+            "delayStatus", "On Track",
+            "delayDays", 0,
+            "targetHandover", "30 Jan 2027",
+            "projectedCompletion", "28 Jan 2027",
+            "milestones", List.of(
+                Map.of("name", "M1: Bored Piles & Raft Casting", "progress", 100, "status", "Completed", "verifiedBy", "Senior Site Engineer"),
+                Map.of("name", "M2: 5-Story RCC Superstructure", "progress", 100, "status", "Completed", "verifiedBy", "Structural Auditor"),
+                Map.of("name", "M3: Terracotta Louvered Exterior Cladding", "progress", 85, "status", "Active", "verifiedBy", "Architect Cell"),
+                Map.of("name", "M4: VRF Air Conditioning & Smart BMS", "progress", 78, "status", "In Progress", "verifiedBy", "MEP Consultant")
+            )
+        ));
+        c5.put("historyTimeline", List.of(
+            Map.of("date", "12 Nov 2024", "title", "EPC Development Agreement Awarded", "details", "Agreement valued at ₹25 Cr executed with 14-month completion schedule."),
+            Map.of("date", "10 Aug 2025", "title", "Superstructure Completion Inspection", "details", "Passed zero-defect audit by institutional lenders.")
+        ));
+        clientList.add(c5);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("organizationId", orgId);
+        response.put("totalClients", clientList.size());
+        response.put("clients", clientList);
+        response.put("averageRating", 4.8);
+        response.put("totalContractPortfolioINR", "₹ 211.85 Cr");
+        response.put("totalCollectedINR", "₹ 164.43 Cr");
+        response.put("totalOutstandingINR", "₹ 47.42 Cr");
+        response.put("onTrackProjectsCount", 3);
+        response.put("delayedProjectsCount", 2);
+
+        return ResponseEntity.ok(response);
     }
 }

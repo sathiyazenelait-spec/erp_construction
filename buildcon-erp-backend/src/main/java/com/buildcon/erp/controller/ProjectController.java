@@ -55,8 +55,15 @@ public class ProjectController {
     }
 
     @PostMapping("/{id}/approve")
-    public ResponseEntity<Project> approveProject(@PathVariable Long id) {
-        return ResponseEntity.ok(service.approveProject(id));
+    public ResponseEntity<Project> approveProject(@PathVariable Long id, @RequestBody(required = false) java.util.Map<String, String> payload) {
+        String remarks = payload != null ? payload.get("remarks") : null;
+        return ResponseEntity.ok(service.approveProject(id, remarks));
+    }
+
+    @PostMapping("/{id}/reject")
+    public ResponseEntity<Project> rejectProject(@PathVariable Long id, @RequestBody(required = false) java.util.Map<String, String> payload) {
+        String remarks = payload != null ? payload.get("remarks") : null;
+        return ResponseEntity.ok(service.rejectProject(id, remarks));
     }
 
     @GetMapping("/assigned-site")

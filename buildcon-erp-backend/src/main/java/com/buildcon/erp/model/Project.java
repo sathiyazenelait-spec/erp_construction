@@ -76,6 +76,27 @@ public class Project {
     @Column(name = "actual_progress")
     private Integer actualProgress = 0;
 
+    @Column(name = "chairman_remarks", length = 1500)
+    private String chairmanRemarks;
+
+    @Column(name = "approved_by", length = 100)
+    private String approvedBy;
+
+    @Column(name = "approval_date")
+    private LocalDate approvalDate;
+
+    @Column(name = "client_name", length = 150)
+    private String clientName;
+
+    @Column(name = "client_email", length = 150)
+    private String clientEmail;
+
+    @Column(name = "client_satisfaction_rating")
+    private Double clientSatisfactionRating;
+
+    @Column(name = "client_review", length = 1500)
+    private String clientReview;
+
     public Project() {
     }
 
@@ -278,5 +299,61 @@ public class Project {
 
     public void setActualProgress(Integer actualProgress) {
         this.actualProgress = actualProgress;
+    }
+
+    public String getChairmanRemarks() {
+        return chairmanRemarks;
+    }
+
+    public void setChairmanRemarks(String chairmanRemarks) {
+        this.chairmanRemarks = chairmanRemarks;
+    }
+
+    public String getApprovedBy() {
+        return approvedBy;
+    }
+
+    public void setApprovedBy(String approvedBy) {
+        this.approvedBy = approvedBy;
+    }
+
+    public LocalDate getApprovalDate() {
+        return approvalDate;
+    }
+
+    public void setApprovalDate(LocalDate approvalDate) {
+        this.approvalDate = approvalDate;
+    }
+
+    public String getClientName() {
+        return clientName;
+    }
+
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
+    }
+
+    public String getClientEmail() {
+        return clientEmail;
+    }
+
+    public void setClientEmail(String clientEmail) {
+        this.clientEmail = clientEmail;
+    }
+
+    public Double getClientSatisfactionRating() {
+        return clientSatisfactionRating;
+    }
+
+    public void setClientSatisfactionRating(Double clientSatisfactionRating) {
+        this.clientSatisfactionRating = clientSatisfactionRating;
+    }
+
+    public String getClientReview() {
+        return clientReview;
+    }
+
+    public void setClientReview(String clientReview) {
+        this.clientReview = clientReview;
     }
 }
