@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getSession, homeForRole } from "@/lib/auth";
+import AiBlueprintStudio from "@/components/AiBlueprintStudio";
 import {
   Layers, Compass, Eye, CheckCircle2, AlertTriangle, AlertOctagon,
   UploadCloud, Search, Filter, ArrowLeft, RefreshCw, X, ZoomIn,
@@ -232,7 +233,7 @@ export default function DrawingsPage() {
   const [drawings, setDrawings] = useState<DrawingRecord[]>(DEFAULT_DRAWINGS);
   const [clashes, setClashes] = useState<DrawingClashRecord[]>(DEFAULT_CLASHES);
   const [prediction, setPrediction] = useState<AiPredictionReport | null>(null);
-  const [activeTab, setActiveTab] = useState<"DRAWINGS" | "CLASHES" | "PREDICTIONS" | "DIFF_TOOL">("DRAWINGS");
+  const [activeTab, setActiveTab] = useState<"DRAWINGS" | "STUDIO" | "CLASHES" | "PREDICTIONS" | "DIFF_TOOL">("DRAWINGS");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
   const [searchTerm, setSearchTerm] = useState("");
@@ -588,6 +589,18 @@ export default function DrawingsPage() {
               All Drawings ({drawings.length})
             </button>
             <button
+              onClick={() => setActiveTab("STUDIO")}
+              className={`px-4 py-2 text-xs font-semibold rounded-lg flex items-center gap-2 transition ${
+                activeTab === "STUDIO"
+                  ? "bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 text-slate-950 font-bold shadow-lg shadow-cyan-500/25"
+                  : "bg-slate-900 text-cyan-400 border border-cyan-500/30 hover:text-white hover:bg-slate-800"
+              }`}
+            >
+              <Compass className="w-3.5 h-3.5 text-cyan-300 animate-pulse" />
+              <span>AI Blueprint Studio (Realistic CAD)</span>
+              <span className="text-[10px] bg-cyan-400/20 text-cyan-300 px-1.5 py-0.2 rounded font-mono">NEW</span>
+            </button>
+            <button
               onClick={() => setActiveTab("CLASHES")}
               className={`px-4 py-2 text-xs font-semibold rounded-lg flex items-center gap-2 transition ${
                 activeTab === "CLASHES"
@@ -806,7 +819,18 @@ export default function DrawingsPage() {
           </div>
         )}
 
-        {/* TAB 2: ACTIVE CLASHES */}
+        {/* TAB 2: AI BLUEPRINT STUDIO (REALISTIC CAD ENGINE) */}
+        {activeTab === "STUDIO" && (
+          <AiBlueprintStudio
+            orgId={orgId}
+            onSaveDrawing={(savedDwg) => {
+              setDrawings([savedDwg, ...drawings]);
+              setActiveTab("DRAWINGS");
+            }}
+          />
+        )}
+
+        {/* TAB 3: ACTIVE CLASHES */}
         {activeTab === "CLASHES" && (
           <div className="space-y-4">
             <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
@@ -1222,30 +1246,80 @@ export default function DrawingsPage() {
           <div className="flex-1 bg-slate-950 overflow-auto flex items-center justify-center p-8 relative">
             {/* Grid Canvas Background */}
             <div
-              className="bg-slate-900 border border-slate-700/80 rounded-xl shadow-2xl relative transition-all duration-200 overflow-hidden"
+              className="bg-[#0A192F] border border-cyan-500/40 rounded-xl shadow-2xl relative transition-all duration-200 overflow-hidden"
               style={{
                 width: `${(800 * zoomLevel) / 100}px`,
                 height: `${(550 * zoomLevel) / 100}px`
               }}
             >
               {/* Detailed Architectural Blueprint CAD Grid */}
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:24px_24px] opacity-70" />
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,#162e52_1px,transparent_1px),linear-gradient(to_bottom,#162e52_1px,transparent_1px)] bg-[size:20px_20px] opacity-70" />
 
-              {/* Vector Blueprint Mock Rooms & Structural Lines */}
+              {/* Vector Blueprint Realistic Rooms & Structural Lines */}
               <svg className="w-full h-full absolute inset-0 text-sky-500/40 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-                {/* Outer Perimeter */}
-                <rect x="8%" y="10%" width="84%" height="80%" fill="none" stroke="#38bdf8" strokeWidth="3" />
-                {/* Core Lift Wall */}
-                <rect x="40%" y="35%" width="20%" height="30%" fill="rgba(56,189,248,0.06)" stroke="#38bdf8" strokeWidth="2" strokeDasharray="4" />
-                {/* Columns */}
-                <rect x="15%" y="18%" width="20" height="20" fill="#38bdf8" />
-                <rect x="50%" y="18%" width="20" height="20" fill="#38bdf8" />
-                <rect x="82%" y="18%" width="20" height="20" fill="#38bdf8" />
-                <rect x="15%" y="78%" width="20" height="20" fill="#38bdf8" />
-                <rect x="50%" y="78%" width="20" height="20" fill="#38bdf8" />
-                <rect x="82%" y="78%" width="20" height="20" fill="#38bdf8" />
+                <defs>
+                  <pattern id="viewerHatch" width="6" height="6" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+                    <line x1="0" y1="0" x2="0" y2="6" stroke="#0369a1" strokeWidth="1.2" />
+                  </pattern>
+                </defs>
+
+                {/* Outer Load-Bearing Double Wall */}
+                <rect x="7%" y="9%" width="86%" height="82%" fill="none" stroke="#38bdf8" strokeWidth="8" />
+                <rect x="7%" y="9%" width="86%" height="82%" fill="none" stroke="url(#viewerHatch)" strokeWidth="6" />
+                <rect x="8%" y="10%" width="84%" height="80%" fill="none" stroke="#0284c7" strokeWidth="1.5" />
+
+                {/* Internal Partition Walls */}
+                <line x1="48%" y1="10%" x2="48%" y2="90%" stroke="#0284c7" strokeWidth="3" />
+                <line x1="8%" y1="52%" x2="48%" y2="52%" stroke="#0284c7" strokeWidth="3" />
+                <line x1="48%" y1="42%" x2="92%" y2="42%" stroke="#0284c7" strokeWidth="3" />
+
+                {/* Door 90-degree Swing Arcs */}
+                <path d="M 370 286 A 25 25 0 0 1 395 261" fill="none" stroke="#7dd3fc" strokeWidth="1.2" strokeDasharray="2 2" />
+                <line x1="370" y1="286" x2="395" y2="261" stroke="#38bdf8" strokeWidth="2" />
+
+                <path d="M 370 500 A 25 25 0 0 1 395 475" fill="none" stroke="#7dd3fc" strokeWidth="1.2" strokeDasharray="2 2" />
+                <line x1="370" y1="500" x2="395" y2="475" stroke="#38bdf8" strokeWidth="2" />
+
+                {/* Window Mullions */}
+                <rect x="20%" y="9%" width="60" height="6" fill="#0284c7" stroke="#38bdf8" strokeWidth="1" />
+                <rect x="65%" y="9%" width="60" height="6" fill="#0284c7" stroke="#38bdf8" strokeWidth="1" />
+
+                {/* Reinforced Columns with Diagonal Rebar */}
+                {[
+                  { cx: "8%", cy: "10%", g: "C1" }, { cx: "48%", cy: "10%", g: "C2" }, { cx: "92%", cy: "10%", g: "C3" },
+                  { cx: "8%", cy: "52%", g: "C4" }, { cx: "48%", cy: "52%", g: "C5" }, { cx: "92%", cy: "42%", g: "C6" },
+                  { cx: "8%", cy: "90%", g: "C7" }, { cx: "48%", cy: "90%", g: "C8" }, { cx: "92%", cy: "90%", g: "C9" }
+                ].map((c, i) => (
+                  <g key={`col-${i}`}>
+                    <rect x={`calc(${c.cx} - 8px)`} y={`calc(${c.cy} - 8px)`} width="16" height="16" fill="#0284c7" stroke="#ffffff" strokeWidth="1" />
+                    <line x1={`calc(${c.cx} - 6px)`} y1={`calc(${c.cy} - 6px)`} x2={`calc(${c.cx} + 6px)`} y2={`calc(${c.cy} + 6px)`} stroke="#0f172a" strokeWidth="1" />
+                    <line x1={`calc(${c.cx} - 6px)`} y1={`calc(${c.cy} + 6px)`} x2={`calc(${c.cx} + 6px)`} y2={`calc(${c.cy} - 6px)`} stroke="#0f172a" strokeWidth="1" />
+                  </g>
+                ))}
+
                 {/* HVAC Duct Routing (Orange) */}
-                <path d="M 160 220 L 480 220 L 480 380 L 720 380" fill="none" stroke="#f97316" strokeWidth="4" strokeLinecap="round" />
+                <path d="M 120 180 L 420 180 L 420 360 L 680 360" fill="none" stroke="#fb923c" strokeWidth="5" strokeLinecap="round" />
+                <rect x="240" y="175" width="10" height="10" fill="#fb923c" />
+                <rect x="550" y="355" width="10" height="10" fill="#fb923c" />
+
+                {/* Fire Sprinklers (Red) */}
+                {[{ sx: 180, sy: 150 }, { sx: 340, sy: 150 }, { sx: 560, sy: 200 }, { sx: 560, sy: 380 }].map((s, idx) => (
+                  <g key={`sp-${idx}`} transform={`translate(${s.sx}, ${s.sy})`}>
+                    <circle cx="0" cy="0" r="30" fill="none" stroke="#ef4444" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.3" />
+                    <circle cx="0" cy="0" r="3.5" fill="#ef4444" />
+                  </g>
+                ))}
+
+                {/* Architectural Title Block */}
+                <g transform="translate(520, 460)">
+                  <rect x="0" y="0" width="200" height="50" fill="rgba(15, 23, 42, 0.95)" stroke="#38bdf8" strokeWidth="1" />
+                  <text x="8" y="14" fill="#38bdf8" fontSize="8" fontWeight="bold">BUILDCON ERP • CAD VIEWER</text>
+                  <text x="8" y="28" fill="#ffffff" fontSize="8" fontWeight="bold">{selectedDrawing.drawingNumber}</text>
+                  <text x="8" y="40" fill="#7dd3fc" fontSize="7" fontFamily="monospace">SCALE 1:100 @ A1</text>
+                  <rect x="135" y="10" width="55" height="28" rx="2" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" strokeWidth="1" />
+                  <text x="162" y="22" fill="#10b981" fontSize="7" fontWeight="bold" textAnchor="middle">RELEASED</text>
+                  <text x="162" y="32" fill="#a7f3d0" fontSize="6" textAnchor="middle">IFC SITE</text>
+                </g>
               </svg>
 
               {/* AI Detection Pins Overlay */}
