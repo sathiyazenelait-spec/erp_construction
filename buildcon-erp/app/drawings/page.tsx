@@ -597,8 +597,8 @@ export default function DrawingsPage() {
               }`}
             >
               <Compass className="w-3.5 h-3.5 text-cyan-300 animate-pulse" />
-              <span>AI Blueprint Studio (Realistic CAD)</span>
-              <span className="text-[10px] bg-cyan-400/20 text-cyan-300 px-1.5 py-0.2 rounded font-mono">NEW</span>
+              <span>AI Blueprint & Complete 3D Building Studio</span>
+              <span className="text-[10px] bg-cyan-400/20 text-cyan-300 px-1.5 py-0.5 rounded font-mono font-bold">GEMINI 3D</span>
             </button>
             <button
               onClick={() => setActiveTab("CLASHES")}
