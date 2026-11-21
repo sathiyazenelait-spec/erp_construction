@@ -1048,6 +1048,40 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     if floors_count > 25:
         floors_count = 25
 
+    prompt_str = prompt or ""
+    p_lower = prompt_str.lower()
+
+    # Detect floor count from prompt if explicitly specified (e.g., "7 floor", "7-floor", "7 story", "7-story")
+    import re
+    flr_match = re.search(r'(\d+)\s*[-_]?\s*(floor|storey|story)', p_lower)
+    if flr_match:
+        try:
+            detected_flrs = int(flr_match.group(1))
+            if 1 <= detected_flrs <= 20:
+                floors_count = detected_flrs
+        except Exception:
+            pass
+
+    # Extract architectural modifiers from prompt
+    has_helipad = any(w in p_lower for w in ["helipad", "heli-pad", "helicopter", "chopper"])
+    has_double_height = any(w in p_lower for w in ["double-height", "double height", "duplex", "mezzanine", "high ceiling"])
+    has_floating_balconies = any(w in p_lower for w in ["floating", "cantilever", "frameless", "balcon"])
+    has_rooftop_garden = any(w in p_lower for w in ["terrace garden", "sky garden", "green roof", "garden terrace", "sky-mansion", "penthouse"])
+    is_luxury_mansion = any(w in p_lower for w in ["sky-mansion", "mansion", "ultra-luxury", "luxury", "penthouse", "gold"])
+    is_biophilic = any(w in p_lower for w in ["biophilic", "vertical garden", "green", "eco", "sustainable"])
+
+    if is_luxury_mansion:
+        facade_palette = "GOLD_LUXURY"
+    elif is_biophilic:
+        facade_palette = "EMERALD_ECO"
+    elif any(w in p_lower for w in ["nordic", "terracotta", "wood", "brick"]):
+        facade_palette = "BRONZE_NORDIC"
+    else:
+        facade_palette = "AZURE_GLASS"
+
+    rooftop_feature = "HELIPAD" if has_helipad else ("PENTHOUSE_GARDEN" if has_rooftop_garden else "SOLAR_CORE")
+    balcony_type = "CANTILEVERED_FLOATING" if has_floating_balconies else ("UNIFORM_RUNNING" if "balcon" in p_lower else "NONE")
+
     # Attempt real Gemini AI Architect call
     gemini_spec = call_gemini_blueprint_designer(prompt, p_type, sqft, floors_count, gemini_api_key)
     
@@ -1199,18 +1233,45 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     total_height_m = round(floors_count * floor_height_m, 1)
     gfa_sqft = round(sqft * floors_count)
 
+    # Dynamic Architecture Title and Facade System based on prompt
+    if is_luxury_mansion:
+        fallback_title = f"{floors_count}-Floor Ultra-Luxury Sky-Mansion Tower"
+        fallback_facade = "Champagne Gold Double-Height Glazing & Frameless Glass"
+    elif "villa" in p_lower or p_type == "VILLA":
+        fallback_title = f"{floors_count}-Story Luxury Villa with Floating Decks"
+        fallback_facade = "Frameless Panoramic Glass & Cantilevered Timber Decks"
+    elif "commercial" in p_lower or "office" in p_lower or p_type == "COMMERCIAL":
+        fallback_title = f"{floors_count}-Story Commercial Corporate Glass Tower"
+        fallback_facade = "Curtain Wall Double Glazed Low-E Blue"
+    elif "hospital" in p_lower or p_type == "HOSPITAL":
+        fallback_title = f"{floors_count}-Floor Medical Diagnostic & Critical Care Center"
+        fallback_facade = "Acoustic Low-E Antibacterial Glazing & Service Core"
+    elif "industrial" in p_lower or "warehouse" in p_lower or p_type == "INDUSTRIAL":
+        fallback_title = f"{floors_count}-Story High-Bay PEB Logistics Warehouse"
+        fallback_facade = "Insulated Sandwich Panels with Polycarbonate Skylights"
+    else:
+        fallback_title = f"{floors_count}-Story Executive Architectural Residence"
+        fallback_facade = "Terracotta Louvers & Glazed Balconies"
+
     # Use Gemini spec if available, otherwise compile standard real-type architect specs
-    architect_title = gemini_spec.get("title") if gemini_spec else title
+    architect_title = gemini_spec.get("title") if gemini_spec else fallback_title
     dwg_number = gemini_spec.get("drawingNumber") if gemini_spec else dwg_no
-    facade_style = gemini_spec.get("facadeStyle") if gemini_spec else (
-        "Curtain Wall Double Glazed Low-E Blue" if p_type in ["COMMERCIAL", "HOSPITAL"] else "Terracotta Louvers & Glazed Balconies"
-    )
+    facade_style = gemini_spec.get("facadeStyle") if gemini_spec else fallback_facade
     structure_type = gemini_spec.get("structureType") if gemini_spec else (
         f"RCC Special Moment-Resisting Frame (SMRF) with Core Shear Wall - IS 13920 ({floors_count} Stories)"
     )
     ai_summary = gemini_spec.get("aiDesignSummary") if gemini_spec else (
-        f"Designed by AI Chief Structural Architect: {floors_count}-story {p_type.lower()} building with {sqft:,.0f} sq.ft typical floor plate, complete IS 456 / IS 1893 seismic compliance, and high-efficiency curtain glazing."
+        f"Designed by AI Chief Structural Architect: {floors_count}-story {architect_title} with {sqft:,.0f} sq.ft typical floor plate, complete IS 456 / IS 1893 seismic compliance, and high-efficiency curtain glazing."
     )
+
+    custom_highlights = [
+        f"{floors_count}-Story Extruded Reinforced Concrete Structure (IS 13920 SMRF)",
+        "Alternating double-height living room glazing with structural silicone mullions" if has_double_height else "High-performance acoustic low-E double curtain wall glazing",
+        "Cantilevered floating balconies with frameless laminated glass balustrades" if has_floating_balconies else "Integrated MEP service core with dual wet risers & HVAC shafts",
+        "Rooftop helipad with perimeter flight safety beacons & sky-mansion terrace garden" if has_helipad else (
+            "Landscaped sky-mansion terrace garden with infinity observation deck" if has_rooftop_garden else "Rooftop terrace with solar PV array & pressurized lift machine room"
+        )
+    ]
 
     return {
         "blueprintId": f"BP-{abs(hash(prompt + str(floors_count))) % 1000000:06d}",
@@ -1234,17 +1295,14 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
             "steelGrade": gemini_spec.get("steelGrade", "Fe550D TMT Reinforcement") if gemini_spec else "Fe550D TMT Reinforcement",
             "foundationType": "Raft Foundation with Bored Cast-in-Situ Piles" if floors_count > 4 else "Isolated Combined Footings",
             "coreLiftCount": 2 if floors_count >= 5 else 1,
-            "architecturalHighlights": gemini_spec.get("architecturalHighlights", [
-                f"{floors_count}-Story Extruded Reinforced Concrete Structure",
-                "High-performance acoustic low-E double curtain wall glazing",
-                "Integrated MEP service core with dual wet risers & HVAC shafts",
-                "Rooftop terrace with solar PV array & pressurized lift machine room"
-            ]) if gemini_spec else [
-                f"{floors_count}-Story Extruded Reinforced Concrete Structure",
-                "High-performance acoustic low-E double curtain wall glazing",
-                "Integrated MEP service core with dual wet risers & HVAC shafts",
-                "Rooftop terrace with solar PV array & pressurized lift machine room"
-            ]
+            "architecturalHighlights": gemini_spec.get("architecturalHighlights", custom_highlights) if gemini_spec else custom_highlights,
+            "hasHelipad": has_helipad,
+            "hasDoubleHeight": has_double_height,
+            "hasFloatingBalconies": has_floating_balconies,
+            "hasRooftopGarden": has_rooftop_garden,
+            "facadePalette": facade_palette,
+            "rooftopFeature": rooftop_feature,
+            "balconyType": balcony_type
         },
         "dimensions": {
             "canvasWidth": 800,

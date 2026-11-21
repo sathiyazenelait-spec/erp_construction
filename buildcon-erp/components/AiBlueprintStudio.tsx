@@ -43,6 +43,13 @@ export interface Building3DSpec {
   foundationType: string;
   coreLiftCount: number;
   architecturalHighlights: string[];
+  hasHelipad?: boolean;
+  hasDoubleHeight?: boolean;
+  hasFloatingBalconies?: boolean;
+  hasRooftopGarden?: boolean;
+  facadePalette?: "GOLD_LUXURY" | "AZURE_GLASS" | "EMERALD_ECO" | "BRONZE_NORDIC";
+  rooftopFeature?: string;
+  balconyType?: string;
 }
 
 export interface BlueprintData {
@@ -225,14 +232,65 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const flrHeight = pType === "INDUSTRIAL" ? 6.5 : 3.2;
     const totalHeight = Math.round(flrCount * flrHeight * 10) / 10;
 
-    let title = "7-Story Executive Residential Complex";
-    let dwg = "DWG-AI-RES-007";
+    const promptStr = prompt || "";
+    const pLower = promptStr.toLowerCase();
+
+    // Detect floor count from prompt if explicitly specified (e.g., "7 floor", "7-floor", "7 story", "7-story")
+    const flrMatch = pLower.match(/(\d+)\s*[-_]?\s*(floor|storey|story)/);
+    let effectiveFloors = flrCount;
+    if (flrMatch && flrMatch[1]) {
+      const parsed = parseInt(flrMatch[1], 10);
+      if (parsed >= 1 && parsed <= 25) effectiveFloors = parsed;
+    }
+
+    const hasHelipad = pLower.includes("helipad") || pLower.includes("heli-pad") || pLower.includes("helicopter") || pLower.includes("chopper");
+    const hasDoubleHeight = pLower.includes("double-height") || pLower.includes("double height") || pLower.includes("duplex") || pLower.includes("mezzanine") || pLower.includes("high ceiling");
+    const hasFloatingBalconies = pLower.includes("floating") || pLower.includes("cantilever") || pLower.includes("frameless") || pLower.includes("balcon");
+    const hasRooftopGarden = pLower.includes("terrace garden") || pLower.includes("sky garden") || pLower.includes("green roof") || pLower.includes("sky-mansion") || pLower.includes("penthouse");
+    const isLuxuryMansion = pLower.includes("sky-mansion") || pLower.includes("mansion") || pLower.includes("ultra-luxury") || pLower.includes("luxury") || pLower.includes("penthouse") || pLower.includes("gold");
+    const isBiophilic = pLower.includes("biophilic") || pLower.includes("vertical garden") || pLower.includes("green") || pLower.includes("eco");
+
+    const facadePalette: "GOLD_LUXURY" | "AZURE_GLASS" | "EMERALD_ECO" | "BRONZE_NORDIC" = isLuxuryMansion
+      ? "GOLD_LUXURY"
+      : isBiophilic
+      ? "EMERALD_ECO"
+      : pLower.includes("nordic")
+      ? "BRONZE_NORDIC"
+      : "AZURE_GLASS";
+
+    const rooftopFeature = hasHelipad ? "HELIPAD" : hasRooftopGarden ? "PENTHOUSE_GARDEN" : "SOLAR_CORE";
+    const balconyType = hasFloatingBalconies ? "CANTILEVERED_FLOATING" : pLower.includes("balcon") ? "UNIFORM_RUNNING" : "NONE";
+
+    let title = `${effectiveFloors}-Story Executive Residence`;
+    let dwg = `DWG-AI-RES-00${effectiveFloors}`;
+    let facadeStyle = "Terracotta Louvers & Glazed Balconies";
+
+    if (isLuxuryMansion) {
+      title = `${effectiveFloors}-Floor Ultra-Luxury Sky-Mansion Tower`;
+      facadeStyle = "Champagne Gold Double-Height Glazing & Frameless Glass";
+      dwg = `DWG-AI-SKY-00${effectiveFloors}`;
+    } else if (pLower.includes("villa") || pType === "VILLA") {
+      title = `${effectiveFloors}-Story Luxury Villa with Floating Decks`;
+      facadeStyle = "Frameless Panoramic Glass & Cantilevered Timber Decks";
+      dwg = `DWG-AI-VIL-00${effectiveFloors}`;
+    } else if (pLower.includes("commercial") || pLower.includes("office") || pType === "COMMERCIAL") {
+      title = `${effectiveFloors}-Story Commercial Corporate Glass Tower`;
+      facadeStyle = "Curtain Wall Double Glazed Low-E Blue";
+      dwg = `DWG-AI-COM-00${effectiveFloors}`;
+    } else if (pLower.includes("hospital") || pType === "HOSPITAL") {
+      title = `${effectiveFloors}-Floor Medical Diagnostic & Critical Care Center`;
+      facadeStyle = "Acoustic Low-E Antibacterial Glazing & Service Core";
+      dwg = `DWG-AI-MED-00${effectiveFloors}`;
+    } else if (pLower.includes("industrial") || pType === "INDUSTRIAL") {
+      title = `${effectiveFloors}-Story High-Bay PEB Logistics Warehouse`;
+      facadeStyle = "Insulated Sandwich Panels with Polycarbonate Skylights";
+      dwg = `DWG-AI-IND-00${effectiveFloors}`;
+    }
+
     let rooms: BlueprintRoom[] = [];
     let cols: BlueprintColumn[] = [];
 
     if (pType === "COMMERCIAL") {
-      title = `${flrCount}-Story Commercial Corporate Glass Tower`;
-      dwg = `DWG-AI-COM-00${flrCount}`;
       rooms = [
         { id: "R1", name: "Executive Open Workstation Hub", x: 100, y: 100, w: 360, h: 260, areaSqft: Math.round(sqft * 0.38), flooring: "Acoustic Carpet Tile", type: "OFFICE" },
         { id: "R2", name: "Boardroom & Video Conference", x: 480, y: 100, w: 220, h: 160, areaSqft: Math.round(sqft * 0.16), flooring: "Hardwood Engineered Oak", type: "MEETING" },
@@ -254,15 +312,13 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         { grid: "C-3", x: 705, y: 585, size: "500x500mm", rebar: "12-T25 Fe550D" }
       ];
     } else {
-      title = `${flrCount}-Story Luxury Residential Tower`;
-      dwg = `DWG-AI-RES-00${flrCount}`;
       rooms = [
-        { id: "R1", name: "Grand Panoramic Living & Dining", x: 100, y: 100, w: 320, h: 220, areaSqft: Math.round(sqft * 0.35), flooring: "Statuario Glazed Vitrified 1200x600", type: "LIVING" },
+        { id: "R1", name: isLuxuryMansion ? "Grand Panoramic Sky-Mansion Salon" : "Grand Panoramic Living & Dining", x: 100, y: 100, w: 320, h: 220, areaSqft: Math.round(sqft * 0.35), flooring: "Statuario Glazed Vitrified 1200x600", type: "LIVING" },
         { id: "R2", name: "Master Suite & Dressing Wardrobe", x: 440, y: 100, w: 260, h: 180, areaSqft: Math.round(sqft * 0.24), flooring: "European Hardwood Plank", type: "BEDROOM" },
         { id: "R3", name: "Guest Bedroom 2 with Balcony", x: 440, y: 300, w: 260, h: 160, areaSqft: Math.round(sqft * 0.18), flooring: "Anti-Skid Vitrified Ceramic", type: "BEDROOM" },
         { id: "R4", name: "Children / Study Bedroom 3", x: 100, y: 340, w: 180, h: 160, areaSqft: Math.round(sqft * 0.12), flooring: "Acoustic Bamboo Flooring", type: "BEDROOM" },
         { id: "R5", name: "Modular Island Kitchen & Dry Utility", x: 300, y: 340, w: 120, h: 160, areaSqft: Math.round(sqft * 0.08), flooring: "Full-Body Leathered Granite", type: "KITCHEN" },
-        { id: "R6", name: "Full-Length Cantilevered Sunset Deck", x: 100, y: 520, w: 600, h: 50, areaSqft: Math.round(sqft * 0.03), flooring: "Weatherproof Composite Wood", type: "OUTDOOR" }
+        { id: "R6", name: hasFloatingBalconies ? "Cantilevered Floating Observation Deck" : "Full-Length Cantilevered Sunset Deck", x: 100, y: 520, w: 600, h: 50, areaSqft: Math.round(sqft * 0.03), flooring: "Weatherproof Composite Wood", type: "OUTDOOR" }
       ];
       cols = [
         { grid: "C-1", x: 95, y: 95, size: "450x450mm", rebar: "8-T20 Fe550D" },
@@ -277,6 +333,15 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
       ];
     }
 
+    const customHighlights = [
+      `${effectiveFloors}-Story Extruded Reinforced Concrete Structure (IS 13920 SMRF)`,
+      hasDoubleHeight ? "Alternating double-height living room glazing with structural silicone mullions" : "High-performance acoustic low-E double curtain wall glazing",
+      hasFloatingBalconies ? "Cantilevered floating balconies with frameless laminated glass balustrades" : "Integrated MEP service core with dual wet risers & HVAC shafts",
+      hasHelipad ? "Rooftop helipad with perimeter flight safety beacons & sky-mansion terrace garden" : (
+        hasRooftopGarden ? "Landscaped sky-mansion terrace garden with infinity observation deck" : "Rooftop terrace with solar PV array & pressurized lift machine room"
+      )
+    ];
+
     const bp: BlueprintData = {
       blueprintId: "BP-AI-" + Math.floor(100000 + Math.random() * 900000),
       drawingNumber: dwg,
@@ -284,27 +349,29 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
       prompt: prompt,
       projectType: pType,
       theme: theme,
-      scale: `1:100 @ A1 CAD (${flrCount} Stories)`,
-      floors: flrCount,
+      scale: `1:100 @ A1 CAD (${effectiveFloors} Stories)`,
+      floors: effectiveFloors,
       building3D: {
-        totalFloors: flrCount,
+        totalFloors: effectiveFloors,
         floorHeightMeters: flrHeight,
         totalHeightMeters: totalHeight,
         totalHeightFeet: Math.round(totalHeight * 3.28084 * 10) / 10,
         typicalFloorPlateSqFt: sqft,
-        grossFloorAreaSqFt: sqft * flrCount,
-        facadeStyle: pType === "COMMERCIAL" ? "Curtain Wall Double Glazed Low-E Blue" : "Terracotta Louvers & Glazed Balconies",
-        structureType: `RCC Special Moment-Resisting Frame (SMRF) with Core Shear Wall - IS 13920 (${flrCount} Stories)`,
+        grossFloorAreaSqFt: sqft * effectiveFloors,
+        facadeStyle: facadeStyle,
+        structureType: `RCC Special Moment-Resisting Frame (SMRF) with Core Shear Wall - IS 13920 (${effectiveFloors} Stories)`,
         concreteGrade: "M35 High Performance",
         steelGrade: "Fe550D TMT Reinforcement",
-        foundationType: flrCount > 4 ? "Raft Foundation with Bored Cast-in-Situ Piles" : "Isolated Combined Footings",
-        coreLiftCount: flrCount >= 5 ? 2 : 1,
-        architecturalHighlights: [
-          `${flrCount}-Story Extruded Reinforced Concrete Structure`,
-          "High-performance acoustic low-E double curtain wall glazing",
-          "Integrated MEP service core with dual wet risers & HVAC shafts",
-          "Rooftop terrace with solar PV array & pressurized lift machine room"
-        ]
+        foundationType: effectiveFloors > 4 ? "Raft Foundation with Bored Cast-in-Situ Piles" : "Isolated Combined Footings",
+        coreLiftCount: effectiveFloors >= 5 ? 2 : 1,
+        architecturalHighlights: customHighlights,
+        hasHelipad,
+        hasDoubleHeight,
+        hasFloatingBalconies,
+        hasRooftopGarden,
+        facadePalette,
+        rooftopFeature,
+        balconyType
       },
       dimensions: {
         canvasWidth: 800,
@@ -607,6 +674,15 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const isNight = lightingMode === "NIGHT";
     const isXRay = viewMode === "BIM_XRAY";
 
+    // Extract dynamic architectural features from prompt and 3D spec
+    const promptLower = (promptText || data?.prompt || "").toLowerCase();
+    const hasHelipad = data?.building3D?.hasHelipad ?? (promptLower.includes("helipad") || promptLower.includes("heli-pad") || promptLower.includes("helicopter") || promptLower.includes("chopper"));
+    const hasDoubleHeight = data?.building3D?.hasDoubleHeight ?? (promptLower.includes("double-height") || promptLower.includes("double height") || promptLower.includes("duplex") || promptLower.includes("mezzanine") || promptLower.includes("high ceiling"));
+    const hasFloatingBalconies = data?.building3D?.hasFloatingBalconies ?? (promptLower.includes("floating") || promptLower.includes("cantilever") || promptLower.includes("frameless") || promptLower.includes("balcon"));
+    const hasRooftopGarden = data?.building3D?.hasRooftopGarden ?? (promptLower.includes("terrace garden") || promptLower.includes("sky garden") || promptLower.includes("green roof") || promptLower.includes("sky-mansion") || promptLower.includes("penthouse"));
+    const isLuxuryGold = data?.building3D?.facadePalette === "GOLD_LUXURY" || promptLower.includes("sky-mansion") || promptLower.includes("ultra-luxury") || promptLower.includes("luxury") || promptLower.includes("gold");
+    const isBiophilic = data?.building3D?.facadePalette === "EMERALD_ECO" || promptLower.includes("biophilic") || promptLower.includes("green") || promptLower.includes("eco");
+
     const floorsArray = [];
     for (let f = 1; f <= totalFlrs; f++) {
       floorsArray.push(f);
@@ -624,7 +700,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         onMouseLeave={handleMouseUp}
       >
         <defs>
-          {/* Glass reflection gradient */}
+          {/* Standard Blue Glass reflection gradient */}
           <linearGradient id="glassFacadeDay" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.85" />
             <stop offset="40%" stopColor="#0284C7" stopOpacity="0.75" />
@@ -637,6 +713,35 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             <stop offset="35%" stopColor="#F59E0B" stopOpacity="0.55" />
             <stop offset="70%" stopColor="#0F172A" stopOpacity="0.85" />
             <stop offset="100%" stopColor="#FEF08A" stopOpacity="0.6" />
+          </linearGradient>
+
+          {/* Ultra-Luxury Champagne Gold Glazing Gradient */}
+          <linearGradient id="goldFacadeDay" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.88" />
+            <stop offset="35%" stopColor="#D97706" stopOpacity="0.80" />
+            <stop offset="70%" stopColor="#B45309" stopOpacity="0.75" />
+            <stop offset="100%" stopColor="#FEF08A" stopOpacity="0.95" />
+          </linearGradient>
+
+          <linearGradient id="goldFacadeNight" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#78350F" stopOpacity="0.95" />
+            <stop offset="35%" stopColor="#F59E0B" stopOpacity="0.80" />
+            <stop offset="70%" stopColor="#451A03" stopOpacity="0.90" />
+            <stop offset="100%" stopColor="#FDE047" stopOpacity="0.90" />
+          </linearGradient>
+
+          {/* Biophilic Emerald Glazing Gradient */}
+          <linearGradient id="emeraldFacadeDay" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#10B981" stopOpacity="0.85" />
+            <stop offset="40%" stopColor="#059669" stopOpacity="0.80" />
+            <stop offset="80%" stopColor="#047857" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#A7F3D0" stopOpacity="0.90" />
+          </linearGradient>
+
+          {/* Helipad Tarmac Gradient */}
+          <linearGradient id="helipadTarmac" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#334155" />
+            <stop offset="100%" stopColor="#0F172A" />
           </linearGradient>
 
           <linearGradient id="slabGradient" x1="0" y1="0" x2="0" y2="1">
@@ -680,9 +785,9 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             return (
               <polygon
                 points={`${ep1.x},${ep1.y} ${ep2.x},${ep2.y} ${ep3.x},${ep3.y} ${ep4.x},${ep4.y}`}
-                fill="#0284C7"
+                fill={isLuxuryGold ? "#D97706" : "#0284C7"}
                 fillOpacity="0.4"
-                stroke="#38BDF8"
+                stroke={isLuxuryGold ? "#F59E0B" : "#38BDF8"}
                 strokeWidth="1"
               />
             );
@@ -711,13 +816,20 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           const t3 = project(halfW, halfD, topZ);
           const t4 = project(-halfW, halfD, topZ);
 
+          const facadeFill = isNight
+            ? (isLuxuryGold ? "url(#goldFacadeNight)" : "url(#glassFacadeNight)")
+            : (isLuxuryGold ? "url(#goldFacadeDay)" : (isBiophilic ? "url(#emeraldFacadeDay)" : "url(#glassFacadeDay)"));
+          const facadeStroke = isNight
+            ? (isLuxuryGold ? "#FEF08A" : "#F59E0B")
+            : (isLuxuryGold ? "#F59E0B" : (isBiophilic ? "#10B981" : "#38BDF8"));
+
           return (
             <g key={`floor-${floorNum}`} className="transition-all duration-300">
               {/* Floor Slab Foundation Base */}
               <polygon
                 points={`${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y} ${b4.x},${b4.y}`}
                 fill={isXRay ? "rgba(16, 185, 129, 0.15)" : (isNight ? "#334155" : "url(#slabGradient)")}
-                stroke={isXRay ? "#10B981" : "#475569"}
+                stroke={isXRay ? "#10B981" : (isLuxuryGold ? "#B45309" : "#475569")}
                 strokeWidth={isXRay ? 1 : 1.5}
               />
 
@@ -749,47 +861,157 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               {/* Curtain Wall Glazed Facade Panels (Front & Side) */}
               {!isXRay && (
                 <>
-                  {/* Facade Face 1 */}
+                  {/* Facade Face 1 (Front) */}
                   <polygon
                     points={`${b3.x},${b3.y} ${b4.x},${b4.y} ${t4.x},${t4.y} ${t3.x},${t3.y}`}
-                    fill={isNight ? "url(#glassFacadeNight)" : "url(#glassFacadeDay)"}
-                    stroke={isNight ? "#F59E0B" : "#38BDF8"}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
                     strokeWidth="1"
-                    strokeOpacity="0.7"
+                    strokeOpacity="0.8"
                   />
-                  {/* Facade Face 2 */}
+                  {/* Facade Face 2 (Right Side) */}
                   <polygon
                     points={`${b2.x},${b2.y} ${b3.x},${b3.y} ${t3.x},${t3.y} ${t2.x},${t2.y}`}
-                    fill={isNight ? "url(#glassFacadeNight)" : "url(#glassFacadeDay)"}
-                    stroke={isNight ? "#F59E0B" : "#0284C7"}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
                     strokeWidth="1"
-                    strokeOpacity="0.5"
+                    strokeOpacity="0.6"
                   />
 
                   {/* Window Mullions / Transoms Grid Lines */}
-                  {[0.25, 0.5, 0.75].map((ratio, mIdx) => {
-                    const mx1 = b3.x + (b4.x - b3.x) * ratio;
-                    const my1 = b3.y + (b4.y - b3.y) * ratio;
-                    const mx2 = t3.x + (t4.x - t3.x) * ratio;
-                    const my2 = t3.y + (t4.y - t3.y) * ratio;
-                    return (
-                      <line
-                        key={`mullion-${floorNum}-${mIdx}`}
-                        x1={mx1}
-                        y1={my1}
-                        x2={mx2}
-                        y2={my2}
-                        stroke={isNight ? "#FEF08A" : "#E0F2FE"}
-                        strokeWidth="1"
-                        strokeOpacity="0.6"
-                      />
-                    );
-                  })}
+                  {hasDoubleHeight && floorNum % 2 === 0 ? (
+                    <>
+                      {/* Double-Height Tall Architectural Mullions spanning vertically */}
+                      {[0.2, 0.4, 0.6, 0.8].map((ratio, mIdx) => {
+                        const mx1 = b3.x + (b4.x - b3.x) * ratio;
+                        const my1 = b3.y + (b4.y - b3.y) * ratio;
+                        const mx2 = t3.x + (t4.x - t3.x) * ratio;
+                        const my2 = t3.y + (t4.y - t3.y) * ratio;
+                        return (
+                          <line
+                            key={`mullion-dh-${floorNum}-${mIdx}`}
+                            x1={mx1}
+                            y1={my1}
+                            x2={mx2}
+                            y2={my2}
+                            stroke={isLuxuryGold ? "#FEF08A" : (isNight ? "#FEF08A" : "#E0F2FE")}
+                            strokeWidth="1.5"
+                            strokeOpacity="0.85"
+                          />
+                        );
+                      })}
+                      {/* Interior Mezzanine Loft Plate Line */}
+                      {(() => {
+                        const midZ = (baseZ + topZ) / 2;
+                        const m1 = project(-halfW + 15, halfD - 20, midZ);
+                        const m2 = project(halfW - 15, halfD - 20, midZ);
+                        return (
+                          <line
+                            x1={m1.x}
+                            y1={m1.y}
+                            x2={m2.x}
+                            y2={m2.y}
+                            stroke={isLuxuryGold ? "#FDE047" : "#38BDF8"}
+                            strokeWidth="1.5"
+                            strokeDasharray="4 3"
+                            strokeOpacity="0.75"
+                          />
+                        );
+                      })()}
+                    </>
+                  ) : (
+                    [0.25, 0.5, 0.75].map((ratio, mIdx) => {
+                      const mx1 = b3.x + (b4.x - b3.x) * ratio;
+                      const my1 = b3.y + (b4.y - b3.y) * ratio;
+                      const mx2 = t3.x + (t4.x - t3.x) * ratio;
+                      const my2 = t3.y + (t4.y - t3.y) * ratio;
+                      return (
+                        <line
+                          key={`mullion-${floorNum}-${mIdx}`}
+                          x1={mx1}
+                          y1={my1}
+                          x2={mx2}
+                          y2={my2}
+                          stroke={isLuxuryGold ? "#FDE047" : (isNight ? "#FEF08A" : "#E0F2FE")}
+                          strokeWidth="1"
+                          strokeOpacity="0.6"
+                        />
+                      );
+                    })
+                  )}
                 </>
               )}
 
-              {/* Cantilevered Balconies & Railings for residential floors */}
-              {selectedPreset === "RESIDENTIAL" && !isXRay && (
+              {/* Cantilevered Floating Balconies with Frameless Glass Balustrades */}
+              {!isXRay && hasFloatingBalconies && (
+                (() => {
+                  // Alternating floating balconies:
+                  // Odd floors (1, 3, 5, 7): Cantilever out to LEFT & FRONT
+                  // Even floors (2, 4, 6): Cantilever out to RIGHT & FRONT
+                  const isOdd = floorNum % 2 !== 0;
+                  const bLeft = isOdd ? -halfW - 25 : -20;
+                  const bRight = isOdd ? 20 : halfW + 25;
+                  const bDepth = halfD + 26;
+                  const bHeight = 14;
+
+                  // Slab bottom corners
+                  const c1 = project(bLeft, halfD, baseZ);
+                  const c2 = project(bRight, halfD, baseZ);
+                  const c3 = project(bRight, bDepth, baseZ);
+                  const c4 = project(bLeft, bDepth, baseZ);
+
+                  // Balustrade top corners
+                  const r1 = project(bLeft, halfD, baseZ + bHeight);
+                  const r2 = project(bRight, halfD, baseZ + bHeight);
+                  const r3 = project(bRight, bDepth, baseZ + bHeight);
+                  const r4 = project(bLeft, bDepth, baseZ + bHeight);
+
+                  return (
+                    <g key={`balcony-floating-${floorNum}`}>
+                      {/* Cantilever Concrete Base Slab */}
+                      <polygon
+                        points={`${c1.x},${c1.y} ${c2.x},${c2.y} ${c3.x},${c3.y} ${c4.x},${c4.y}`}
+                        fill={isLuxuryGold ? "#451A03" : "#1E293B"}
+                        stroke={isLuxuryGold ? "#F59E0B" : "#38BDF8"}
+                        strokeWidth="1.2"
+                      />
+                      {/* Frameless Glass Front Balustrade */}
+                      <polygon
+                        points={`${c4.x},${c4.y} ${c3.x},${c3.y} ${r3.x},${r3.y} ${r4.x},${r4.y}`}
+                        fill={isLuxuryGold ? "rgba(245, 158, 11, 0.35)" : "rgba(56, 189, 248, 0.45)"}
+                        stroke={isLuxuryGold ? "#FEF08A" : "#38BDF8"}
+                        strokeWidth="1"
+                      />
+                      {/* Frameless Glass Outer Side Balustrade */}
+                      {isOdd ? (
+                        <polygon
+                          points={`${c1.x},${c1.y} ${c4.x},${c4.y} ${r4.x},${r4.y} ${r1.x},${r1.y}`}
+                          fill={isLuxuryGold ? "rgba(245, 158, 11, 0.3)" : "rgba(56, 189, 248, 0.4)"}
+                          stroke={isLuxuryGold ? "#FEF08A" : "#0284C7"}
+                          strokeWidth="1"
+                        />
+                      ) : (
+                        <polygon
+                          points={`${c2.x},${c2.y} ${c3.x},${c3.y} ${r3.x},${r3.y} ${r2.x},${r2.y}`}
+                          fill={isLuxuryGold ? "rgba(245, 158, 11, 0.3)" : "rgba(56, 189, 248, 0.4)"}
+                          stroke={isLuxuryGold ? "#FEF08A" : "#0284C7"}
+                          strokeWidth="1"
+                        />
+                      )}
+                      {/* Polished Stainless Steel Handrail (Top Rim) */}
+                      <line x1={r4.x} y1={r4.y} x2={r3.x} y2={r3.y} stroke="#F8FAFC" strokeWidth="2" strokeLinecap="round" />
+                      {isOdd ? (
+                        <line x1={r1.x} y1={r1.y} x2={r4.x} y2={r4.y} stroke="#F8FAFC" strokeWidth="2" strokeLinecap="round" />
+                      ) : (
+                        <line x1={r2.x} y1={r2.y} x2={r3.x} y2={r3.y} stroke="#F8FAFC" strokeWidth="2" strokeLinecap="round" />
+                      )}
+                    </g>
+                  );
+                })()
+              )}
+
+              {/* If not floating balconies but standard residential, render regular balcony */}
+              {!isXRay && !hasFloatingBalconies && selectedPreset === "RESIDENTIAL" && (
                 (() => {
                   const bc1 = project(-halfW + 20, halfD + 18, baseZ);
                   const bc2 = project(halfW - 20, halfD + 18, baseZ);
@@ -811,13 +1033,13 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               <polygon
                 points={`${t1.x},${t1.y} ${t2.x},${t2.y} ${t3.x},${t3.y} ${t4.x},${t4.y}`}
                 fill={isXRay ? "rgba(16, 185, 129, 0.2)" : (isNight ? "#1E293B" : "url(#slabGradient)")}
-                stroke={isXRay ? "#10B981" : "#94A3B8"}
+                stroke={isXRay ? "#10B981" : (isLuxuryGold ? "#D97706" : "#94A3B8")}
                 strokeWidth={isXRay ? 1 : 1.5}
               />
 
               {/* Floor Level Label Pill (Left floating) */}
               <g transform={`translate(${b1.x - 70}, ${b1.y})`}>
-                <rect x="0" y="-9" width="55" height="18" rx="4" fill="rgba(15, 23, 42, 0.85)" stroke="#38BDF8" strokeWidth="0.8" />
+                <rect x="0" y="-9" width="55" height="18" rx="4" fill="rgba(15, 23, 42, 0.85)" stroke={isLuxuryGold ? "#F59E0B" : "#38BDF8"} strokeWidth="0.8" />
                 <text x="27" y="3" fill="#E2E8F0" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
                   {floorNum === 1 ? "G (LOBBY)" : `LEVEL ${floorNum}`}
                 </text>
@@ -826,7 +1048,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           );
         })}
 
-        {/* 3. Rooftop Terrace, Core Lift Machine Room & Solar PV Array */}
+        {/* 3. Rooftop Terrace, Helipad / Core Lift Machine Room & Garden */}
         {(isolatedFloor === "ALL" || isolatedFloor === totalFlrs) && (() => {
           const topZ = totalFlrs * floorHeight + 10;
           const halfW = buildingWidth / 2;
@@ -838,70 +1060,243 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           const p3 = project(halfW, halfD, topZ + 8);
           const p4 = project(-halfW, halfD, topZ + 8);
 
-          // Central Lift Core Machine Room
-          const l1 = project(-40, -30, topZ);
-          const l2 = project(40, -30, topZ);
-          const l3 = project(40, 30, topZ);
-          const l4 = project(-40, 30, topZ);
+          // Central Dual Lift Core Machine Room
+          const l1 = project(-35, -25, topZ);
+          const l2 = project(35, -25, topZ);
+          const l3 = project(35, 25, topZ);
+          const l4 = project(-35, 25, topZ);
 
-          const lt1 = project(-40, -30, topZ + 28);
-          const lt2 = project(40, -30, topZ + 28);
-          const lt3 = project(40, 30, topZ + 28);
-          const lt4 = project(-40, 30, topZ + 28);
-
-          // Solar Panels array
-          const s1 = project(-100, -20, topZ + 12);
-          const s2 = project(-55, -20, topZ + 12);
-          const s3 = project(-55, 35, topZ + 18);
-          const s4 = project(-100, 35, topZ + 18);
+          const lt1 = project(-35, -25, topZ + 26);
+          const lt2 = project(35, -25, topZ + 26);
+          const lt3 = project(35, 25, topZ + 26);
+          const lt4 = project(-35, 25, topZ + 26);
 
           return (
             <g id="rooftop-terrace">
-              {/* Parapet Wall Wire */}
+              {/* Parapet Wall Outline */}
               <polygon
                 points={`${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`}
-                fill="none"
-                stroke="#38BDF8"
+                fill={hasRooftopGarden ? "rgba(5, 150, 105, 0.25)" : "none"}
+                stroke={hasRooftopGarden ? "#10B981" : (isLuxuryGold ? "#F59E0B" : "#38BDF8")}
                 strokeWidth="1.5"
                 strokeDasharray="4 2"
               />
 
-              {/* Lift Machine Core Box */}
-              <polygon
-                points={`${l1.x},${l1.y} ${l2.x},${l2.y} ${l3.x},${l3.y} ${l4.x},${l4.y}`}
-                fill="#475569"
-              />
-              <polygon
-                points={`${l3.x},${l3.y} ${l4.x},${l4.y} ${lt4.x},${lt4.y} ${lt3.x},${lt3.y}`}
-                fill="#334155"
-                stroke="#64748B"
-              />
-              <polygon
-                points={`${l2.x},${l2.y} ${l3.x},${l3.y} ${lt3.x},${lt3.y} ${lt2.x},${lt2.y}`}
-                fill="#1E293B"
-                stroke="#64748B"
-              />
-              <polygon
-                points={`${lt1.x},${lt1.y} ${lt2.x},${lt2.y} ${lt3.x},${lt3.y} ${lt4.x},${lt4.y}`}
-                fill="#64748B"
-                stroke="#94A3B8"
-              />
+              {/* Terrace Garden Planters (if hasRooftopGarden) */}
+              {hasRooftopGarden && (() => {
+                const g1 = project(-halfW + 12, -halfD + 12, topZ + 4);
+                const g2 = project(-halfW + 45, -halfD + 12, topZ + 4);
+                const g3 = project(-halfW + 45, halfD - 12, topZ + 4);
+                const g4 = project(-halfW + 12, halfD - 12, topZ + 4);
 
-              {/* Solar PV Panels (Blue angled array) */}
-              <polygon
-                points={`${s1.x},${s1.y} ${s2.x},${s2.y} ${s3.x},${s3.y} ${s4.x},${s4.y}`}
-                fill="#1E40AF"
-                stroke="#60A5FA"
-                strokeWidth="1"
-              />
+                const g5 = project(halfW - 45, -halfD + 12, topZ + 4);
+                const g6 = project(halfW - 12, -halfD + 12, topZ + 4);
+                const g7 = project(halfW - 12, halfD - 12, topZ + 4);
+                const g8 = project(halfW - 45, halfD - 12, topZ + 4);
 
-              {/* Rooftop Badge */}
-              <g transform={`translate(${lt3.x + 10}, ${lt3.y - 10})`}>
-                <rect x="0" y="-8" width="85" height="16" rx="4" fill="rgba(15, 23, 42, 0.9)" stroke="#F59E0B" strokeWidth="1" />
-                <text x="42" y="3" fill="#F59E0B" fontSize="8" fontWeight="bold" textAnchor="middle">
-                  ROOFTOP + OHWT
-                </text>
-              </g>
+                return (
+                  <g id="terrace-gardens">
+                    {/* Left Garden Planter */}
+                    <polygon
+                      points={`${g1.x},${g1.y} ${g2.x},${g2.y} ${g3.x},${g3.y} ${g4.x},${g4.y}`}
+                      fill="#059669"
+                      fillOpacity="0.7"
+                      stroke="#34D399"
+                      strokeWidth="1"
+                    />
+                    {/* Right Garden Planter */}
+                    <polygon
+                      points={`${g5.x},${g5.y} ${g6.x},${g6.y} ${g7.x},${g7.y} ${g8.x},${g8.y}`}
+                      fill="#059669"
+                      fillOpacity="0.7"
+                      stroke="#34D399"
+                      strokeWidth="1"
+                    />
+                  </g>
+                );
+              })()}
+
+              {/* Central Dual Lift Core Machine Box */}
+              <polygon points={`${l1.x},${l1.y} ${l2.x},${l2.y} ${l3.x},${l3.y} ${l4.x},${l4.y}`} fill="#334155" />
+              <polygon points={`${l3.x},${l3.y} ${l4.x},${l4.y} ${lt4.x},${lt4.y} ${lt3.x},${lt3.y}`} fill="#1E293B" stroke="#475569" />
+              <polygon points={`${l2.x},${l2.y} ${l3.x},${l3.y} ${lt3.x},${lt3.y} ${lt2.x},${lt2.y}`} fill="#0F172A" stroke="#475569" />
+              <polygon points={`${lt1.x},${lt1.y} ${lt2.x},${lt2.y} ${lt3.x},${lt3.y} ${lt4.x},${lt4.y}`} fill="#475569" stroke="#64748B" />
+
+              {/* Communication Mast / Antenna Spire on Lift Core */}
+              {(() => {
+                const spireBase = project(0, 0, topZ + 26);
+                const spireTip = project(0, 0, topZ + 55);
+                return (
+                  <g id="rooftop-antenna">
+                    <line x1={spireBase.x} y1={spireBase.y} x2={spireTip.x} y2={spireTip.y} stroke="#EF4444" strokeWidth="2.5" />
+                    <circle cx={spireTip.x} cy={spireTip.y} r="3" fill="#EF4444" className="animate-ping" />
+                    <circle cx={spireTip.x} cy={spireTip.y} r="2.5" fill="#EF4444" />
+                  </g>
+                );
+              })()}
+
+              {/* ROOFTOP HELIPAD (When hasHelipad is true) */}
+              {hasHelipad ? (
+                (() => {
+                  const padZ = topZ + 14;
+                  const padRadius = 65;
+                  const numPoints = 12;
+                  const padPoints = [];
+                  for (let i = 0; i < numPoints; i++) {
+                    const angle = (i * 2 * Math.PI) / numPoints;
+                    const px = Math.cos(angle) * padRadius;
+                    const py = Math.sin(angle) * padRadius;
+                    padPoints.push(project(px, py, padZ));
+                  }
+                  const padPolyStr = padPoints.map(p => `${p.x},${p.y}`).join(" ");
+
+                  // Center of Helipad
+                  const hCenter = project(0, 0, padZ);
+
+                  // Helipad "H" Marker Vertices
+                  const hH = 20; // half height
+                  const hW = 14; // half width
+                  const hLeftTop = project(-hW, -hH, padZ);
+                  const hLeftBottom = project(-hW, hH, padZ);
+                  const hRightTop = project(hW, -hH, padZ);
+                  const hRightBottom = project(hW, hH, padZ);
+                  const hMidLeft = project(-hW, 0, padZ);
+                  const hMidRight = project(hW, 0, padZ);
+
+                  // Safety Beacons at 4 perimeter points
+                  const beaconPoints = [
+                    project(-padRadius + 4, 0, padZ),
+                    project(padRadius - 4, 0, padZ),
+                    project(0, -padRadius + 4, padZ),
+                    project(0, padRadius - 4, padZ),
+                  ];
+
+                  return (
+                    <g id="rooftop-helipad">
+                      {/* Cantilever Pedestals holding Helipad deck */}
+                      {padPoints.filter((_, idx) => idx % 3 === 0).map((pt, pIdx) => {
+                        const basePt = project(
+                          Math.cos((pIdx * 3 * 2 * Math.PI) / numPoints) * padRadius,
+                          Math.sin((pIdx * 3 * 2 * Math.PI) / numPoints) * padRadius,
+                          topZ
+                        );
+                        return (
+                          <line
+                            key={`helipad-ped-${pIdx}`}
+                            x1={basePt.x}
+                            y1={basePt.y}
+                            x2={pt.x}
+                            y2={pt.y}
+                            stroke="#64748B"
+                            strokeWidth="3.5"
+                          />
+                        );
+                      })}
+
+                      {/* Helipad Tarmac Platform */}
+                      <polygon
+                        points={padPolyStr}
+                        fill="url(#helipadTarmac)"
+                        stroke="#FACC15"
+                        strokeWidth="3.5"
+                      />
+
+                      {/* Inner Dashed White Ring */}
+                      {(() => {
+                        const innerPoints = [];
+                        for (let i = 0; i < numPoints; i++) {
+                          const angle = (i * 2 * Math.PI) / numPoints;
+                          const px = Math.cos(angle) * (padRadius - 10);
+                          const py = Math.sin(angle) * (padRadius - 10);
+                          innerPoints.push(project(px, py, padZ));
+                        }
+                        return (
+                          <polygon
+                            points={innerPoints.map(p => `${p.x},${p.y}`).join(" ")}
+                            fill="none"
+                            stroke="#FFFFFF"
+                            strokeWidth="1.5"
+                            strokeDasharray="5 3"
+                            strokeOpacity="0.85"
+                          />
+                        );
+                      })()}
+
+                      {/* Bold Architectural 'H' Marker */}
+                      {/* Left Vertical Bar */}
+                      <line
+                        x1={hLeftTop.x}
+                        y1={hLeftTop.y}
+                        x2={hLeftBottom.x}
+                        y2={hLeftBottom.y}
+                        stroke="#FFFFFF"
+                        strokeWidth="5.5"
+                        strokeLinecap="round"
+                      />
+                      {/* Right Vertical Bar */}
+                      <line
+                        x1={hRightTop.x}
+                        y1={hRightTop.y}
+                        x2={hRightBottom.x}
+                        y2={hRightBottom.y}
+                        stroke="#FFFFFF"
+                        strokeWidth="5.5"
+                        strokeLinecap="round"
+                      />
+                      {/* Center Crossbar */}
+                      <line
+                        x1={hMidLeft.x}
+                        y1={hMidLeft.y}
+                        x2={hMidRight.x}
+                        y2={hMidRight.y}
+                        stroke="#FFFFFF"
+                        strokeWidth="5.5"
+                        strokeLinecap="round"
+                      />
+
+                      {/* Aviation Flight Safety Beacons */}
+                      {beaconPoints.map((bp, bIdx) => (
+                        <g key={`beacon-${bIdx}`}>
+                          <circle cx={bp.x} cy={bp.y} r="4" fill="#EF4444" stroke="#FECACA" strokeWidth="1" />
+                          <circle cx={bp.x} cy={bp.y} r="2" fill="#FFFFFF" />
+                        </g>
+                      ))}
+
+                      {/* Helipad Callout Badge */}
+                      <g transform={`translate(${hCenter.x - 70}, ${hCenter.y - 45})`}>
+                        <rect x="0" y="-8" width="140" height="18" rx="4" fill="rgba(15, 23, 42, 0.95)" stroke="#FACC15" strokeWidth="1.2" />
+                        <text x="70" y="4" fill="#FACC15" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                          🚁 HELIPAD + SKY TERRACE
+                        </text>
+                      </g>
+                    </g>
+                  );
+                })()
+              ) : (
+                /* Standard Solar PV Array & Lift Badge */
+                <>
+                  {(() => {
+                    const s1 = project(-100, -20, topZ + 12);
+                    const s2 = project(-55, -20, topZ + 12);
+                    const s3 = project(-55, 35, topZ + 18);
+                    const s4 = project(-100, 35, topZ + 18);
+                    return (
+                      <polygon
+                        points={`${s1.x},${s1.y} ${s2.x},${s2.y} ${s3.x},${s3.y} ${s4.x},${s4.y}`}
+                        fill="#1E40AF"
+                        stroke="#60A5FA"
+                        strokeWidth="1"
+                      />
+                    );
+                  })()}
+                  <g transform={`translate(${lt3.x + 10}, ${lt3.y - 10})`}>
+                    <rect x="0" y="-8" width="85" height="16" rx="4" fill="rgba(15, 23, 42, 0.9)" stroke="#F59E0B" strokeWidth="1" />
+                    <text x="42" y="3" fill="#F59E0B" fontSize="8" fontWeight="bold" textAnchor="middle">
+                      ROOFTOP + OHWT
+                    </text>
+                  </g>
+                </>
+              )}
             </g>
           );
         })()}
@@ -1277,7 +1672,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                       {data.title}
                     </div>
                     <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                      {floors} Stories • Height: {(floors * 3.2).toFixed(1)}m / {(floors * 3.2 * 3.28084).toFixed(0)}ft • SMRF Frame
+                      {floors} Stories • Height: {(floors * 3.2).toFixed(1)}m / {(floors * 3.2 * 3.28084).toFixed(0)}ft • {data.building3D?.hasHelipad ? "🚁 Rooftop Helipad Certified" : "SMRF Frame"}
                     </div>
                   </div>
                 </div>
