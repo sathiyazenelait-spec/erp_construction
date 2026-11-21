@@ -6,7 +6,7 @@ import {
   Printer, Save, RefreshCw, Sliders, ChevronRight,
   HardHat, Activity, Cpu, ShieldCheck, Thermometer,
   Grid, Move, Info, Check, ArrowRight, Sun, Moon, Rotate3d,
-  Key, Building, Building2, EyeOff
+  Key, Building, Building2, EyeOff, Send, X
 } from "lucide-react";
 
 export interface BlueprintRoom {
