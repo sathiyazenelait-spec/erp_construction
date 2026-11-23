@@ -1862,8 +1862,13 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               type="text"
               value={promptText}
               onChange={(e) => setPromptText(e.target.value)}
-              placeholder="e.g. 7 Floor Luxury Residential Tower with glass curtain wall facade..."
-              className="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 font-mono"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  generateBlueprint(selectedPreset, promptText, builtupSqft, floors);
+                }
+              }}
+              placeholder="e.g. 7-Floor L-Shaped Building with central courtyard, or Helipad Tower..."
+              className="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 font-mono shadow-inner"
             />
           </div>
 
@@ -1935,6 +1940,35 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               <span>Send to Chairman</span>
             </button>
           </div>
+        </div>
+
+        {/* 1-Click AI Design Archetype Chips */}
+        <div className="mt-3.5 pt-3 border-t border-slate-700/60 flex flex-wrap items-center gap-1.5 relative z-10">
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mr-1 flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-cyan-400" />
+            Quick Models:
+          </span>
+          {[
+            { label: "🌿 L-Shaped Courtyard", prompt: "7-Floor Modern L-Shaped Building Model with central landscaped courtyard and cantilevered balconies", floors: 7 },
+            { label: "🚁 Helipad Sky-Mansion", prompt: "7-Floor Ultra-Luxury Sky-Mansion Tower with champagne gold glazing, cantilevered floating balconies, and rooftop helipad terrace", floors: 7 },
+            { label: "🏊 Infinity Sky Pool", prompt: "6-Floor Contemporary Waterfront Tower with elevated glass infinity sky pool, wooden sundeck, and azure glass facade", floors: 6 },
+            { label: "🌀 Twisted Spiral Diagrid", prompt: "8-Floor Futuristic Spiral Twisted Tower with diamond diagrid exoskeleton and obsidian glass curtain wall", floors: 8 },
+            { label: "🔭 Observatory Dome", prompt: "5-Floor Sky Observatory Tower with geodesic glass dome astronomical observatory and panoramic sky lounge", floors: 5 },
+            { label: "🌲 Biophilic Vertical Forest", prompt: "6-Floor Biophilic Vertical Forest Residential Complex with cascading planted terraces and living green wall facade", floors: 6 },
+            { label: "🏭 PEB Logistics Warehouse", prompt: "High-Bay PEB Logistics Warehouse with insulated sandwich panels and translucent roof skylights", floors: 2 },
+          ].map((chip, idx) => (
+            <button
+              key={`chip-${idx}`}
+              onClick={() => {
+                setPromptText(chip.prompt);
+                setFloors(chip.floors);
+                generateBlueprint(selectedPreset, chip.prompt, builtupSqft, chip.floors);
+              }}
+              className="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-800/80 hover:bg-cyan-500/20 hover:text-cyan-300 text-slate-300 border border-slate-700/80 hover:border-cyan-500/40 transition flex items-center gap-1 shadow-sm active:scale-95"
+            >
+              {chip.label}
+            </button>
+          ))}
         </div>
       </div>
 
