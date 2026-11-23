@@ -43,7 +43,8 @@ export interface Building3DSpec {
   foundationType: string;
   coreLiftCount: number;
   architecturalHighlights: string[];
-  massingForm?: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED";
+  massingForm?: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED";
+  isLShaped?: boolean;
   rooftopFeature?: "HELIPAD" | "INFINITY_POOL" | "OBSERVATORY_DOME" | "PENTHOUSE_GARDEN" | "GABLE_ROOF" | "SOLAR_ARRAY";
   balconyType?: "CANTILEVERED_FLOATING" | "WRAPAROUND_RIBBON" | "CURVED_WAVE" | "TERRACED_CASCADE" | "MINIMAL_FLUSH";
   facadePalette?: "GOLD_LUXURY" | "CYBER_OBSIDIAN" | "EMERALD_BIOPHILIC" | "TERRACOTTA_NORDIC" | "WHITE_MARBLE" | "AZURE_GLASS";
@@ -281,10 +282,13 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const hasDiagrid = pLower.includes("diagrid") || pLower.includes("diamond") || pLower.includes("lattice") || pLower.includes("exoskeleton") || pLower.includes("cross brace") || pLower.includes("x-brace");
     const hasSkyCourt = pLower.includes("sky court") || pLower.includes("sky-court") || pLower.includes("mid-level garden") || pLower.includes("void") || pLower.includes("cutout") || pLower.includes("hollow") || pLower.includes("sky bridge");
     const hasSunLouvers = pLower.includes("louver") || pLower.includes("louvers") || pLower.includes("shading") || pLower.includes("brise-soleil") || pLower.includes("fins") || pLower.includes("slats");
+    const isLShaped = pLower.includes("l-shape") || pLower.includes("l shape") || pLower.includes("l-shaped") || pLower.includes("l shaped") || pLower.includes("l building") || pLower.includes("l block") || pLower.includes("l layout");
 
     // Massing Form
-    let massingForm: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" = "RECTANGULAR";
-    if (pLower.includes("stepped") || pLower.includes("cascading") || pLower.includes("terraced tower") || pLower.includes("ziggurat") || pLower.includes("setback") || pLower.includes("pyramid")) {
+    let massingForm: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED" = "RECTANGULAR";
+    if (isLShaped) {
+      massingForm = "L_SHAPED";
+    } else if (pLower.includes("stepped") || pLower.includes("cascading") || pLower.includes("terraced tower") || pLower.includes("ziggurat") || pLower.includes("setback") || pLower.includes("pyramid")) {
       massingForm = "STEPPED_CASCADING";
     } else if (pLower.includes("curved") || pLower.includes("cylinder") || pLower.includes("cylindrical") || pLower.includes("circular") || pLower.includes("round tower") || pLower.includes("oval") || pLower.includes("fluid")) {
       massingForm = "CURVED_CYLINDRICAL";
@@ -322,7 +326,11 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     let dwg = `DWG-AI-RES-00${effectiveFloors}`;
     let facadeStyle = "Terracotta Louvers & Glazed Balconies";
 
-    if (isLuxuryMansion) {
+    if (isLShaped) {
+      title = `${effectiveFloors}-Story Modern L-Shaped Dual-Wing Complex`;
+      facadeStyle = "L-Shaped Dual Wing Glazed Envelope with Courtyard";
+      dwg = `DWG-AI-LSHP-00${effectiveFloors}`;
+    } else if (isLuxuryMansion) {
       title = `${effectiveFloors}-Floor Ultra-Luxury Sky-Mansion Tower`;
       facadeStyle = "Champagne Gold Double-Height Glazing & Frameless Glass";
       dwg = `DWG-AI-SKY-00${effectiveFloors}`;
@@ -355,7 +363,25 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     let rooms: BlueprintRoom[] = [];
     let cols: BlueprintColumn[] = [];
 
-    if (pType === "COMMERCIAL") {
+    if (isLShaped) {
+      rooms = [
+        { id: "R1", name: "Living Suite (Left Wing)", x: 100, y: 340, w: 280, h: 220, areaSqft: Math.round(sqft * 0.28), flooring: "Imported Italian Marble", type: "LIVING" },
+        { id: "R2", name: "Master Suite (Left Wing)", x: 100, y: 100, w: 280, h: 220, areaSqft: Math.round(sqft * 0.26), flooring: "Hardwood Oak Parquet", type: "BEDROOM" },
+        { id: "R3", name: "Dining & Gourmet Kitchen (Rear Wing)", x: 400, y: 100, w: 300, h: 140, areaSqft: Math.round(sqft * 0.22), flooring: "Polished Vitrified Tile", type: "KITCHEN" },
+        { id: "R4", name: "Guest Suite & Executive Study (Rear Wing)", x: 400, y: 250, w: 300, h: 80, areaSqft: Math.round(sqft * 0.14), flooring: "Engineered Hardwood", type: "BEDROOM" },
+        { id: "R5", name: "Landscaped Zen Courtyard (Open-to-Sky)", x: 400, y: 340, w: 300, h: 220, areaSqft: Math.round(sqft * 0.10), flooring: "Green Lawn & Granite Pavers", type: "COURTYARD" }
+      ];
+      cols = [
+        { grid: "L-1", x: 95, y: 95, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "L-2", x: 395, y: 95, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "L-3", x: 695, y: 95, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "L-4", x: 95, y: 335, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "L-5", x: 395, y: 335, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "L-6", x: 695, y: 335, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "L-7", x: 95, y: 555, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "L-8", x: 395, y: 555, size: "500x500mm", rebar: "12-T25 Fe550D" }
+      ];
+    } else if (pType === "COMMERCIAL") {
       rooms = [
         { id: "R1", name: "Executive Open Workstation Hub", x: 100, y: 100, w: 360, h: 260, areaSqft: Math.round(sqft * 0.38), flooring: "Acoustic Carpet Tile", type: "OFFICE" },
         { id: "R2", name: "Boardroom & Video Conference", x: 480, y: 100, w: 220, h: 160, areaSqft: Math.round(sqft * 0.16), flooring: "Hardwood Engineered Oak", type: "MEETING" },
@@ -400,8 +426,10 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
     const customHighlights = [
       `${effectiveFloors}-Story ${massingForm.replace('_', ' ').toLowerCase()} structural frame`,
-      hasDiagrid ? "External diagonal structural steel diagrid exoskeleton" : (
-        hasDoubleHeight ? "Alternating double-height living room glazing with structural silicone mullions" : "High-performance acoustic low-E double curtain wall glazing"
+      massingForm === "L_SHAPED" ? "L-shaped dual wing configuration with central open-air courtyard" : (
+        hasDiagrid ? "External diagonal structural steel diagrid exoskeleton" : (
+          hasDoubleHeight ? "Alternating double-height living room glazing with structural silicone mullions" : "High-performance acoustic low-E double curtain wall glazing"
+        )
       ),
       balconyType === "CURVED_WAVE" ? "Curved wave sinusoidal organic balconies" : (
         balconyType === "WRAPAROUND_RIBBON" ? "Continuous 360-degree wrap-around panoramic ribbon balconies" : (
@@ -445,6 +473,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         coreLiftCount: effectiveFloors >= 5 ? 2 : 1,
         architecturalHighlights: customHighlights,
         massingForm,
+        isLShaped,
         rooftopFeature,
         balconyType,
         facadePalette,
@@ -784,7 +813,9 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
     // Active Massing Form
     const massingForm = data?.building3D?.massingForm || (
-      promptLower.includes("stepped") || promptLower.includes("cascading") || promptLower.includes("terraced tower") || promptLower.includes("ziggurat") || promptLower.includes("setback") || promptLower.includes("pyramid")
+      promptLower.includes("l-shape") || promptLower.includes("l shape") || promptLower.includes("l-shaped") || promptLower.includes("l shaped") || promptLower.includes("l building") || promptLower.includes("l block")
+        ? "L_SHAPED"
+        : promptLower.includes("stepped") || promptLower.includes("cascading") || promptLower.includes("terraced tower") || promptLower.includes("ziggurat") || promptLower.includes("setback") || promptLower.includes("pyramid")
         ? "STEPPED_CASCADING"
         : promptLower.includes("curved") || promptLower.includes("cylinder") || promptLower.includes("cylindrical") || promptLower.includes("circular") || promptLower.includes("round tower") || promptLower.includes("oval")
         ? "CURVED_CYLINDRICAL"
@@ -794,6 +825,8 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         ? "INDUSTRIAL_SHED"
         : "RECTANGULAR"
     );
+
+    const isLShaped = massingForm === "L_SHAPED" || !!data?.building3D?.isLShaped || promptLower.includes("l-shape") || promptLower.includes("l shape") || promptLower.includes("l-shaped") || promptLower.includes("l shaped") || promptLower.includes("l building") || promptLower.includes("l block");
 
     // Active Rooftop Feature
     const rooftopFeature = data?.building3D?.rooftopFeature || (
@@ -959,6 +992,50 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               />
             );
           })()}
+
+          {/* L-Shaped Central Courtyard Plaza with Lawn & Fountain */}
+          {isLShaped && (() => {
+            const halfW = buildingWidth / 2;
+            const halfD = buildingDepth / 2;
+            const xCorner = 10;
+            const yCorner = -10;
+            const cp1 = project(xCorner + 4, yCorner + 4, 2);
+            const cp2 = project(halfW + 4, yCorner + 4, 2);
+            const cp3 = project(halfW + 4, halfD + 4, 2);
+            const cp4 = project(xCorner + 4, halfD + 4, 2);
+            const fCenter = project((xCorner + halfW) / 2 + 5, (yCorner + halfD) / 2 + 2, 3);
+            return (
+              <g id="lshape-courtyard-plaza">
+                {/* Landscaped Green Lawn Slab */}
+                <polygon
+                  points={`${cp1.x},${cp1.y} ${cp2.x},${cp2.y} ${cp3.x},${cp3.y} ${cp4.x},${cp4.y}`}
+                  fill="#065F46"
+                  stroke="#10B981"
+                  strokeWidth="1.5"
+                />
+                {/* Stone Paver Border */}
+                <line x1={cp4.x} y1={cp4.y} x2={cp1.x} y2={cp1.y} stroke="#34D399" strokeWidth="2" strokeDasharray="6 3" />
+                <line x1={cp1.x} y1={cp1.y} x2={cp2.x} y2={cp2.y} stroke="#34D399" strokeWidth="2" strokeDasharray="6 3" />
+                
+                {/* Central Water Fountain & Reflection Pool */}
+                <ellipse cx={fCenter.x} cy={fCenter.y} rx="30" ry="15" fill="#0369A1" stroke="#38BDF8" strokeWidth="2" />
+                <ellipse cx={fCenter.x} cy={fCenter.y} rx="20" ry="10" fill="#0284C7" stroke="#7DD3FC" strokeWidth="1.5" />
+                <ellipse cx={fCenter.x} cy={fCenter.y} rx="10" ry="5" fill="#38BDF8" />
+                {/* Upward Fountain Spout */}
+                <line x1={fCenter.x} y1={fCenter.y} x2={fCenter.x} y2={fCenter.y - 15} stroke="#E0F2FE" strokeWidth="2.5" />
+                <circle cx={fCenter.x} cy={fCenter.y - 15} r="3" fill="#FFFFFF" className="animate-ping" />
+                <circle cx={fCenter.x} cy={fCenter.y - 15} r="2.5" fill="#FFFFFF" />
+
+                {/* Floating Courtyard Label Badge */}
+                <g transform={`translate(${fCenter.x - 60}, ${fCenter.y + 22})`}>
+                  <rect x="0" y="-8" width="120" height="16" rx="4" fill="rgba(15, 23, 42, 0.92)" stroke="#10B981" strokeWidth="0.8" />
+                  <text x="60" y="4" fill="#34D399" fontSize="8" fontWeight="bold" textAnchor="middle">
+                    ⛲ ZEN COURTYARD PLAZA
+                  </text>
+                </g>
+              </g>
+            );
+          })()}
         </g>
 
         {/* 2. Multi-Story Floors Extrusion */}
@@ -998,6 +1075,23 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           const t3 = project(halfW + twistX, halfD, topZ);
           const t4 = project(-halfW + twistX, halfD, topZ);
 
+          // 6 Vertices of L-shaped slabs (dual wing + inner courtyard)
+          const xCorner = 10;
+          const yCorner = -10;
+          const lb1 = project(-halfW + twistX, -halfD, baseZ);
+          const lb2 = project(halfW + twistX, -halfD, baseZ);
+          const lb3 = project(halfW + twistX, yCorner, baseZ);
+          const lb4 = project(xCorner + twistX, yCorner, baseZ);
+          const lb5 = project(xCorner + twistX, halfD, baseZ);
+          const lb6 = project(-halfW + twistX, halfD, baseZ);
+
+          const lt1 = project(-halfW + twistX, -halfD, topZ);
+          const lt2 = project(halfW + twistX, -halfD, topZ);
+          const lt3 = project(halfW + twistX, yCorner, topZ);
+          const lt4 = project(xCorner + twistX, yCorner, topZ);
+          const lt5 = project(xCorner + twistX, halfD, topZ);
+          const lt6 = project(-halfW + twistX, halfD, topZ);
+
           // Determine Facade Fill and Stroke
           let facadeFill = isNight ? "url(#glassFacadeNight)" : "url(#glassFacadeDay)";
           let facadeStroke = isNight ? "#F59E0B" : "#38BDF8";
@@ -1023,21 +1117,33 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             <g key={`floor-${floorNum}`} className="transition-all duration-300">
               {/* Floor Slab Foundation Base */}
               <polygon
-                points={`${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y} ${b4.x},${b4.y}`}
+                points={isLShaped
+                  ? `${lb1.x},${lb1.y} ${lb2.x},${lb2.y} ${lb3.x},${lb3.y} ${lb4.x},${lb4.y} ${lb5.x},${lb5.y} ${lb6.x},${lb6.y}`
+                  : `${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y} ${b4.x},${b4.y}`
+                }
                 fill={isXRay ? "rgba(16, 185, 129, 0.15)" : (isNight ? "#334155" : "url(#slabGradient)")}
                 stroke={isXRay ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#B45309" : "#475569"))}
                 strokeWidth={isXRay ? 1 : 1.5}
               />
 
               {/* Structural RCC Columns (if X-Ray or Shaded) */}
-              {[
+              {(isLShaped ? [
+                { x: -halfW + 8, y: -halfD + 8 },
+                { x: halfW - 8, y: -halfD + 8 },
+                { x: halfW - 8, y: yCorner - 8 },
+                { x: xCorner + 6, y: yCorner - 6 },
+                { x: xCorner - 8, y: halfD - 8 },
+                { x: -halfW + 8, y: halfD - 8 },
+                { x: -halfW / 2, y: -halfD + 8 },
+                { x: -halfW + 8, y: 0 }
+              ] : [
                 { x: -halfW + 8, y: -halfD + 8 },
                 { x: halfW - 8, y: -halfD + 8 },
                 { x: halfW - 8, y: halfD - 8 },
                 { x: -halfW + 8, y: halfD - 8 },
                 { x: 0, y: -halfD + 8 },
-                { x: 0, y: halfD - 8 },
-              ].map((col, idx) => {
+                { x: 0, y: halfD - 8 }
+              ]).map((col, idx) => {
                 const cBottom = project(col.x + twistX, col.y, baseZ);
                 const cTop = project(col.x + twistX, col.y, topZ);
                 return (
@@ -1075,6 +1181,69 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     </g>
                   );
                 })()
+              ) : isLShaped && !isXRay ? (
+                /* L-SHAPED 4-FACE CURTAIN WALL FACADE */
+                <g id={`lshape-facade-floor-${floorNum}`}>
+                  {/* Face 1: Left Wing Front Face */}
+                  <polygon
+                    points={`${lb6.x},${lb6.y} ${lb5.x},${lb5.y} ${lt5.x},${lt5.y} ${lt6.x},${lt6.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.85"
+                  />
+                  {/* Face 2: Courtyard West Wall (Inner Left Wing) */}
+                  <polygon
+                    points={`${lb5.x},${lb5.y} ${lb4.x},${lb4.y} ${lt4.x},${lt4.y} ${lt5.x},${lt5.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.75"
+                  />
+                  {/* Face 3: Courtyard South Wall (Inner Rear Wing) */}
+                  <polygon
+                    points={`${lb4.x},${lb4.y} ${lb3.x},${lb3.y} ${lt3.x},${lt3.y} ${lt4.x},${lt4.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.80"
+                  />
+                  {/* Face 4: Rear Wing Right Face */}
+                  <polygon
+                    points={`${lb3.x},${lb3.y} ${lb2.x},${lb2.y} ${lt2.x},${lt2.y} ${lt3.x},${lt3.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.65"
+                  />
+
+                  {/* Vertical Window Mullions across all 4 visible faces */}
+                  {[
+                    { p1: lb6, p2: lb5, t1: lt6, t2: lt5 },
+                    { p1: lb5, p2: lb4, t1: lt5, t2: lt4 },
+                    { p1: lb4, p2: lb3, t1: lt4, t2: lt3 },
+                    { p1: lb3, p2: lb2, t1: lt3, t2: lt2 }
+                  ].map((face, fIdx) => (
+                    [0.33, 0.66].map((ratio, mIdx) => {
+                      const mx1 = face.p1.x + (face.p2.x - face.p1.x) * ratio;
+                      const my1 = face.p1.y + (face.p2.y - face.p1.y) * ratio;
+                      const mx2 = face.t1.x + (face.t2.x - face.t1.x) * ratio;
+                      const my2 = face.t1.y + (face.t2.y - face.t1.y) * ratio;
+                      return (
+                        <line
+                          key={`mullion-ls-${floorNum}-${fIdx}-${mIdx}`}
+                          x1={mx1}
+                          y1={my1}
+                          x2={mx2}
+                          y2={my2}
+                          stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#E0F2FE"))}
+                          strokeWidth="1"
+                          strokeOpacity="0.6"
+                        />
+                      );
+                    })
+                  ))}
+                </g>
               ) : (
                 /* Curtain Wall Glazed Facade Panels (Front & Side) */
                 !isXRay && (
@@ -1190,7 +1359,30 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               {/* DYNAMIC BALCONY VARIATIONS */}
               {!isXRay && (
                 (() => {
-                  if (balconyType === "WRAPAROUND_RIBBON") {
+                  if (isLShaped) {
+                    // Cantilevered glass balconies along Left Wing Front (Face 1) and Rear Wing Right (Face 4)
+                    const bLeftFront = project(-halfW + twistX, halfD + 18, baseZ);
+                    const bRightFront = project(xCorner + twistX, halfD + 18, baseZ);
+                    const brLeftFront = project(-halfW + twistX, halfD + 18, baseZ + 12);
+                    const brRightFront = project(xCorner + twistX, halfD + 18, baseZ + 12);
+
+                    const bRearRight1 = project(halfW + 18 + twistX, -halfD, baseZ);
+                    const bRearRight2 = project(halfW + 18 + twistX, yCorner, baseZ);
+                    const brRearRight1 = project(halfW + 18 + twistX, -halfD, baseZ + 12);
+                    const brRearRight2 = project(halfW + 18 + twistX, yCorner, baseZ + 12);
+
+                    return (
+                      <g key={`lshape-balconies-${floorNum}`}>
+                        <polygon points={`${lb6.x},${lb6.y} ${bLeftFront.x},${bLeftFront.y} ${bRightFront.x},${bRightFront.y} ${lb5.x},${lb5.y}`} fill="#1E293B" stroke="#38BDF8" strokeWidth="1" />
+                        <polygon points={`${bLeftFront.x},${bLeftFront.y} ${bRightFront.x},${bRightFront.y} ${brRightFront.x},${brRightFront.y} ${brLeftFront.x},${brLeftFront.y}`} fill="rgba(56, 189, 248, 0.45)" stroke="#38BDF8" strokeWidth="1" />
+                        <line x1={brLeftFront.x} y1={brLeftFront.y} x2={brRightFront.x} y2={brRightFront.y} stroke="#FFFFFF" strokeWidth="2" />
+
+                        <polygon points={`${lb3.x},${lb3.y} ${bRearRight2.x},${bRearRight2.y} ${bRearRight1.x},${bRearRight1.y} ${lb2.x},${lb2.y}`} fill="#0F172A" stroke="#0284C7" strokeWidth="1" />
+                        <polygon points={`${bRearRight2.x},${bRearRight2.y} ${bRearRight1.x},${bRearRight1.y} ${brRearRight1.x},${brRearRight1.y} ${brRearRight2.x},${brRearRight2.y}`} fill="rgba(2, 132, 199, 0.4)" stroke="#0284C7" strokeWidth="1" />
+                        <line x1={brRearRight2.x} y1={brRearRight2.y} x2={brRearRight1.x} y2={brRearRight1.y} stroke="#FFFFFF" strokeWidth="2" />
+                      </g>
+                    );
+                  } else if (balconyType === "WRAPAROUND_RIBBON") {
                     // Continuous wrap-around 360-deg ribbon balconies around front and right side
                     const wrapDepth = halfD + 20;
                     const c1 = project(-halfW - 15 + twistX, wrapDepth, baseZ);
@@ -1289,7 +1481,10 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
               {/* Top Slab Chamfer Edge */}
               <polygon
-                points={`${t1.x},${t1.y} ${t2.x},${t2.y} ${t3.x},${t3.y} ${t4.x},${t4.y}`}
+                points={isLShaped
+                  ? `${lt1.x},${lt1.y} ${lt2.x},${lt2.y} ${lt3.x},${lt3.y} ${lt4.x},${lt4.y} ${lt5.x},${lt5.y} ${lt6.x},${lt6.y}`
+                  : `${t1.x},${t1.y} ${t2.x},${t2.y} ${t3.x},${t3.y} ${t4.x},${t4.y}`
+                }
                 fill={isXRay ? "rgba(16, 185, 129, 0.2)" : (isNight ? "#1E293B" : "url(#slabGradient)")}
                 stroke={isXRay ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#D97706" : "#94A3B8"))}
                 strokeWidth={isXRay ? 1 : 1.5}
@@ -1324,29 +1519,44 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
           const halfW = (buildingWidth / 2) * topWidthScale;
           const halfD = (buildingDepth / 2) * topDepthScale;
+          const xCorner = 10;
+          const yCorner = -10;
 
-          // Parapet wall coping
+          // Parapet wall coping (standard rectangular)
           const p1 = project(-halfW + topTwistX, -halfD, topZ + 8);
           const p2 = project(halfW + topTwistX, -halfD, topZ + 8);
           const p3 = project(halfW + topTwistX, halfD, topZ + 8);
           const p4 = project(-halfW + topTwistX, halfD, topZ + 8);
 
-          // Central Core Lift Machine Room
-          const l1 = project(-35 + topTwistX, -25, topZ);
-          const l2 = project(35 + topTwistX, -25, topZ);
-          const l3 = project(35 + topTwistX, 25, topZ);
-          const l4 = project(-35 + topTwistX, 25, topZ);
+          // Parapet wall coping (L-shaped)
+          const lp1 = project(-halfW + topTwistX, -halfD, topZ + 8);
+          const lp2 = project(halfW + topTwistX, -halfD, topZ + 8);
+          const lp3 = project(halfW + topTwistX, yCorner, topZ + 8);
+          const lp4 = project(xCorner + topTwistX, yCorner, topZ + 8);
+          const lp5 = project(xCorner + topTwistX, halfD, topZ + 8);
+          const lp6 = project(-halfW + topTwistX, halfD, topZ + 8);
 
-          const lt1 = project(-35 + topTwistX, -25, topZ + 26);
-          const lt2 = project(35 + topTwistX, -25, topZ + 26);
-          const lt3 = project(35 + topTwistX, 25, topZ + 26);
-          const lt4 = project(-35 + topTwistX, 25, topZ + 26);
+          // Central Core Lift Machine Room
+          const coreX = isLShaped ? -halfW * 0.45 : 0;
+          const coreY = isLShaped ? -halfD * 0.45 : 0;
+          const l1 = project(coreX - 25 + topTwistX, coreY - 20, topZ);
+          const l2 = project(coreX + 25 + topTwistX, coreY - 20, topZ);
+          const l3 = project(coreX + 25 + topTwistX, coreY + 20, topZ);
+          const l4 = project(coreX - 25 + topTwistX, coreY + 20, topZ);
+
+          const lt1 = project(coreX - 25 + topTwistX, coreY - 20, topZ + 26);
+          const lt2 = project(coreX + 25 + topTwistX, coreY - 20, topZ + 26);
+          const lt3 = project(coreX + 25 + topTwistX, coreY + 20, topZ + 26);
+          const lt4 = project(coreX - 25 + topTwistX, coreY + 20, topZ + 26);
 
           return (
             <g id="rooftop-feature-group">
               {/* Parapet Outline */}
               <polygon
-                points={`${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`}
+                points={isLShaped
+                  ? `${lp1.x},${lp1.y} ${lp2.x},${lp2.y} ${lp3.x},${lp3.y} ${lp4.x},${lp4.y} ${lp5.x},${lp5.y} ${lp6.x},${lp6.y}`
+                  : `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`
+                }
                 fill={hasRooftopGarden ? "rgba(5, 150, 105, 0.25)" : "none"}
                 stroke={hasRooftopGarden ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#F59E0B" : "#38BDF8"))}
                 strokeWidth="1.5"
@@ -1361,8 +1571,8 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
               {/* Communication Mast / Antenna Spire */}
               {(() => {
-                const spireBase = project(topTwistX, 0, topZ + 26);
-                const spireTip = project(topTwistX, 0, topZ + 55);
+                const spireBase = project(coreX + topTwistX, coreY, topZ + 26);
+                const spireTip = project(coreX + topTwistX, coreY, topZ + 55);
                 return (
                   <g id="rooftop-antenna">
                     <line x1={spireBase.x} y1={spireBase.y} x2={spireTip.x} y2={spireTip.y} stroke="#EF4444" strokeWidth="2.5" />
@@ -1950,11 +2160,42 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     )}
 
                     {layers.architectural && (
-                      <g>
-                        <rect x="94" y="94" width="622" height="482" fill="none" stroke={themeColors.wallExterior} strokeWidth="12" />
-                        <rect x="94" y="94" width="622" height="482" fill="none" stroke="url(#concreteHatch)" strokeWidth="8" />
-                        <rect x="100" y="100" width="610" height="470" fill="none" stroke={themeColors.wallInterior} strokeWidth="2" />
-                      </g>
+                      (data.building3D?.massingForm === "L_SHAPED" || data.building3D?.isLShaped || data.prompt?.toLowerCase().includes("l shape") || data.prompt?.toLowerCase().includes("l-shape") || data.prompt?.toLowerCase().includes("l shaped") || data.prompt?.toLowerCase().includes("l-shaped")) ? (
+                        <g id="cad-lshape-outline">
+                          {/* L-shaped Exterior Thick Walls */}
+                          <polygon
+                            points="94,94 716,94 716,334 394,334 394,582 94,582"
+                            fill="none"
+                            stroke={themeColors.wallExterior}
+                            strokeWidth="12"
+                          />
+                          <polygon
+                            points="94,94 716,94 716,334 394,334 394,582 94,582"
+                            fill="none"
+                            stroke="url(#concreteHatch)"
+                            strokeWidth="8"
+                          />
+                          <polygon
+                            points="100,100 710,100 710,328 400,328 400,576 100,576"
+                            fill="none"
+                            stroke={themeColors.wallInterior}
+                            strokeWidth="2"
+                          />
+                          {/* Courtyard Lawn & Fountain in 2D Blueprint */}
+                          <rect x="404" y="334" width="306" height="242" fill="#064E3B" fillOpacity="0.25" stroke="#10B981" strokeWidth="1" strokeDasharray="4 2" />
+                          <circle cx="557" cy="455" r="35" fill="none" stroke="#38BDF8" strokeWidth="1.5" />
+                          <circle cx="557" cy="455" r="15" fill="none" stroke="#7DD3FC" strokeWidth="1" />
+                          <text x="557" y="458" fill="#34D399" fontSize="10" fontWeight="bold" textAnchor="middle">
+                            ZEN COURTYARD
+                          </text>
+                        </g>
+                      ) : (
+                        <g>
+                          <rect x="94" y="94" width="622" height="482" fill="none" stroke={themeColors.wallExterior} strokeWidth="12" />
+                          <rect x="94" y="94" width="622" height="482" fill="none" stroke="url(#concreteHatch)" strokeWidth="8" />
+                          <rect x="100" y="100" width="610" height="470" fill="none" stroke={themeColors.wallInterior} strokeWidth="2" />
+                        </g>
+                      )
                     )}
 
                     {layers.architectural &&

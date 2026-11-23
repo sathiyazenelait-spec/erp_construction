@@ -1011,6 +1011,7 @@ def call_gemini_blueprint_designer(prompt: str, project_type: str, builtup_sqft:
             f"- 'totalBuildingHeightMeters': float (e.g. {floors * 3.2:.1f})\n"
             f"- 'concreteGrade': e.g. 'M30 / M35'\n"
             f"- 'steelGrade': e.g. 'Fe550D High Ductility'\n"
+            f"- 'massingForm': One of ['L_SHAPED', 'STEPPED_CASCADING', 'CURVED_CYLINDRICAL', 'TWISTED_DIAGRID', 'INDUSTRIAL_SHED', 'RECTANGULAR']. If prompt mentions 'l-shape', 'l shape', or 'l shaped', you MUST return 'L_SHAPED'.\n"
             f"- 'architecturalHighlights': array of 4 string engineering highlights\n"
             f"- 'aiDesignSummary': 2-3 sentence executive summary by the architect"
         )
@@ -1081,9 +1082,12 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     has_diagrid = any(w in p_lower for w in ["diagrid", "diamond", "lattice", "exoskeleton", "cross brace", "x-brace"])
     has_sky_court = any(w in p_lower for w in ["sky court", "sky-court", "mid-level garden", "void", "cutout", "hollow", "sky bridge"])
     has_sun_louvers = any(w in p_lower for w in ["louver", "louvers", "shading", "brise-soleil", "fins", "slats"])
+    is_l_shaped = any(w in p_lower for w in ["l-shape", "l shape", "l-shaped", "l shaped", "l building", "l block", "l-type", "l layout"])
 
     # Massing Form Classification
-    if any(w in p_lower for w in ["stepped", "cascading", "terraced tower", "ziggurat", "setback", "tapering", "pyramid"]):
+    if is_l_shaped:
+        massing_form = "L_SHAPED"
+    elif any(w in p_lower for w in ["stepped", "cascading", "terraced tower", "ziggurat", "setback", "tapering", "pyramid"]):
         massing_form = "STEPPED_CASCADING"
     elif any(w in p_lower for w in ["curved", "cylinder", "cylindrical", "circular", "round tower", "oval", "fluid"]):
         massing_form = "CURVED_CYLINDRICAL"
@@ -1139,7 +1143,29 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     # Attempt real Gemini AI Architect call
     gemini_spec = call_gemini_blueprint_designer(prompt, p_type, sqft, floors_count, gemini_api_key)
     
-    if p_type == "COMMERCIAL":
+    if is_l_shaped:
+        title = f"{floors_count}-Story Modern L-Shaped Architectural Complex"
+        dwg_no = "DWG-AI-LSHP-001"
+        rooms = [
+            {"id": "R1", "name": "Living Suite (Left Wing)", "x": 100, "y": 340, "w": 280, "h": 220, "areaSqft": round(sqft * 0.28), "flooring": "Imported Italian Marble", "type": "LIVING"},
+            {"id": "R2", "name": "Master Suite (Left Wing)", "x": 100, "y": 100, "w": 280, "h": 220, "areaSqft": round(sqft * 0.26), "flooring": "Hardwood Oak Parquet", "type": "BEDROOM"},
+            {"id": "R3", "name": "Dining & Gourmet Kitchen (Rear Wing)", "x": 400, "y": 100, "w": 300, "h": 140, "areaSqft": round(sqft * 0.22), "flooring": "Polished Vitrified Tile", "type": "KITCHEN"},
+            {"id": "R4", "name": "Guest Suite & Executive Study (Rear Wing)", "x": 400, "y": 250, "w": 300, "h": 80, "areaSqft": round(sqft * 0.14), "flooring": "Engineered Hardwood", "type": "BEDROOM"},
+            {"id": "R5", "name": "Landscaped Zen Courtyard (Open-to-Sky)", "x": 400, "y": 340, "w": 300, "h": 220, "areaSqft": round(sqft * 0.10), "flooring": "Green Lawn & Granite Pavers", "type": "COURTYARD"}
+        ]
+        columns = [
+            {"grid": "L-1", "x": 95, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "L-2", "x": 395, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "L-3", "x": 695, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "L-4", "x": 95, "y": 335, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "L-5", "x": 395, "y": 335, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "L-6", "x": 695, "y": 335, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "L-7", "x": 95, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "L-8", "x": 395, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"}
+        ]
+        hvac_path = "M 140 180 L 380 180 L 380 400 L 220 400 M 420 180 L 660 180"
+        sprinklers = [{"x": 160, "y": 160}, {"x": 300, "y": 160}, {"x": 160, "y": 420}, {"x": 300, "y": 420}, {"x": 520, "y": 160}, {"x": 640, "y": 160}]
+    elif p_type == "COMMERCIAL":
         title = "Corporate Commercial Office Layout"
         dwg_no = "DWG-AI-COM-001"
         rooms = [
@@ -1288,7 +1314,10 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     gfa_sqft = round(sqft * floors_count)
 
     # Dynamic Architecture Title and Facade System based on prompt
-    if is_luxury_mansion:
+    if is_l_shaped:
+        fallback_title = f"{floors_count}-Story Modern L-Shaped Dual-Wing Complex"
+        fallback_facade = "L-Shaped Dual Wing Glazed Envelope with Courtyard"
+    elif is_luxury_mansion:
         fallback_title = f"{floors_count}-Floor Ultra-Luxury Sky-Mansion Tower"
         fallback_facade = "Champagne Gold Double-Height Glazing & Frameless Glass"
     elif is_cyber_obsidian:
@@ -1327,8 +1356,10 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     # Build highly responsive architectural highlights
     custom_highlights = [
         f"{floors_count}-Story {massing_form.replace('_', ' ').title()} RCC Frame Structure",
-        "External diagonal structural steel diagrid exoskeleton" if has_diagrid else (
-            "Alternating double-height living room glazing with structural silicone mullions" if has_double_height else "High-performance acoustic Low-E double curtain wall glazing"
+        "L-Shaped dual wing geometry with open-air central courtyard plaza" if massing_form == "L_SHAPED" else (
+            "External diagonal structural steel diagrid exoskeleton" if has_diagrid else (
+                "Alternating double-height living room glazing with structural silicone mullions" if has_double_height else "High-performance acoustic Low-E double curtain wall glazing"
+            )
         ),
         "Curved wave sinusoidal organic balconies" if balcony_type == "CURVED_WAVE" else (
             "Continuous 360-degree wrap-around panoramic ribbon balconies" if balcony_type == "WRAPAROUND_RIBBON" else (
@@ -1372,6 +1403,7 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
             "coreLiftCount": 2 if floors_count >= 5 else 1,
             "architecturalHighlights": gemini_spec.get("architecturalHighlights", custom_highlights) if gemini_spec else custom_highlights,
             "massingForm": massing_form,
+            "isLShaped": is_l_shaped,
             "rooftopFeature": rooftop_feature,
             "balconyType": balcony_type,
             "facadePalette": facade_palette,
