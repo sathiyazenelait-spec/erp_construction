@@ -43,13 +43,21 @@ export interface Building3DSpec {
   foundationType: string;
   coreLiftCount: number;
   architecturalHighlights: string[];
+  massingForm?: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED";
+  rooftopFeature?: "HELIPAD" | "INFINITY_POOL" | "OBSERVATORY_DOME" | "PENTHOUSE_GARDEN" | "GABLE_ROOF" | "SOLAR_ARRAY";
+  balconyType?: "CANTILEVERED_FLOATING" | "WRAPAROUND_RIBBON" | "CURVED_WAVE" | "TERRACED_CASCADE" | "MINIMAL_FLUSH";
+  facadePalette?: "GOLD_LUXURY" | "CYBER_OBSIDIAN" | "EMERALD_BIOPHILIC" | "TERRACOTTA_NORDIC" | "WHITE_MARBLE" | "AZURE_GLASS";
   hasHelipad?: boolean;
+  hasInfinityPool?: boolean;
+  hasObservatoryDome?: boolean;
+  hasGableRoof?: boolean;
   hasDoubleHeight?: boolean;
   hasFloatingBalconies?: boolean;
+  hasWraparoundBalconies?: boolean;
   hasRooftopGarden?: boolean;
-  facadePalette?: "GOLD_LUXURY" | "AZURE_GLASS" | "EMERALD_ECO" | "BRONZE_NORDIC";
-  rooftopFeature?: string;
-  balconyType?: string;
+  hasDiagrid?: boolean;
+  hasSkyCourt?: boolean;
+  hasSunLouvers?: boolean;
 }
 
 export interface BlueprintData {
@@ -190,6 +198,18 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
   async function generateBlueprint(pType: string, prompt: string, sqft: number, flrCount: number) {
     setGenerating(true);
     setSaveSuccess(false);
+
+    // Auto-detect floor count from prompt if explicitly specified (e.g. "10 floor", "12 story", "4 storey")
+    let targetFloors = flrCount;
+    const match = (prompt || "").match(/(\d+)\s*[-_]?\s*(floor|storey|story)/i);
+    if (match && match[1]) {
+      const parsed = parseInt(match[1], 10);
+      if (parsed >= 1 && parsed <= 25) {
+        targetFloors = parsed;
+        if (targetFloors !== floors) setFloors(targetFloors);
+      }
+    }
+
     try {
       const res = await fetch("http://localhost:8001/api/ai/generate-blueprint", {
         method: "POST",
@@ -198,7 +218,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           prompt: prompt || `${pType} building design`,
           projectType: pType,
           builtupSqft: sqft,
-          floors: flrCount,
+          floors: targetFloors,
           includeMep: layers.mep,
           theme: theme,
           geminiApiKey: geminiApiKey || undefined
@@ -212,11 +232,11 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           setSelectedRoom(bpData.rooms[0]);
         }
       } else {
-        fallbackGenerate(pType, prompt, sqft, flrCount);
+        fallbackGenerate(pType, prompt, sqft, targetFloors);
       }
     } catch (e) {
       console.warn("FastAPI offline, executing client-side generative model", e);
-      fallbackGenerate(pType, prompt, sqft, flrCount);
+      fallbackGenerate(pType, prompt, sqft, targetFloors);
     } finally {
       setGenerating(false);
     }
@@ -244,22 +264,59 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     }
 
     const hasHelipad = pLower.includes("helipad") || pLower.includes("heli-pad") || pLower.includes("helicopter") || pLower.includes("chopper");
+    const hasInfinityPool = pLower.includes("pool") || pLower.includes("infinity pool") || pLower.includes("sky pool") || pLower.includes("swimming pool") || pLower.includes("sundeck") || pLower.includes("jacuzzi");
+    const hasObservatoryDome = pLower.includes("dome") || pLower.includes("observatory") || pLower.includes("planetarium") || pLower.includes("sky lounge") || pLower.includes("telescope") || pLower.includes("crown") || pLower.includes("spire");
+    const hasGableRoof = pLower.includes("gable") || pLower.includes("pitched") || pLower.includes("slanted") || pLower.includes("sloped") || pLower.includes("cottage");
     const hasDoubleHeight = pLower.includes("double-height") || pLower.includes("double height") || pLower.includes("duplex") || pLower.includes("mezzanine") || pLower.includes("high ceiling");
     const hasFloatingBalconies = pLower.includes("floating") || pLower.includes("cantilever") || pLower.includes("frameless") || pLower.includes("balcon");
+    const hasWraparoundBalconies = pLower.includes("wrap") || pLower.includes("wraparound") || pLower.includes("wrap-around") || pLower.includes("continuous") || pLower.includes("ribbon") || pLower.includes("panoramic balcony");
+    const hasWaveBalconies = pLower.includes("wave") || pLower.includes("undulating") || pLower.includes("ripple") || pLower.includes("organic") || pLower.includes("aqua");
+    const hasTerracedBalconies = pLower.includes("vertical garden") || pLower.includes("planted balcony") || pLower.includes("bosco") || pLower.includes("cascading plant") || pLower.includes("hanging garden");
     const hasRooftopGarden = pLower.includes("terrace garden") || pLower.includes("sky garden") || pLower.includes("green roof") || pLower.includes("sky-mansion") || pLower.includes("penthouse");
-    const isLuxuryMansion = pLower.includes("sky-mansion") || pLower.includes("mansion") || pLower.includes("ultra-luxury") || pLower.includes("luxury") || pLower.includes("penthouse") || pLower.includes("gold");
-    const isBiophilic = pLower.includes("biophilic") || pLower.includes("vertical garden") || pLower.includes("green") || pLower.includes("eco");
+    const isLuxuryMansion = pLower.includes("sky-mansion") || pLower.includes("mansion") || pLower.includes("ultra-luxury") || pLower.includes("luxury") || pLower.includes("penthouse") || pLower.includes("gold") || pLower.includes("champagne") || pLower.includes("prestige");
+    const isCyberObsidian = pLower.includes("black") || pLower.includes("obsidian") || pLower.includes("dark") || pLower.includes("smoke") || pLower.includes("carbon") || pLower.includes("cyber") || pLower.includes("stealth") || pLower.includes("neon") || pLower.includes("futuristic");
+    const isBiophilic = pLower.includes("biophilic") || pLower.includes("vertical forest") || pLower.includes("green") || pLower.includes("eco") || pLower.includes("sustainable") || pLower.includes("living wall");
+    const isWhiteMarble = pLower.includes("white") || pLower.includes("marble") || pLower.includes("classical") || pLower.includes("statuario") || pLower.includes("clean") || pLower.includes("ivory") || pLower.includes("minimalist");
+    const isTerracotta = pLower.includes("nordic") || pLower.includes("terracotta") || pLower.includes("wood") || pLower.includes("timber") || pLower.includes("brick") || pLower.includes("clay");
+    const hasDiagrid = pLower.includes("diagrid") || pLower.includes("diamond") || pLower.includes("lattice") || pLower.includes("exoskeleton") || pLower.includes("cross brace") || pLower.includes("x-brace");
+    const hasSkyCourt = pLower.includes("sky court") || pLower.includes("sky-court") || pLower.includes("mid-level garden") || pLower.includes("void") || pLower.includes("cutout") || pLower.includes("hollow") || pLower.includes("sky bridge");
+    const hasSunLouvers = pLower.includes("louver") || pLower.includes("louvers") || pLower.includes("shading") || pLower.includes("brise-soleil") || pLower.includes("fins") || pLower.includes("slats");
 
-    const facadePalette: "GOLD_LUXURY" | "AZURE_GLASS" | "EMERALD_ECO" | "BRONZE_NORDIC" = isLuxuryMansion
-      ? "GOLD_LUXURY"
-      : isBiophilic
-      ? "EMERALD_ECO"
-      : pLower.includes("nordic")
-      ? "BRONZE_NORDIC"
-      : "AZURE_GLASS";
+    // Massing Form
+    let massingForm: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" = "RECTANGULAR";
+    if (pLower.includes("stepped") || pLower.includes("cascading") || pLower.includes("terraced tower") || pLower.includes("ziggurat") || pLower.includes("setback") || pLower.includes("pyramid")) {
+      massingForm = "STEPPED_CASCADING";
+    } else if (pLower.includes("curved") || pLower.includes("cylinder") || pLower.includes("cylindrical") || pLower.includes("circular") || pLower.includes("round tower") || pLower.includes("oval") || pLower.includes("fluid")) {
+      massingForm = "CURVED_CYLINDRICAL";
+    } else if (pLower.includes("twist") || pLower.includes("twisted") || pLower.includes("spiral") || pLower.includes("diagrid")) {
+      massingForm = "TWISTED_DIAGRID";
+    } else if (pType === "INDUSTRIAL" || pLower.includes("warehouse") || pLower.includes("shed") || pLower.includes("factory") || pLower.includes("hangar")) {
+      massingForm = "INDUSTRIAL_SHED";
+    }
 
-    const rooftopFeature = hasHelipad ? "HELIPAD" : hasRooftopGarden ? "PENTHOUSE_GARDEN" : "SOLAR_CORE";
-    const balconyType = hasFloatingBalconies ? "CANTILEVERED_FLOATING" : pLower.includes("balcon") ? "UNIFORM_RUNNING" : "NONE";
+    // Facade Palette
+    let facadePalette: "GOLD_LUXURY" | "CYBER_OBSIDIAN" | "EMERALD_BIOPHILIC" | "TERRACOTTA_NORDIC" | "WHITE_MARBLE" | "AZURE_GLASS" = "AZURE_GLASS";
+    if (isLuxuryMansion) facadePalette = "GOLD_LUXURY";
+    else if (isCyberObsidian) facadePalette = "CYBER_OBSIDIAN";
+    else if (isBiophilic) facadePalette = "EMERALD_BIOPHILIC";
+    else if (isWhiteMarble) facadePalette = "WHITE_MARBLE";
+    else if (isTerracotta) facadePalette = "TERRACOTTA_NORDIC";
+
+    // Rooftop Feature
+    let rooftopFeature: "HELIPAD" | "INFINITY_POOL" | "OBSERVATORY_DOME" | "PENTHOUSE_GARDEN" | "GABLE_ROOF" | "SOLAR_ARRAY" = "SOLAR_ARRAY";
+    if (hasHelipad) rooftopFeature = "HELIPAD";
+    else if (hasInfinityPool) rooftopFeature = "INFINITY_POOL";
+    else if (hasObservatoryDome) rooftopFeature = "OBSERVATORY_DOME";
+    else if (hasGableRoof || pType === "VILLA") rooftopFeature = "GABLE_ROOF";
+    else if (hasRooftopGarden) rooftopFeature = "PENTHOUSE_GARDEN";
+
+    // Balcony Type
+    let balconyType: "CANTILEVERED_FLOATING" | "WRAPAROUND_RIBBON" | "CURVED_WAVE" | "TERRACED_CASCADE" | "MINIMAL_FLUSH" = "MINIMAL_FLUSH";
+    if (hasWaveBalconies) balconyType = "CURVED_WAVE";
+    else if (hasWraparoundBalconies) balconyType = "WRAPAROUND_RIBBON";
+    else if (hasTerracedBalconies) balconyType = "TERRACED_CASCADE";
+    else if (hasFloatingBalconies) balconyType = "CANTILEVERED_FLOATING";
+    else if (pType === "RESIDENTIAL") balconyType = "CANTILEVERED_FLOATING";
 
     let title = `${effectiveFloors}-Story Executive Residence`;
     let dwg = `DWG-AI-RES-00${effectiveFloors}`;
@@ -269,8 +326,16 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
       title = `${effectiveFloors}-Floor Ultra-Luxury Sky-Mansion Tower`;
       facadeStyle = "Champagne Gold Double-Height Glazing & Frameless Glass";
       dwg = `DWG-AI-SKY-00${effectiveFloors}`;
+    } else if (isCyberObsidian) {
+      title = `${effectiveFloors}-Story Cyberpunk Obsidian Glass Tower`;
+      facadeStyle = "Smoke Obsidian Glazing with Neon Structural Exoskeleton";
+      dwg = `DWG-AI-CYB-00${effectiveFloors}`;
+    } else if (isBiophilic) {
+      title = `${effectiveFloors}-Floor Biophilic Vertical Forest Complex`;
+      facadeStyle = "Living Green Wall Facade & Cascading Planted Terraces";
+      dwg = `DWG-AI-ECO-00${effectiveFloors}`;
     } else if (pLower.includes("villa") || pType === "VILLA") {
-      title = `${effectiveFloors}-Story Luxury Villa with Floating Decks`;
+      title = `${effectiveFloors}-Story Modern Luxury Villa with Floating Decks`;
       facadeStyle = "Frameless Panoramic Glass & Cantilevered Timber Decks";
       dwg = `DWG-AI-VIL-00${effectiveFloors}`;
     } else if (pLower.includes("commercial") || pLower.includes("office") || pType === "COMMERCIAL") {
@@ -334,11 +399,25 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     }
 
     const customHighlights = [
-      `${effectiveFloors}-Story Extruded Reinforced Concrete Structure (IS 13920 SMRF)`,
-      hasDoubleHeight ? "Alternating double-height living room glazing with structural silicone mullions" : "High-performance acoustic low-E double curtain wall glazing",
-      hasFloatingBalconies ? "Cantilevered floating balconies with frameless laminated glass balustrades" : "Integrated MEP service core with dual wet risers & HVAC shafts",
-      hasHelipad ? "Rooftop helipad with perimeter flight safety beacons & sky-mansion terrace garden" : (
-        hasRooftopGarden ? "Landscaped sky-mansion terrace garden with infinity observation deck" : "Rooftop terrace with solar PV array & pressurized lift machine room"
+      `${effectiveFloors}-Story ${massingForm.replace('_', ' ').toLowerCase()} structural frame`,
+      hasDiagrid ? "External diagonal structural steel diagrid exoskeleton" : (
+        hasDoubleHeight ? "Alternating double-height living room glazing with structural silicone mullions" : "High-performance acoustic low-E double curtain wall glazing"
+      ),
+      balconyType === "CURVED_WAVE" ? "Curved wave sinusoidal organic balconies" : (
+        balconyType === "WRAPAROUND_RIBBON" ? "Continuous 360-degree wrap-around panoramic ribbon balconies" : (
+          balconyType === "TERRACED_CASCADE" ? "Cascading planted vertical garden terraces with automated drip misting" : (
+            balconyType === "CANTILEVERED_FLOATING" ? "Cantilevered floating balconies with frameless laminated glass balustrades" : "Integrated MEP service core with dual wet risers & HVAC shafts"
+          )
+        )
+      ),
+      rooftopFeature === "HELIPAD" ? "Rooftop helipad with perimeter flight safety beacons & sky terrace" : (
+        rooftopFeature === "INFINITY_POOL" ? "Elevated infinity sky pool with glass overflow edge and wooden sundeck" : (
+          rooftopFeature === "OBSERVATORY_DOME" ? "Geodesic glass dome astronomical observatory & panoramic sky lounge" : (
+            rooftopFeature === "GABLE_ROOF" ? "Architectural pitched timber gable roof with weather-sealed standing seams" : (
+              rooftopFeature === "PENTHOUSE_GARDEN" ? "Landscaped sky-park botanical terrace garden with observation deck" : "Rooftop terrace with solar PV array & pressurized lift machine room"
+            )
+          )
+        )
       )
     ];
 
@@ -365,13 +444,21 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         foundationType: effectiveFloors > 4 ? "Raft Foundation with Bored Cast-in-Situ Piles" : "Isolated Combined Footings",
         coreLiftCount: effectiveFloors >= 5 ? 2 : 1,
         architecturalHighlights: customHighlights,
+        massingForm,
+        rooftopFeature,
+        balconyType,
+        facadePalette,
         hasHelipad,
+        hasInfinityPool,
+        hasObservatoryDome,
+        hasGableRoof,
         hasDoubleHeight,
         hasFloatingBalconies,
+        hasWraparoundBalconies,
         hasRooftopGarden,
-        facadePalette,
-        rooftopFeature,
-        balconyType
+        hasDiagrid,
+        hasSkyCourt,
+        hasSunLouvers
       },
       dimensions: {
         canvasWidth: 800,
@@ -677,11 +764,46 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     // Extract dynamic architectural features from prompt and 3D spec
     const promptLower = (promptText || data?.prompt || "").toLowerCase();
     const hasHelipad = data?.building3D?.hasHelipad ?? (promptLower.includes("helipad") || promptLower.includes("heli-pad") || promptLower.includes("helicopter") || promptLower.includes("chopper"));
+    const hasInfinityPool = data?.building3D?.hasInfinityPool ?? (promptLower.includes("pool") || promptLower.includes("infinity pool") || promptLower.includes("sky pool") || promptLower.includes("swimming pool") || promptLower.includes("sundeck"));
+    const hasObservatoryDome = data?.building3D?.hasObservatoryDome ?? (promptLower.includes("dome") || promptLower.includes("observatory") || promptLower.includes("planetarium") || promptLower.includes("sky lounge") || promptLower.includes("telescope") || promptLower.includes("crown") || promptLower.includes("spire"));
+    const hasGableRoof = data?.building3D?.hasGableRoof ?? (promptLower.includes("gable") || promptLower.includes("pitched") || promptLower.includes("slanted") || promptLower.includes("sloped") || promptLower.includes("cottage"));
     const hasDoubleHeight = data?.building3D?.hasDoubleHeight ?? (promptLower.includes("double-height") || promptLower.includes("double height") || promptLower.includes("duplex") || promptLower.includes("mezzanine") || promptLower.includes("high ceiling"));
-    const hasFloatingBalconies = data?.building3D?.hasFloatingBalconies ?? (promptLower.includes("floating") || promptLower.includes("cantilever") || promptLower.includes("frameless") || promptLower.includes("balcon"));
+    const hasFloatingBalconies = data?.building3D?.hasFloatingBalconies ?? (promptLower.includes("floating") || promptLower.includes("cantilever") || promptLower.includes("frameless"));
+    const hasWraparoundBalconies = data?.building3D?.hasWraparoundBalconies ?? (promptLower.includes("wrap") || promptLower.includes("wraparound") || promptLower.includes("wrap-around") || promptLower.includes("continuous") || promptLower.includes("ribbon") || promptLower.includes("panoramic balcony"));
+    const hasWaveBalconies = promptLower.includes("wave") || promptLower.includes("undulating") || promptLower.includes("ripple") || promptLower.includes("organic") || promptLower.includes("aqua");
+    const hasTerracedBalconies = promptLower.includes("vertical garden") || promptLower.includes("planted balcony") || promptLower.includes("bosco") || promptLower.includes("cascading plant") || promptLower.includes("hanging garden");
     const hasRooftopGarden = data?.building3D?.hasRooftopGarden ?? (promptLower.includes("terrace garden") || promptLower.includes("sky garden") || promptLower.includes("green roof") || promptLower.includes("sky-mansion") || promptLower.includes("penthouse"));
-    const isLuxuryGold = data?.building3D?.facadePalette === "GOLD_LUXURY" || promptLower.includes("sky-mansion") || promptLower.includes("ultra-luxury") || promptLower.includes("luxury") || promptLower.includes("gold");
-    const isBiophilic = data?.building3D?.facadePalette === "EMERALD_ECO" || promptLower.includes("biophilic") || promptLower.includes("green") || promptLower.includes("eco");
+    const isLuxuryGold = data?.building3D?.facadePalette === "GOLD_LUXURY" || promptLower.includes("sky-mansion") || promptLower.includes("ultra-luxury") || promptLower.includes("luxury") || promptLower.includes("gold") || promptLower.includes("champagne");
+    const isCyberObsidian = data?.building3D?.facadePalette === "CYBER_OBSIDIAN" || promptLower.includes("black") || promptLower.includes("obsidian") || promptLower.includes("dark") || promptLower.includes("smoke") || promptLower.includes("carbon") || promptLower.includes("cyber") || promptLower.includes("stealth") || promptLower.includes("neon") || promptLower.includes("futuristic");
+    const isBiophilic = data?.building3D?.facadePalette === "EMERALD_BIOPHILIC" || promptLower.includes("biophilic") || promptLower.includes("vertical forest") || promptLower.includes("green") || promptLower.includes("eco");
+    const isWhiteMarble = data?.building3D?.facadePalette === "WHITE_MARBLE" || promptLower.includes("white") || promptLower.includes("marble") || promptLower.includes("classical") || promptLower.includes("statuario");
+    const isTerracotta = data?.building3D?.facadePalette === "TERRACOTTA_NORDIC" || promptLower.includes("nordic") || promptLower.includes("terracotta") || promptLower.includes("wood") || promptLower.includes("timber") || promptLower.includes("brick");
+    const hasDiagrid = data?.building3D?.hasDiagrid ?? (promptLower.includes("diagrid") || promptLower.includes("diamond") || promptLower.includes("lattice") || promptLower.includes("exoskeleton") || promptLower.includes("cross brace") || promptLower.includes("x-brace"));
+    const hasSkyCourt = data?.building3D?.hasSkyCourt ?? (promptLower.includes("sky court") || promptLower.includes("sky-court") || promptLower.includes("mid-level garden") || promptLower.includes("void") || promptLower.includes("cutout") || promptLower.includes("hollow") || promptLower.includes("sky bridge"));
+    const hasSunLouvers = data?.building3D?.hasSunLouvers ?? (promptLower.includes("louver") || promptLower.includes("louvers") || promptLower.includes("shading") || promptLower.includes("brise-soleil") || promptLower.includes("fins") || promptLower.includes("slats"));
+
+    // Active Massing Form
+    const massingForm = data?.building3D?.massingForm || (
+      promptLower.includes("stepped") || promptLower.includes("cascading") || promptLower.includes("terraced tower") || promptLower.includes("ziggurat") || promptLower.includes("setback") || promptLower.includes("pyramid")
+        ? "STEPPED_CASCADING"
+        : promptLower.includes("curved") || promptLower.includes("cylinder") || promptLower.includes("cylindrical") || promptLower.includes("circular") || promptLower.includes("round tower") || promptLower.includes("oval")
+        ? "CURVED_CYLINDRICAL"
+        : promptLower.includes("twist") || promptLower.includes("twisted") || promptLower.includes("spiral") || promptLower.includes("diagrid")
+        ? "TWISTED_DIAGRID"
+        : selectedPreset === "INDUSTRIAL" || promptLower.includes("warehouse") || promptLower.includes("shed")
+        ? "INDUSTRIAL_SHED"
+        : "RECTANGULAR"
+    );
+
+    // Active Rooftop Feature
+    const rooftopFeature = data?.building3D?.rooftopFeature || (
+      hasHelipad ? "HELIPAD" : hasInfinityPool ? "INFINITY_POOL" : hasObservatoryDome ? "OBSERVATORY_DOME" : hasGableRoof || selectedPreset === "VILLA" ? "GABLE_ROOF" : hasRooftopGarden ? "PENTHOUSE_GARDEN" : "SOLAR_ARRAY"
+    );
+
+    // Active Balcony Type
+    const balconyType = data?.building3D?.balconyType || (
+      hasWaveBalconies ? "CURVED_WAVE" : hasWraparoundBalconies ? "WRAPAROUND_RIBBON" : hasTerracedBalconies ? "TERRACED_CASCADE" : hasFloatingBalconies ? "CANTILEVERED_FLOATING" : (selectedPreset === "RESIDENTIAL" ? "CANTILEVERED_FLOATING" : "MINIMAL_FLUSH")
+    );
 
     const floorsArray = [];
     for (let f = 1; f <= totalFlrs; f++) {
@@ -700,7 +822,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         onMouseLeave={handleMouseUp}
       >
         <defs>
-          {/* Standard Blue Glass reflection gradient */}
+          {/* Azure Glass reflection gradient */}
           <linearGradient id="glassFacadeDay" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.85" />
             <stop offset="40%" stopColor="#0284C7" stopOpacity="0.75" />
@@ -715,7 +837,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             <stop offset="100%" stopColor="#FEF08A" stopOpacity="0.6" />
           </linearGradient>
 
-          {/* Ultra-Luxury Champagne Gold Glazing Gradient */}
+          {/* Champagne Gold Luxury Glazing Gradient */}
           <linearGradient id="goldFacadeDay" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.88" />
             <stop offset="35%" stopColor="#D97706" stopOpacity="0.80" />
@@ -730,12 +852,58 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             <stop offset="100%" stopColor="#FDE047" stopOpacity="0.90" />
           </linearGradient>
 
-          {/* Biophilic Emerald Glazing Gradient */}
+          {/* Cyber Obsidian Smoke Black Gradient */}
+          <linearGradient id="cyberFacadeDay" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#0F172A" stopOpacity="0.95" />
+            <stop offset="40%" stopColor="#1E293B" stopOpacity="0.90" />
+            <stop offset="75%" stopColor="#090D16" stopOpacity="0.95" />
+            <stop offset="100%" stopColor="#334155" stopOpacity="0.85" />
+          </linearGradient>
+
+          <linearGradient id="cyberFacadeNight" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#030712" stopOpacity="0.98" />
+            <stop offset="30%" stopColor="#06B6D4" stopOpacity="0.45" />
+            <stop offset="70%" stopColor="#0F172A" stopOpacity="0.95" />
+            <stop offset="100%" stopColor="#EC4899" stopOpacity="0.55" />
+          </linearGradient>
+
+          {/* Biophilic Emerald Jade Glazing Gradient */}
           <linearGradient id="emeraldFacadeDay" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#10B981" stopOpacity="0.85" />
             <stop offset="40%" stopColor="#059669" stopOpacity="0.80" />
             <stop offset="80%" stopColor="#047857" stopOpacity="0.85" />
             <stop offset="100%" stopColor="#A7F3D0" stopOpacity="0.90" />
+          </linearGradient>
+
+          <linearGradient id="emeraldFacadeNight" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#064E3B" stopOpacity="0.95" />
+            <stop offset="35%" stopColor="#10B981" stopOpacity="0.75" />
+            <stop offset="70%" stopColor="#022C22" stopOpacity="0.90" />
+            <stop offset="100%" stopColor="#6EE7B7" stopOpacity="0.80" />
+          </linearGradient>
+
+          {/* Terracotta Nordic Wood/Clay Gradient */}
+          <linearGradient id="nordicFacadeDay" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#EA580C" stopOpacity="0.85" />
+            <stop offset="45%" stopColor="#C2410C" stopOpacity="0.80" />
+            <stop offset="80%" stopColor="#9A3412" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#FDBA74" stopOpacity="0.90" />
+          </linearGradient>
+
+          {/* Statuario White Marble Gradient */}
+          <linearGradient id="marbleFacadeDay" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#F8FAFC" stopOpacity="0.92" />
+            <stop offset="45%" stopColor="#E2E8F0" stopOpacity="0.85" />
+            <stop offset="80%" stopColor="#CBD5E1" stopOpacity="0.88" />
+            <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.95" />
+          </linearGradient>
+
+          {/* Infinity Pool Water Gradient */}
+          <linearGradient id="poolWater" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.95" />
+            <stop offset="40%" stopColor="#06B6D4" stopOpacity="0.85" />
+            <stop offset="80%" stopColor="#0891B2" stopOpacity="0.90" />
+            <stop offset="100%" stopColor="#67E8F9" stopOpacity="0.95" />
           </linearGradient>
 
           {/* Helipad Tarmac Gradient */}
@@ -757,7 +925,6 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
         {/* 1. Ground Plaza & Foundations */}
         <g id="ground-plinth">
-          {/* Circular Ground Shadow */}
           <ellipse cx="400" cy="460" rx="280" ry="120" fill="url(#groundShadow)" />
 
           {/* Plaza Slab (Footprint) */}
@@ -769,8 +936,8 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             return (
               <polygon
                 points={`${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`}
-                fill={isNight ? "#0F172A" : "#1E293B"}
-                stroke="#334155"
+                fill={isNight ? "#0F172A" : (isCyberObsidian ? "#090D16" : "#1E293B")}
+                stroke={isCyberObsidian ? "#06B6D4" : "#334155"}
                 strokeWidth="1.5"
               />
             );
@@ -785,9 +952,9 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             return (
               <polygon
                 points={`${ep1.x},${ep1.y} ${ep2.x},${ep2.y} ${ep3.x},${ep3.y} ${ep4.x},${ep4.y}`}
-                fill={isLuxuryGold ? "#D97706" : "#0284C7"}
+                fill={isLuxuryGold ? "#D97706" : (isCyberObsidian ? "#06B6D4" : (isBiophilic ? "#059669" : "#0284C7"))}
                 fillOpacity="0.4"
-                stroke={isLuxuryGold ? "#F59E0B" : "#38BDF8"}
+                stroke={isLuxuryGold ? "#F59E0B" : (isCyberObsidian ? "#22D3EE" : "#38BDF8")}
                 strokeWidth="1"
               />
             );
@@ -801,27 +968,56 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
           const baseZ = (floorNum - 1) * floorHeight + 10;
           const topZ = baseZ + floorHeight - 4;
-          const halfW = buildingWidth / 2;
-          const halfD = buildingDepth / 2;
+
+          // Dynamic scale per floor based on massing form
+          let widthScale = 1.0;
+          let depthScale = 1.0;
+          let twistX = 0;
+
+          if (massingForm === "STEPPED_CASCADING") {
+            const stepRatio = 1 - ((floorNum - 1) / totalFlrs) * 0.32;
+            widthScale = stepRatio;
+            depthScale = stepRatio;
+          } else if (massingForm === "TWISTED_DIAGRID") {
+            const twistAngle = ((floorNum - 1) / totalFlrs) * 0.55;
+            twistX = Math.sin(twistAngle) * 16;
+          }
+
+          const halfW = (buildingWidth / 2) * widthScale;
+          const halfD = (buildingDepth / 2) * depthScale;
 
           // 4 Vertices of bottom slab
-          const b1 = project(-halfW, -halfD, baseZ);
-          const b2 = project(halfW, -halfD, baseZ);
-          const b3 = project(halfW, halfD, baseZ);
-          const b4 = project(-halfW, halfD, baseZ);
+          const b1 = project(-halfW + twistX, -halfD, baseZ);
+          const b2 = project(halfW + twistX, -halfD, baseZ);
+          const b3 = project(halfW + twistX, halfD, baseZ);
+          const b4 = project(-halfW + twistX, halfD, baseZ);
 
           // 4 Vertices of top slab
-          const t1 = project(-halfW, -halfD, topZ);
-          const t2 = project(halfW, -halfD, topZ);
-          const t3 = project(halfW, halfD, topZ);
-          const t4 = project(-halfW, halfD, topZ);
+          const t1 = project(-halfW + twistX, -halfD, topZ);
+          const t2 = project(halfW + twistX, -halfD, topZ);
+          const t3 = project(halfW + twistX, halfD, topZ);
+          const t4 = project(-halfW + twistX, halfD, topZ);
 
-          const facadeFill = isNight
-            ? (isLuxuryGold ? "url(#goldFacadeNight)" : "url(#glassFacadeNight)")
-            : (isLuxuryGold ? "url(#goldFacadeDay)" : (isBiophilic ? "url(#emeraldFacadeDay)" : "url(#glassFacadeDay)"));
-          const facadeStroke = isNight
-            ? (isLuxuryGold ? "#FEF08A" : "#F59E0B")
-            : (isLuxuryGold ? "#F59E0B" : (isBiophilic ? "#10B981" : "#38BDF8"));
+          // Determine Facade Fill and Stroke
+          let facadeFill = isNight ? "url(#glassFacadeNight)" : "url(#glassFacadeDay)";
+          let facadeStroke = isNight ? "#F59E0B" : "#38BDF8";
+
+          if (isLuxuryGold) {
+            facadeFill = isNight ? "url(#goldFacadeNight)" : "url(#goldFacadeDay)";
+            facadeStroke = isNight ? "#FEF08A" : "#F59E0B";
+          } else if (isCyberObsidian) {
+            facadeFill = isNight ? "url(#cyberFacadeNight)" : "url(#cyberFacadeDay)";
+            facadeStroke = isNight ? "#06B6D4" : "#38BDF8";
+          } else if (isBiophilic) {
+            facadeFill = isNight ? "url(#emeraldFacadeNight)" : "url(#emeraldFacadeDay)";
+            facadeStroke = isNight ? "#6EE7B7" : "#10B981";
+          } else if (isWhiteMarble) {
+            facadeFill = "url(#marbleFacadeDay)";
+            facadeStroke = "#94A3B8";
+          } else if (isTerracotta) {
+            facadeFill = "url(#nordicFacadeDay)";
+            facadeStroke = "#EA580C";
+          }
 
           return (
             <g key={`floor-${floorNum}`} className="transition-all duration-300">
@@ -829,7 +1025,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               <polygon
                 points={`${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y} ${b4.x},${b4.y}`}
                 fill={isXRay ? "rgba(16, 185, 129, 0.15)" : (isNight ? "#334155" : "url(#slabGradient)")}
-                stroke={isXRay ? "#10B981" : (isLuxuryGold ? "#B45309" : "#475569")}
+                stroke={isXRay ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#B45309" : "#475569"))}
                 strokeWidth={isXRay ? 1 : 1.5}
               />
 
@@ -842,8 +1038,8 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                 { x: 0, y: -halfD + 8 },
                 { x: 0, y: halfD - 8 },
               ].map((col, idx) => {
-                const cBottom = project(col.x, col.y, baseZ);
-                const cTop = project(col.x, col.y, topZ);
+                const cBottom = project(col.x + twistX, col.y, baseZ);
+                const cTop = project(col.x + twistX, col.y, topZ);
                 return (
                   <line
                     key={`col-${floorNum}-${idx}`}
@@ -851,181 +1047,243 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     y1={cBottom.y}
                     x2={cTop.x}
                     y2={cTop.y}
-                    stroke={isXRay ? "#34D399" : "#F59E0B"}
+                    stroke={isXRay ? "#34D399" : (isCyberObsidian ? "#06B6D4" : "#F59E0B")}
                     strokeWidth={isXRay ? 3 : 4}
                     strokeLinecap="square"
                   />
                 );
               })}
 
-              {/* Curtain Wall Glazed Facade Panels (Front & Side) */}
-              {!isXRay && (
-                <>
-                  {/* Facade Face 1 (Front) */}
-                  <polygon
-                    points={`${b3.x},${b3.y} ${b4.x},${b4.y} ${t4.x},${t4.y} ${t3.x},${t3.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.8"
-                  />
-                  {/* Facade Face 2 (Right Side) */}
-                  <polygon
-                    points={`${b2.x},${b2.y} ${b3.x},${b3.y} ${t3.x},${t3.y} ${t2.x},${t2.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.6"
-                  />
+              {/* Mid-Level Sky Court Garden Cutout (if hasSkyCourt and mid floor) */}
+              {hasSkyCourt && floorNum === Math.ceil(totalFlrs / 2) && !isXRay ? (
+                (() => {
+                  const sc1 = project(-halfW * 0.4 + twistX, halfD, baseZ + 2);
+                  const sc2 = project(halfW * 0.4 + twistX, halfD, baseZ + 2);
+                  const sc3 = project(halfW * 0.4 + twistX, -halfD * 0.2, baseZ + 2);
+                  const sc4 = project(-halfW * 0.4 + twistX, -halfD * 0.2, baseZ + 2);
+                  return (
+                    <g id="sky-court-cutout">
+                      {/* Open-Air Garden Terrace Void */}
+                      <polygon points={`${sc1.x},${sc1.y} ${sc2.x},${sc2.y} ${sc3.x},${sc3.y} ${sc4.x},${sc4.y}`} fill="#059669" stroke="#34D399" strokeWidth="1.5" />
+                      {/* Sky Court Label */}
+                      <g transform={`translate(${sc1.x + 10}, ${sc1.y - 12})`}>
+                        <rect x="0" y="-8" width="80" height="15" rx="3" fill="rgba(15, 23, 42, 0.9)" stroke="#10B981" strokeWidth="0.8" />
+                        <text x="40" y="3" fill="#34D399" fontSize="7" fontWeight="bold" textAnchor="middle">
+                          🌿 SKY COURT
+                        </text>
+                      </g>
+                    </g>
+                  );
+                })()
+              ) : (
+                /* Curtain Wall Glazed Facade Panels (Front & Side) */
+                !isXRay && (
+                  <>
+                    {/* Facade Face 1 (Front) */}
+                    <polygon
+                      points={`${b3.x},${b3.y} ${b4.x},${b4.y} ${t4.x},${t4.y} ${t3.x},${t3.y}`}
+                      fill={facadeFill}
+                      stroke={facadeStroke}
+                      strokeWidth="1"
+                      strokeOpacity="0.8"
+                    />
+                    {/* Facade Face 2 (Right Side) */}
+                    <polygon
+                      points={`${b2.x},${b2.y} ${b3.x},${b3.y} ${t3.x},${t3.y} ${t2.x},${t2.y}`}
+                      fill={facadeFill}
+                      stroke={facadeStroke}
+                      strokeWidth="1"
+                      strokeOpacity="0.6"
+                    />
 
-                  {/* Window Mullions / Transoms Grid Lines */}
-                  {hasDoubleHeight && floorNum % 2 === 0 ? (
-                    <>
-                      {/* Double-Height Tall Architectural Mullions spanning vertically */}
-                      {[0.2, 0.4, 0.6, 0.8].map((ratio, mIdx) => {
+                    {/* Structural Diagrid Exoskeleton (if hasDiagrid) */}
+                    {hasDiagrid && (
+                      <g id={`diagrid-frame-${floorNum}`}>
+                        <line x1={b4.x} y1={b4.y} x2={t3.x} y2={t3.y} stroke={isCyberObsidian ? "#06B6D4" : "#38BDF8"} strokeWidth="2.5" strokeOpacity="0.85" />
+                        <line x1={b3.x} y1={b3.y} x2={t4.x} y2={t4.y} stroke={isCyberObsidian ? "#06B6D4" : "#38BDF8"} strokeWidth="2.5" strokeOpacity="0.85" />
+                      </g>
+                    )}
+
+                    {/* Window Mullions / Transoms Grid Lines */}
+                    {hasDoubleHeight && floorNum % 2 === 0 ? (
+                      <>
+                        {/* Double-Height Tall Architectural Mullions spanning vertically */}
+                        {[0.2, 0.4, 0.6, 0.8].map((ratio, mIdx) => {
+                          const mx1 = b3.x + (b4.x - b3.x) * ratio;
+                          const my1 = b3.y + (b4.y - b3.y) * ratio;
+                          const mx2 = t3.x + (t4.x - t3.x) * ratio;
+                          const my2 = t3.y + (t4.y - t3.y) * ratio;
+                          return (
+                            <line
+                              key={`mullion-dh-${floorNum}-${mIdx}`}
+                              x1={mx1}
+                              y1={my1}
+                              x2={mx2}
+                              y2={my2}
+                              stroke={isLuxuryGold ? "#FEF08A" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#E0F2FE"))}
+                              strokeWidth="1.5"
+                              strokeOpacity="0.85"
+                            />
+                          );
+                        })}
+                        {/* Interior Mezzanine Loft Plate Line */}
+                        {(() => {
+                          const midZ = (baseZ + topZ) / 2;
+                          const m1 = project(-halfW + 15 + twistX, halfD - 20, midZ);
+                          const m2 = project(halfW - 15 + twistX, halfD - 20, midZ);
+                          return (
+                            <line
+                              x1={m1.x}
+                              y1={m1.y}
+                              x2={m2.x}
+                              y2={m2.y}
+                              stroke={isLuxuryGold ? "#FDE047" : "#38BDF8"}
+                              strokeWidth="1.5"
+                              strokeDasharray="4 3"
+                              strokeOpacity="0.75"
+                            />
+                          );
+                        })()}
+                      </>
+                    ) : (
+                      [0.25, 0.5, 0.75].map((ratio, mIdx) => {
                         const mx1 = b3.x + (b4.x - b3.x) * ratio;
                         const my1 = b3.y + (b4.y - b3.y) * ratio;
                         const mx2 = t3.x + (t4.x - t3.x) * ratio;
                         const my2 = t3.y + (t4.y - t3.y) * ratio;
                         return (
                           <line
-                            key={`mullion-dh-${floorNum}-${mIdx}`}
+                            key={`mullion-${floorNum}-${mIdx}`}
                             x1={mx1}
                             y1={my1}
                             x2={mx2}
                             y2={my2}
-                            stroke={isLuxuryGold ? "#FEF08A" : (isNight ? "#FEF08A" : "#E0F2FE")}
-                            strokeWidth="1.5"
-                            strokeOpacity="0.85"
+                            stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#E0F2FE"))}
+                            strokeWidth="1"
+                            strokeOpacity="0.6"
                           />
                         );
-                      })}
-                      {/* Interior Mezzanine Loft Plate Line */}
-                      {(() => {
-                        const midZ = (baseZ + topZ) / 2;
-                        const m1 = project(-halfW + 15, halfD - 20, midZ);
-                        const m2 = project(halfW - 15, halfD - 20, midZ);
-                        return (
-                          <line
-                            x1={m1.x}
-                            y1={m1.y}
-                            x2={m2.x}
-                            y2={m2.y}
-                            stroke={isLuxuryGold ? "#FDE047" : "#38BDF8"}
-                            strokeWidth="1.5"
-                            strokeDasharray="4 3"
-                            strokeOpacity="0.75"
-                          />
-                        );
-                      })()}
-                    </>
-                  ) : (
-                    [0.25, 0.5, 0.75].map((ratio, mIdx) => {
-                      const mx1 = b3.x + (b4.x - b3.x) * ratio;
-                      const my1 = b3.y + (b4.y - b3.y) * ratio;
-                      const mx2 = t3.x + (t4.x - t3.x) * ratio;
-                      const my2 = t3.y + (t4.y - t3.y) * ratio;
+                      })
+                    )}
+
+                    {/* Sun Louvers / Vertical Fins (if hasSunLouvers) */}
+                    {hasSunLouvers && [0.15, 0.35, 0.55, 0.75, 0.95].map((ratio, lIdx) => {
+                      const fx = b4.x + (b3.x - b4.x) * ratio;
+                      const fy = b4.y + (b3.y - b4.y) * ratio;
                       return (
                         <line
-                          key={`mullion-${floorNum}-${mIdx}`}
-                          x1={mx1}
-                          y1={my1}
-                          x2={mx2}
-                          y2={my2}
-                          stroke={isLuxuryGold ? "#FDE047" : (isNight ? "#FEF08A" : "#E0F2FE")}
-                          strokeWidth="1"
-                          strokeOpacity="0.6"
+                          key={`louver-${floorNum}-${lIdx}`}
+                          x1={fx}
+                          y1={fy}
+                          x2={fx}
+                          y2={fy - floorHeight * 0.9}
+                          stroke="#F59E0B"
+                          strokeWidth="2.5"
+                          strokeOpacity="0.7"
                         />
                       );
-                    })
-                  )}
-                </>
+                    })}
+                  </>
+                )
               )}
 
-              {/* Cantilevered Floating Balconies with Frameless Glass Balustrades */}
-              {!isXRay && hasFloatingBalconies && (
+              {/* DYNAMIC BALCONY VARIATIONS */}
+              {!isXRay && (
                 (() => {
-                  // Alternating floating balconies:
-                  // Odd floors (1, 3, 5, 7): Cantilever out to LEFT & FRONT
-                  // Even floors (2, 4, 6): Cantilever out to RIGHT & FRONT
-                  const isOdd = floorNum % 2 !== 0;
-                  const bLeft = isOdd ? -halfW - 25 : -20;
-                  const bRight = isOdd ? 20 : halfW + 25;
-                  const bDepth = halfD + 26;
-                  const bHeight = 14;
+                  if (balconyType === "WRAPAROUND_RIBBON") {
+                    // Continuous wrap-around 360-deg ribbon balconies around front and right side
+                    const wrapDepth = halfD + 20;
+                    const c1 = project(-halfW - 15 + twistX, wrapDepth, baseZ);
+                    const c2 = project(halfW + 20 + twistX, wrapDepth, baseZ);
+                    const c3 = project(halfW + 20 + twistX, -halfD - 15, baseZ);
+                    const r1 = project(-halfW - 15 + twistX, wrapDepth, baseZ + 12);
+                    const r2 = project(halfW + 20 + twistX, wrapDepth, baseZ + 12);
+                    const r3 = project(halfW + 20 + twistX, -halfD - 15, baseZ + 12);
 
-                  // Slab bottom corners
-                  const c1 = project(bLeft, halfD, baseZ);
-                  const c2 = project(bRight, halfD, baseZ);
-                  const c3 = project(bRight, bDepth, baseZ);
-                  const c4 = project(bLeft, bDepth, baseZ);
+                    return (
+                      <g key={`balcony-wrap-${floorNum}`}>
+                        <polygon points={`${b4.x},${b4.y} ${c1.x},${c1.y} ${c2.x},${c2.y} ${b3.x},${b3.y}`} fill="#1E293B" stroke="#38BDF8" strokeWidth="1" />
+                        <polygon points={`${b3.x},${b3.y} ${c2.x},${c2.y} ${c3.x},${c3.y} ${b2.x},${b2.y}`} fill="#0F172A" stroke="#0284C7" strokeWidth="1" />
+                        {/* Wrap-around glass balustrade */}
+                        <polygon points={`${c1.x},${c1.y} ${c2.x},${c2.y} ${r2.x},${r2.y} ${r1.x},${r1.y}`} fill="rgba(56, 189, 248, 0.45)" stroke="#38BDF8" strokeWidth="1" />
+                        <polygon points={`${c2.x},${c2.y} ${c3.x},${c3.y} ${r3.x},${r3.y} ${r2.x},${r2.y}`} fill="rgba(2, 132, 199, 0.4)" stroke="#0284C7" strokeWidth="1" />
+                        <line x1={r1.x} y1={r1.y} x2={r2.x} y2={r2.y} stroke="#FFFFFF" strokeWidth="2" />
+                        <line x1={r2.x} y1={r2.y} x2={r3.x} y2={r3.y} stroke="#FFFFFF" strokeWidth="2" />
+                      </g>
+                    );
+                  } else if (balconyType === "CURVED_WAVE") {
+                    // Sinusoidal undulating wave balconies (Aqua Tower style)
+                    const waveOffset = Math.sin((floorNum * Math.PI) / 2) * 24;
+                    const w1 = project(-halfW + 10 + twistX, halfD + 14 + (waveOffset < 0 ? 18 : 6), baseZ);
+                    const w2 = project(halfW - 10 + twistX, halfD + 14 + (waveOffset > 0 ? 18 : 6), baseZ);
+                    const wr1 = project(-halfW + 10 + twistX, halfD + 14 + (waveOffset < 0 ? 18 : 6), baseZ + 12);
+                    const wr2 = project(halfW - 10 + twistX, halfD + 14 + (waveOffset > 0 ? 18 : 6), baseZ + 12);
 
-                  // Balustrade top corners
-                  const r1 = project(bLeft, halfD, baseZ + bHeight);
-                  const r2 = project(bRight, halfD, baseZ + bHeight);
-                  const r3 = project(bRight, bDepth, baseZ + bHeight);
-                  const r4 = project(bLeft, bDepth, baseZ + bHeight);
+                    return (
+                      <g key={`balcony-wave-${floorNum}`}>
+                        <polygon points={`${b4.x},${b4.y} ${w1.x},${w1.y} ${w2.x},${w2.y} ${b3.x},${b3.y}`} fill="#1E293B" stroke="#38BDF8" strokeWidth="1" />
+                        <polygon points={`${w1.x},${w1.y} ${w2.x},${w2.y} ${wr2.x},${wr2.y} ${wr1.x},${wr1.y}`} fill="rgba(56, 189, 248, 0.5)" stroke="#38BDF8" strokeWidth="1.2" />
+                        <line x1={wr1.x} y1={wr1.y} x2={wr2.x} y2={wr2.y} stroke="#F8FAFC" strokeWidth="2" />
+                      </g>
+                    );
+                  } else if (balconyType === "TERRACED_CASCADE") {
+                    // Terraced cascade with hanging green vertical foliage
+                    const tc1 = project(-halfW + 15 + twistX, halfD + 22, baseZ);
+                    const tc2 = project(halfW - 15 + twistX, halfD + 22, baseZ);
+                    const tcr1 = project(-halfW + 15 + twistX, halfD + 22, baseZ + 11);
+                    const tcr2 = project(halfW - 15 + twistX, halfD + 22, baseZ + 11);
 
-                  return (
-                    <g key={`balcony-floating-${floorNum}`}>
-                      {/* Cantilever Concrete Base Slab */}
-                      <polygon
-                        points={`${c1.x},${c1.y} ${c2.x},${c2.y} ${c3.x},${c3.y} ${c4.x},${c4.y}`}
-                        fill={isLuxuryGold ? "#451A03" : "#1E293B"}
-                        stroke={isLuxuryGold ? "#F59E0B" : "#38BDF8"}
-                        strokeWidth="1.2"
-                      />
-                      {/* Frameless Glass Front Balustrade */}
-                      <polygon
-                        points={`${c4.x},${c4.y} ${c3.x},${c3.y} ${r3.x},${r3.y} ${r4.x},${r4.y}`}
-                        fill={isLuxuryGold ? "rgba(245, 158, 11, 0.35)" : "rgba(56, 189, 248, 0.45)"}
-                        stroke={isLuxuryGold ? "#FEF08A" : "#38BDF8"}
-                        strokeWidth="1"
-                      />
-                      {/* Frameless Glass Outer Side Balustrade */}
-                      {isOdd ? (
-                        <polygon
-                          points={`${c1.x},${c1.y} ${c4.x},${c4.y} ${r4.x},${r4.y} ${r1.x},${r1.y}`}
-                          fill={isLuxuryGold ? "rgba(245, 158, 11, 0.3)" : "rgba(56, 189, 248, 0.4)"}
-                          stroke={isLuxuryGold ? "#FEF08A" : "#0284C7"}
-                          strokeWidth="1"
-                        />
-                      ) : (
-                        <polygon
-                          points={`${c2.x},${c2.y} ${c3.x},${c3.y} ${r3.x},${r3.y} ${r2.x},${r2.y}`}
-                          fill={isLuxuryGold ? "rgba(245, 158, 11, 0.3)" : "rgba(56, 189, 248, 0.4)"}
-                          stroke={isLuxuryGold ? "#FEF08A" : "#0284C7"}
-                          strokeWidth="1"
-                        />
-                      )}
-                      {/* Polished Stainless Steel Handrail (Top Rim) */}
-                      <line x1={r4.x} y1={r4.y} x2={r3.x} y2={r3.y} stroke="#F8FAFC" strokeWidth="2" strokeLinecap="round" />
-                      {isOdd ? (
-                        <line x1={r1.x} y1={r1.y} x2={r4.x} y2={r4.y} stroke="#F8FAFC" strokeWidth="2" strokeLinecap="round" />
-                      ) : (
-                        <line x1={r2.x} y1={r2.y} x2={r3.x} y2={r3.y} stroke="#F8FAFC" strokeWidth="2" strokeLinecap="round" />
-                      )}
-                    </g>
-                  );
-                })()
-              )}
+                    return (
+                      <g key={`balcony-terrace-${floorNum}`}>
+                        <polygon points={`${b4.x},${b4.y} ${tc1.x},${tc1.y} ${tc2.x},${tc2.y} ${b3.x},${b3.y}`} fill="#064E3B" stroke="#10B981" strokeWidth="1.2" />
+                        <polygon points={`${tc1.x},${tc1.y} ${tc2.x},${tc2.y} ${tcr2.x},${tcr2.y} ${tcr1.x},${tcr1.y}`} fill="#059669" stroke="#34D399" strokeWidth="1" />
+                        {/* Cascading hanging ivy greenery */}
+                        {[0.2, 0.4, 0.6, 0.8].map((ratio, vIdx) => {
+                          const vx = tc1.x + (tc2.x - tc1.x) * ratio;
+                          const vy = tc1.y + (tc2.y - tc1.y) * ratio;
+                          return (
+                            <line key={`vine-${floorNum}-${vIdx}`} x1={vx} y1={vy} x2={vx + (vIdx % 2 === 0 ? 3 : -3)} y2={vy + 10} stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" />
+                          );
+                        })}
+                      </g>
+                    );
+                  } else if (balconyType === "CANTILEVERED_FLOATING") {
+                    // Alternating cantilevered floating pods
+                    const isOdd = floorNum % 2 !== 0;
+                    const bLeft = isOdd ? -halfW - 25 : -20;
+                    const bRight = isOdd ? 20 : halfW + 25;
+                    const bDepth = halfD + 26;
+                    const bHeight = 14;
 
-              {/* If not floating balconies but standard residential, render regular balcony */}
-              {!isXRay && !hasFloatingBalconies && selectedPreset === "RESIDENTIAL" && (
-                (() => {
-                  const bc1 = project(-halfW + 20, halfD + 18, baseZ);
-                  const bc2 = project(halfW - 20, halfD + 18, baseZ);
-                  const bc3 = project(halfW - 20, halfD + 18, baseZ + 12);
-                  const bc4 = project(-halfW + 20, halfD + 18, baseZ + 12);
-                  return (
-                    <polygon
-                      points={`${bc1.x},${bc1.y} ${bc2.x},${bc2.y} ${bc3.x},${bc3.y} ${bc4.x},${bc4.y}`}
-                      fill="#38BDF8"
-                      fillOpacity="0.45"
-                      stroke="#0284C7"
-                      strokeWidth="1"
-                    />
-                  );
+                    const c1 = project(bLeft + twistX, halfD, baseZ);
+                    const c2 = project(bRight + twistX, halfD, baseZ);
+                    const c3 = project(bRight + twistX, bDepth, baseZ);
+                    const c4 = project(bLeft + twistX, bDepth, baseZ);
+
+                    const r1 = project(bLeft + twistX, halfD, baseZ + bHeight);
+                    const r2 = project(bRight + twistX, halfD, baseZ + bHeight);
+                    const r3 = project(bRight + twistX, bDepth, baseZ + bHeight);
+                    const r4 = project(bLeft + twistX, bDepth, baseZ + bHeight);
+
+                    return (
+                      <g key={`balcony-floating-${floorNum}`}>
+                        <polygon points={`${c1.x},${c1.y} ${c2.x},${c2.y} ${c3.x},${c3.y} ${c4.x},${c4.y}`} fill={isLuxuryGold ? "#451A03" : "#1E293B"} stroke={isLuxuryGold ? "#F59E0B" : "#38BDF8"} strokeWidth="1.2" />
+                        <polygon points={`${c4.x},${c4.y} ${c3.x},${c3.y} ${r3.x},${r3.y} ${r4.x},${r4.y}`} fill={isLuxuryGold ? "rgba(245, 158, 11, 0.35)" : "rgba(56, 189, 248, 0.45)"} stroke={isLuxuryGold ? "#FEF08A" : "#38BDF8"} strokeWidth="1" />
+                        {isOdd ? (
+                          <polygon points={`${c1.x},${c1.y} ${c4.x},${c4.y} ${r4.x},${r4.y} ${r1.x},${r1.y}`} fill={isLuxuryGold ? "rgba(245, 158, 11, 0.3)" : "rgba(56, 189, 248, 0.4)"} stroke={isLuxuryGold ? "#FEF08A" : "#0284C7"} strokeWidth="1" />
+                        ) : (
+                          <polygon points={`${c2.x},${c2.y} ${c3.x},${c3.y} ${r3.x},${r3.y} ${r2.x},${r2.y}`} fill={isLuxuryGold ? "rgba(245, 158, 11, 0.3)" : "rgba(56, 189, 248, 0.4)"} stroke={isLuxuryGold ? "#FEF08A" : "#0284C7"} strokeWidth="1" />
+                        )}
+                        <line x1={r4.x} y1={r4.y} x2={r3.x} y2={r3.y} stroke="#F8FAFC" strokeWidth="2" strokeLinecap="round" />
+                        {isOdd ? (
+                          <line x1={r1.x} y1={r1.y} x2={r4.x} y2={r4.y} stroke="#F8FAFC" strokeWidth="2" strokeLinecap="round" />
+                        ) : (
+                          <line x1={r2.x} y1={r2.y} x2={r3.x} y2={r3.y} stroke="#F8FAFC" strokeWidth="2" strokeLinecap="round" />
+                        )}
+                      </g>
+                    );
+                  }
+                  return null;
                 })()
               )}
 
@@ -1033,13 +1291,13 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               <polygon
                 points={`${t1.x},${t1.y} ${t2.x},${t2.y} ${t3.x},${t3.y} ${t4.x},${t4.y}`}
                 fill={isXRay ? "rgba(16, 185, 129, 0.2)" : (isNight ? "#1E293B" : "url(#slabGradient)")}
-                stroke={isXRay ? "#10B981" : (isLuxuryGold ? "#D97706" : "#94A3B8")}
+                stroke={isXRay ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#D97706" : "#94A3B8"))}
                 strokeWidth={isXRay ? 1 : 1.5}
               />
 
               {/* Floor Level Label Pill (Left floating) */}
               <g transform={`translate(${b1.x - 70}, ${b1.y})`}>
-                <rect x="0" y="-9" width="55" height="18" rx="4" fill="rgba(15, 23, 42, 0.85)" stroke={isLuxuryGold ? "#F59E0B" : "#38BDF8"} strokeWidth="0.8" />
+                <rect x="0" y="-9" width="55" height="18" rx="4" fill="rgba(15, 23, 42, 0.85)" stroke={isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#F59E0B" : "#38BDF8")} strokeWidth="0.8" />
                 <text x="27" y="3" fill="#E2E8F0" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
                   {floorNum === 1 ? "G (LOBBY)" : `LEVEL ${floorNum}`}
                 </text>
@@ -1048,84 +1306,63 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           );
         })}
 
-        {/* 3. Rooftop Terrace, Helipad / Core Lift Machine Room & Garden */}
+        {/* 3. DYNAMIC ROOFTOP ARCHITECTURE */}
         {(isolatedFloor === "ALL" || isolatedFloor === totalFlrs) && (() => {
           const topZ = totalFlrs * floorHeight + 10;
-          const halfW = buildingWidth / 2;
-          const halfD = buildingDepth / 2;
+          let topWidthScale = 1.0;
+          let topDepthScale = 1.0;
+          let topTwistX = 0;
+
+          if (massingForm === "STEPPED_CASCADING") {
+            const stepRatio = 1 - ((totalFlrs - 1) / totalFlrs) * 0.32;
+            topWidthScale = stepRatio;
+            topDepthScale = stepRatio;
+          } else if (massingForm === "TWISTED_DIAGRID") {
+            const twistAngle = ((totalFlrs - 1) / totalFlrs) * 0.55;
+            topTwistX = Math.sin(twistAngle) * 16;
+          }
+
+          const halfW = (buildingWidth / 2) * topWidthScale;
+          const halfD = (buildingDepth / 2) * topDepthScale;
 
           // Parapet wall coping
-          const p1 = project(-halfW, -halfD, topZ + 8);
-          const p2 = project(halfW, -halfD, topZ + 8);
-          const p3 = project(halfW, halfD, topZ + 8);
-          const p4 = project(-halfW, halfD, topZ + 8);
+          const p1 = project(-halfW + topTwistX, -halfD, topZ + 8);
+          const p2 = project(halfW + topTwistX, -halfD, topZ + 8);
+          const p3 = project(halfW + topTwistX, halfD, topZ + 8);
+          const p4 = project(-halfW + topTwistX, halfD, topZ + 8);
 
-          // Central Dual Lift Core Machine Room
-          const l1 = project(-35, -25, topZ);
-          const l2 = project(35, -25, topZ);
-          const l3 = project(35, 25, topZ);
-          const l4 = project(-35, 25, topZ);
+          // Central Core Lift Machine Room
+          const l1 = project(-35 + topTwistX, -25, topZ);
+          const l2 = project(35 + topTwistX, -25, topZ);
+          const l3 = project(35 + topTwistX, 25, topZ);
+          const l4 = project(-35 + topTwistX, 25, topZ);
 
-          const lt1 = project(-35, -25, topZ + 26);
-          const lt2 = project(35, -25, topZ + 26);
-          const lt3 = project(35, 25, topZ + 26);
-          const lt4 = project(-35, 25, topZ + 26);
+          const lt1 = project(-35 + topTwistX, -25, topZ + 26);
+          const lt2 = project(35 + topTwistX, -25, topZ + 26);
+          const lt3 = project(35 + topTwistX, 25, topZ + 26);
+          const lt4 = project(-35 + topTwistX, 25, topZ + 26);
 
           return (
-            <g id="rooftop-terrace">
-              {/* Parapet Wall Outline */}
+            <g id="rooftop-feature-group">
+              {/* Parapet Outline */}
               <polygon
                 points={`${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`}
                 fill={hasRooftopGarden ? "rgba(5, 150, 105, 0.25)" : "none"}
-                stroke={hasRooftopGarden ? "#10B981" : (isLuxuryGold ? "#F59E0B" : "#38BDF8")}
+                stroke={hasRooftopGarden ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#F59E0B" : "#38BDF8"))}
                 strokeWidth="1.5"
                 strokeDasharray="4 2"
               />
 
-              {/* Terrace Garden Planters (if hasRooftopGarden) */}
-              {hasRooftopGarden && (() => {
-                const g1 = project(-halfW + 12, -halfD + 12, topZ + 4);
-                const g2 = project(-halfW + 45, -halfD + 12, topZ + 4);
-                const g3 = project(-halfW + 45, halfD - 12, topZ + 4);
-                const g4 = project(-halfW + 12, halfD - 12, topZ + 4);
-
-                const g5 = project(halfW - 45, -halfD + 12, topZ + 4);
-                const g6 = project(halfW - 12, -halfD + 12, topZ + 4);
-                const g7 = project(halfW - 12, halfD - 12, topZ + 4);
-                const g8 = project(halfW - 45, halfD - 12, topZ + 4);
-
-                return (
-                  <g id="terrace-gardens">
-                    {/* Left Garden Planter */}
-                    <polygon
-                      points={`${g1.x},${g1.y} ${g2.x},${g2.y} ${g3.x},${g3.y} ${g4.x},${g4.y}`}
-                      fill="#059669"
-                      fillOpacity="0.7"
-                      stroke="#34D399"
-                      strokeWidth="1"
-                    />
-                    {/* Right Garden Planter */}
-                    <polygon
-                      points={`${g5.x},${g5.y} ${g6.x},${g6.y} ${g7.x},${g7.y} ${g8.x},${g8.y}`}
-                      fill="#059669"
-                      fillOpacity="0.7"
-                      stroke="#34D399"
-                      strokeWidth="1"
-                    />
-                  </g>
-                );
-              })()}
-
-              {/* Central Dual Lift Core Machine Box */}
+              {/* Central Lift Core Box */}
               <polygon points={`${l1.x},${l1.y} ${l2.x},${l2.y} ${l3.x},${l3.y} ${l4.x},${l4.y}`} fill="#334155" />
               <polygon points={`${l3.x},${l3.y} ${l4.x},${l4.y} ${lt4.x},${lt4.y} ${lt3.x},${lt3.y}`} fill="#1E293B" stroke="#475569" />
               <polygon points={`${l2.x},${l2.y} ${l3.x},${l3.y} ${lt3.x},${lt3.y} ${lt2.x},${lt2.y}`} fill="#0F172A" stroke="#475569" />
               <polygon points={`${lt1.x},${lt1.y} ${lt2.x},${lt2.y} ${lt3.x},${lt3.y} ${lt4.x},${lt4.y}`} fill="#475569" stroke="#64748B" />
 
-              {/* Communication Mast / Antenna Spire on Lift Core */}
+              {/* Communication Mast / Antenna Spire */}
               {(() => {
-                const spireBase = project(0, 0, topZ + 26);
-                const spireTip = project(0, 0, topZ + 55);
+                const spireBase = project(topTwistX, 0, topZ + 26);
+                const spireTip = project(topTwistX, 0, topZ + 55);
                 return (
                   <g id="rooftop-antenna">
                     <line x1={spireBase.x} y1={spireBase.y} x2={spireTip.x} y2={spireTip.y} stroke="#EF4444" strokeWidth="2.5" />
@@ -1135,168 +1372,168 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                 );
               })()}
 
-              {/* ROOFTOP HELIPAD (When hasHelipad is true) */}
-              {hasHelipad ? (
-                (() => {
-                  const padZ = topZ + 14;
-                  const padRadius = 65;
-                  const numPoints = 12;
-                  const padPoints = [];
-                  for (let i = 0; i < numPoints; i++) {
-                    const angle = (i * 2 * Math.PI) / numPoints;
-                    const px = Math.cos(angle) * padRadius;
-                    const py = Math.sin(angle) * padRadius;
-                    padPoints.push(project(px, py, padZ));
-                  }
-                  const padPolyStr = padPoints.map(p => `${p.x},${p.y}`).join(" ");
+              {/* 1. ROOFTOP HELIPAD */}
+              {rooftopFeature === "HELIPAD" && (() => {
+                const padZ = topZ + 14;
+                const padRadius = 65;
+                const numPoints = 12;
+                const padPoints = [];
+                for (let i = 0; i < numPoints; i++) {
+                  const angle = (i * 2 * Math.PI) / numPoints;
+                  const px = Math.cos(angle) * padRadius + topTwistX;
+                  const py = Math.sin(angle) * padRadius;
+                  padPoints.push(project(px, py, padZ));
+                }
 
-                  // Center of Helipad
-                  const hCenter = project(0, 0, padZ);
+                const hCenter = project(topTwistX, 0, padZ);
+                const hH = 20;
+                const hW = 14;
+                const hLeftTop = project(-hW + topTwistX, -hH, padZ);
+                const hLeftBottom = project(-hW + topTwistX, hH, padZ);
+                const hRightTop = project(hW + topTwistX, -hH, padZ);
+                const hRightBottom = project(hW + topTwistX, hH, padZ);
+                const hMidLeft = project(-hW + topTwistX, 0, padZ);
+                const hMidRight = project(hW + topTwistX, 0, padZ);
 
-                  // Helipad "H" Marker Vertices
-                  const hH = 20; // half height
-                  const hW = 14; // half width
-                  const hLeftTop = project(-hW, -hH, padZ);
-                  const hLeftBottom = project(-hW, hH, padZ);
-                  const hRightTop = project(hW, -hH, padZ);
-                  const hRightBottom = project(hW, hH, padZ);
-                  const hMidLeft = project(-hW, 0, padZ);
-                  const hMidRight = project(hW, 0, padZ);
+                const beaconPoints = [
+                  project(-padRadius + 4 + topTwistX, 0, padZ),
+                  project(padRadius - 4 + topTwistX, 0, padZ),
+                  project(topTwistX, -padRadius + 4, padZ),
+                  project(topTwistX, padRadius - 4, padZ),
+                ];
 
-                  // Safety Beacons at 4 perimeter points
-                  const beaconPoints = [
-                    project(-padRadius + 4, 0, padZ),
-                    project(padRadius - 4, 0, padZ),
-                    project(0, -padRadius + 4, padZ),
-                    project(0, padRadius - 4, padZ),
-                  ];
-
-                  return (
-                    <g id="rooftop-helipad">
-                      {/* Cantilever Pedestals holding Helipad deck */}
-                      {padPoints.filter((_, idx) => idx % 3 === 0).map((pt, pIdx) => {
-                        const basePt = project(
-                          Math.cos((pIdx * 3 * 2 * Math.PI) / numPoints) * padRadius,
-                          Math.sin((pIdx * 3 * 2 * Math.PI) / numPoints) * padRadius,
-                          topZ
-                        );
-                        return (
-                          <line
-                            key={`helipad-ped-${pIdx}`}
-                            x1={basePt.x}
-                            y1={basePt.y}
-                            x2={pt.x}
-                            y2={pt.y}
-                            stroke="#64748B"
-                            strokeWidth="3.5"
-                          />
-                        );
-                      })}
-
-                      {/* Helipad Tarmac Platform */}
-                      <polygon
-                        points={padPolyStr}
-                        fill="url(#helipadTarmac)"
-                        stroke="#FACC15"
-                        strokeWidth="3.5"
-                      />
-
-                      {/* Inner Dashed White Ring */}
-                      {(() => {
-                        const innerPoints = [];
-                        for (let i = 0; i < numPoints; i++) {
-                          const angle = (i * 2 * Math.PI) / numPoints;
-                          const px = Math.cos(angle) * (padRadius - 10);
-                          const py = Math.sin(angle) * (padRadius - 10);
-                          innerPoints.push(project(px, py, padZ));
-                        }
-                        return (
-                          <polygon
-                            points={innerPoints.map(p => `${p.x},${p.y}`).join(" ")}
-                            fill="none"
-                            stroke="#FFFFFF"
-                            strokeWidth="1.5"
-                            strokeDasharray="5 3"
-                            strokeOpacity="0.85"
-                          />
-                        );
-                      })()}
-
-                      {/* Bold Architectural 'H' Marker */}
-                      {/* Left Vertical Bar */}
-                      <line
-                        x1={hLeftTop.x}
-                        y1={hLeftTop.y}
-                        x2={hLeftBottom.x}
-                        y2={hLeftBottom.y}
-                        stroke="#FFFFFF"
-                        strokeWidth="5.5"
-                        strokeLinecap="round"
-                      />
-                      {/* Right Vertical Bar */}
-                      <line
-                        x1={hRightTop.x}
-                        y1={hRightTop.y}
-                        x2={hRightBottom.x}
-                        y2={hRightBottom.y}
-                        stroke="#FFFFFF"
-                        strokeWidth="5.5"
-                        strokeLinecap="round"
-                      />
-                      {/* Center Crossbar */}
-                      <line
-                        x1={hMidLeft.x}
-                        y1={hMidLeft.y}
-                        x2={hMidRight.x}
-                        y2={hMidRight.y}
-                        stroke="#FFFFFF"
-                        strokeWidth="5.5"
-                        strokeLinecap="round"
-                      />
-
-                      {/* Aviation Flight Safety Beacons */}
-                      {beaconPoints.map((bp, bIdx) => (
-                        <g key={`beacon-${bIdx}`}>
-                          <circle cx={bp.x} cy={bp.y} r="4" fill="#EF4444" stroke="#FECACA" strokeWidth="1" />
-                          <circle cx={bp.x} cy={bp.y} r="2" fill="#FFFFFF" />
-                        </g>
-                      ))}
-
-                      {/* Helipad Callout Badge */}
-                      <g transform={`translate(${hCenter.x - 70}, ${hCenter.y - 45})`}>
-                        <rect x="0" y="-8" width="140" height="18" rx="4" fill="rgba(15, 23, 42, 0.95)" stroke="#FACC15" strokeWidth="1.2" />
-                        <text x="70" y="4" fill="#FACC15" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
-                          🚁 HELIPAD + SKY TERRACE
-                        </text>
+                return (
+                  <g id="rooftop-helipad">
+                    {/* Support Columns */}
+                    {padPoints.filter((_, idx) => idx % 3 === 0).map((pt, pIdx) => {
+                      const basePt = project(Math.cos((pIdx * 3 * 2 * Math.PI) / numPoints) * padRadius + topTwistX, Math.sin((pIdx * 3 * 2 * Math.PI) / numPoints) * padRadius, topZ);
+                      return <line key={`helipad-ped-${pIdx}`} x1={basePt.x} y1={basePt.y} x2={pt.x} y2={pt.y} stroke="#64748B" strokeWidth="3.5" />;
+                    })}
+                    <polygon points={padPoints.map(p => `${p.x},${p.y}`).join(" ")} fill="url(#helipadTarmac)" stroke="#FACC15" strokeWidth="3.5" />
+                    <line x1={hLeftTop.x} y1={hLeftTop.y} x2={hLeftBottom.x} y2={hLeftBottom.y} stroke="#FFFFFF" strokeWidth="5.5" strokeLinecap="round" />
+                    <line x1={hRightTop.x} y1={hRightTop.y} x2={hRightBottom.x} y2={hRightBottom.y} stroke="#FFFFFF" strokeWidth="5.5" strokeLinecap="round" />
+                    <line x1={hMidLeft.x} y1={hMidLeft.y} x2={hMidRight.x} y2={hMidRight.y} stroke="#FFFFFF" strokeWidth="5.5" strokeLinecap="round" />
+                    {beaconPoints.map((bp, bIdx) => (
+                      <g key={`beacon-${bIdx}`}>
+                        <circle cx={bp.x} cy={bp.y} r="4" fill="#EF4444" stroke="#FECACA" strokeWidth="1" />
+                        <circle cx={bp.x} cy={bp.y} r="2" fill="#FFFFFF" />
                       </g>
+                    ))}
+                    <g transform={`translate(${hCenter.x - 70}, ${hCenter.y - 45})`}>
+                      <rect x="0" y="-8" width="140" height="18" rx="4" fill="rgba(15, 23, 42, 0.95)" stroke="#FACC15" strokeWidth="1.2" />
+                      <text x="70" y="4" fill="#FACC15" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                        🚁 HELIPAD + SKY TERRACE
+                      </text>
                     </g>
-                  );
-                })()
-              ) : (
-                /* Standard Solar PV Array & Lift Badge */
-                <>
-                  {(() => {
-                    const s1 = project(-100, -20, topZ + 12);
-                    const s2 = project(-55, -20, topZ + 12);
-                    const s3 = project(-55, 35, topZ + 18);
-                    const s4 = project(-100, 35, topZ + 18);
-                    return (
-                      <polygon
-                        points={`${s1.x},${s1.y} ${s2.x},${s2.y} ${s3.x},${s3.y} ${s4.x},${s4.y}`}
-                        fill="#1E40AF"
-                        stroke="#60A5FA"
-                        strokeWidth="1"
-                      />
-                    );
-                  })()}
-                  <g transform={`translate(${lt3.x + 10}, ${lt3.y - 10})`}>
-                    <rect x="0" y="-8" width="85" height="16" rx="4" fill="rgba(15, 23, 42, 0.9)" stroke="#F59E0B" strokeWidth="1" />
-                    <text x="42" y="3" fill="#F59E0B" fontSize="8" fontWeight="bold" textAnchor="middle">
-                      ROOFTOP + OHWT
-                    </text>
                   </g>
-                </>
-              )}
+                );
+              })()}
+
+              {/* 2. ROOFTOP SKY INFINITY POOL */}
+              {rooftopFeature === "INFINITY_POOL" && (() => {
+                const poolZ = topZ + 6;
+                const poolW1 = project(-halfW * 0.7 + topTwistX, -halfD * 0.3, poolZ);
+                const poolW2 = project(halfW * 0.7 + topTwistX, -halfD * 0.3, poolZ);
+                const poolW3 = project(halfW * 0.7 + topTwistX, halfD * 0.7, poolZ);
+                const poolW4 = project(-halfW * 0.7 + topTwistX, halfD * 0.7, poolZ);
+
+                // Wooden sundeck border
+                const deck1 = project(-halfW * 0.9 + topTwistX, -halfD * 0.5, poolZ - 2);
+                const deck2 = project(halfW * 0.9 + topTwistX, -halfD * 0.5, poolZ - 2);
+                const deck3 = project(halfW * 0.9 + topTwistX, halfD * 0.85, poolZ - 2);
+                const deck4 = project(-halfW * 0.9 + topTwistX, halfD * 0.85, poolZ - 2);
+
+                return (
+                  <g id="rooftop-infinity-pool">
+                    {/* Teak Timber Sundeck */}
+                    <polygon points={`${deck1.x},${deck1.y} ${deck2.x},${deck2.y} ${deck3.x},${deck3.y} ${deck4.x},${deck4.y}`} fill="#78350F" stroke="#B45309" strokeWidth="1.5" />
+                    {/* Luminous Cyan Pool Water Body */}
+                    <polygon points={`${poolW1.x},${poolW1.y} ${poolW2.x},${poolW2.y} ${poolW3.x},${poolW3.y} ${poolW4.x},${poolW4.y}`} fill="url(#poolWater)" stroke="#67E8F9" strokeWidth="2" />
+                    {/* Glass Rim-Flow Overflow Edge */}
+                    <line x1={poolW4.x} y1={poolW4.y} x2={poolW3.x} y2={poolW3.y} stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" />
+                    {/* Poolside Sun Loungers */}
+                    {[-30, 0, 30].map((lx, lIdx) => {
+                      const lp = project(lx + topTwistX, -halfD * 0.4, poolZ);
+                      return <rect key={`lounger-${lIdx}`} x={lp.x - 7} y={lp.y - 4} width="14" height="8" rx="2" fill="#FFFFFF" stroke="#94A3B8" strokeWidth="0.8" />;
+                    })}
+                    {/* Callout Badge */}
+                    <g transform={`translate(${poolW1.x + 30}, ${poolW1.y - 25})`}>
+                      <rect x="0" y="-8" width="165" height="18" rx="4" fill="rgba(15, 23, 42, 0.95)" stroke="#06B6D4" strokeWidth="1.2" />
+                      <text x="82" y="4" fill="#22D3EE" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                        🏊 SKY INFINITY POOL & SUNDECK
+                      </text>
+                    </g>
+                  </g>
+                );
+              })()}
+
+              {/* 3. ROOFTOP OBSERVATORY DOME */}
+              {rooftopFeature === "OBSERVATORY_DOME" && (() => {
+                const domeCenter = project(topTwistX, 0, topZ + 26);
+                const domeRadius = 45;
+                return (
+                  <g id="rooftop-observatory-dome">
+                    {/* Spherical Dome Structure */}
+                    <ellipse cx={domeCenter.x} cy={domeCenter.y - 12} rx={domeRadius} ry={domeRadius * 0.75} fill="url(#glassFacadeDay)" stroke="#38BDF8" strokeWidth="2" />
+                    {/* Geodesic Rib Lines */}
+                    <ellipse cx={domeCenter.x} cy={domeCenter.y - 12} rx={domeRadius * 0.65} ry={domeRadius * 0.75} fill="none" stroke="#E0F2FE" strokeWidth="1.2" />
+                    <ellipse cx={domeCenter.x} cy={domeCenter.y - 12} rx={domeRadius * 0.3} ry={domeRadius * 0.75} fill="none" stroke="#E0F2FE" strokeWidth="1" />
+                    {/* Astronomical Telescope Viewing Slit */}
+                    <line x1={domeCenter.x - 8} y1={domeCenter.y - 42} x2={domeCenter.x + 12} y2={domeCenter.y + 12} stroke="#F59E0B" strokeWidth="3" />
+                    {/* Callout Badge */}
+                    <g transform={`translate(${domeCenter.x - 85}, ${domeCenter.y - 55})`}>
+                      <rect x="0" y="-8" width="170" height="18" rx="4" fill="rgba(15, 23, 42, 0.95)" stroke="#38BDF8" strokeWidth="1.2" />
+                      <text x="85" y="4" fill="#38BDF8" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                        🔭 SKY OBSERVATORY & DOME
+                      </text>
+                    </g>
+                  </g>
+                );
+              })()}
+
+              {/* 4. ROOFTOP PITCHED GABLE ROOF */}
+              {rooftopFeature === "GABLE_ROOF" && (() => {
+                const ridgeHeight = topZ + 36;
+                const ridge1 = project(-halfW + topTwistX, 0, ridgeHeight);
+                const ridge2 = project(halfW + topTwistX, 0, ridgeHeight);
+
+                return (
+                  <g id="rooftop-gable-roof">
+                    {/* Sloped Roof Plane Front */}
+                    <polygon points={`${ridge1.x},${ridge1.y} ${ridge2.x},${ridge2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`} fill="#B91C1C" stroke="#7F1D1D" strokeWidth="1.5" />
+                    {/* Sloped Roof Plane Rear */}
+                    <polygon points={`${ridge1.x},${ridge1.y} ${ridge2.x},${ridge2.y} ${p2.x},${p2.y} ${p1.x},${p1.y}`} fill="#991B1B" stroke="#7F1D1D" strokeWidth="1.5" />
+                    {/* Ridge Line */}
+                    <line x1={ridge1.x} y1={ridge1.y} x2={ridge2.x} y2={ridge2.y} stroke="#FEF08A" strokeWidth="2.5" />
+                    {/* Callout Badge */}
+                    <g transform={`translate(${ridge1.x + 30}, ${ridge1.y - 20})`}>
+                      <rect x="0" y="-8" width="160" height="18" rx="4" fill="rgba(15, 23, 42, 0.95)" stroke="#EF4444" strokeWidth="1.2" />
+                      <text x="80" y="4" fill="#FCA5A5" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                        🏠 ARCHITECTURAL GABLE ROOF
+                      </text>
+                    </g>
+                  </g>
+                );
+              })()}
+
+              {/* 5. STANDARD SOLAR PV ARRAY */}
+              {rooftopFeature === "SOLAR_ARRAY" && (() => {
+                const s1 = project(-100 + topTwistX, -20, topZ + 12);
+                const s2 = project(-55 + topTwistX, -20, topZ + 12);
+                const s3 = project(-55 + topTwistX, 35, topZ + 18);
+                const s4 = project(-100 + topTwistX, 35, topZ + 18);
+                return (
+                  <g id="rooftop-solar">
+                    <polygon points={`${s1.x},${s1.y} ${s2.x},${s2.y} ${s3.x},${s3.y} ${s4.x},${s4.y}`} fill="#1E40AF" stroke="#60A5FA" strokeWidth="1" />
+                    <g transform={`translate(${lt3.x + 10}, ${lt3.y - 10})`}>
+                      <rect x="0" y="-8" width="85" height="16" rx="4" fill="rgba(15, 23, 42, 0.9)" stroke="#F59E0B" strokeWidth="1" />
+                      <text x="42" y="3" fill="#F59E0B" fontSize="8" fontWeight="bold" textAnchor="middle">
+                        ROOFTOP + OHWT
+                      </text>
+                    </g>
+                  </g>
+                );
+              })()}
             </g>
           );
         })()}
@@ -1672,7 +1909,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                       {data.title}
                     </div>
                     <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                      {floors} Stories • Height: {(floors * 3.2).toFixed(1)}m / {(floors * 3.2 * 3.28084).toFixed(0)}ft • {data.building3D?.hasHelipad ? "🚁 Rooftop Helipad Certified" : "SMRF Frame"}
+                      {floors} Stories • Height: {(floors * 3.2).toFixed(1)}m / {(floors * 3.2 * 3.28084).toFixed(0)}ft • {data.building3D?.rooftopFeature === "HELIPAD" ? "🚁 Rooftop Helipad" : (data.building3D?.rooftopFeature === "INFINITY_POOL" ? "🏊 Sky Infinity Pool" : (data.building3D?.rooftopFeature === "OBSERVATORY_DOME" ? "🔭 Panoramic Dome" : (data.building3D?.rooftopFeature === "GABLE_ROOF" ? "🏠 Pitched Gable Roof" : "SMRF Frame")))}
                     </div>
                   </div>
                 </div>

@@ -1062,25 +1062,79 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
         except Exception:
             pass
 
-    # Extract architectural modifiers from prompt
+    # Extract rich multi-dimensional architectural modifiers from prompt
     has_helipad = any(w in p_lower for w in ["helipad", "heli-pad", "helicopter", "chopper"])
+    has_infinity_pool = any(w in p_lower for w in ["pool", "infinity pool", "sky pool", "swimming pool", "sundeck", "jacuzzi"])
+    has_observatory_dome = any(w in p_lower for w in ["dome", "observatory", "planetarium", "sky lounge", "telescope", "crown", "spire"])
+    has_gable_roof = any(w in p_lower for w in ["gable", "pitched", "slanted", "sloped", "villa", "cottage"])
     has_double_height = any(w in p_lower for w in ["double-height", "double height", "duplex", "mezzanine", "high ceiling"])
     has_floating_balconies = any(w in p_lower for w in ["floating", "cantilever", "frameless", "balcon"])
+    has_wraparound_balconies = any(w in p_lower for w in ["wrap", "wraparound", "wrap-around", "continuous", "ribbon", "panoramic balcony"])
+    has_wave_balconies = any(w in p_lower for w in ["wave", "undulating", "ripple", "organic", "aqua"])
+    has_terraced_balconies = any(w in p_lower for w in ["vertical garden", "planted balcony", "bosco", "cascading plant", "hanging garden"])
     has_rooftop_garden = any(w in p_lower for w in ["terrace garden", "sky garden", "green roof", "garden terrace", "sky-mansion", "penthouse"])
-    is_luxury_mansion = any(w in p_lower for w in ["sky-mansion", "mansion", "ultra-luxury", "luxury", "penthouse", "gold"])
-    is_biophilic = any(w in p_lower for w in ["biophilic", "vertical garden", "green", "eco", "sustainable"])
+    is_luxury_mansion = any(w in p_lower for w in ["sky-mansion", "mansion", "ultra-luxury", "luxury", "penthouse", "gold", "champagne", "prestige", "palace"])
+    is_cyber_obsidian = any(w in p_lower for w in ["black", "obsidian", "dark", "smoke", "carbon", "cyber", "stealth", "neon", "futuristic"])
+    is_biophilic = any(w in p_lower for w in ["biophilic", "vertical forest", "green", "eco", "sustainable", "living wall"])
+    is_white_marble = any(w in p_lower for w in ["white", "marble", "classical", "statuario", "clean", "ivory", "minimalist"])
+    is_terracotta = any(w in p_lower for w in ["nordic", "terracotta", "wood", "timber", "brick", "clay", "scandinavian"])
+    has_diagrid = any(w in p_lower for w in ["diagrid", "diamond", "lattice", "exoskeleton", "cross brace", "x-brace"])
+    has_sky_court = any(w in p_lower for w in ["sky court", "sky-court", "mid-level garden", "void", "cutout", "hollow", "sky bridge"])
+    has_sun_louvers = any(w in p_lower for w in ["louver", "louvers", "shading", "brise-soleil", "fins", "slats"])
 
+    # Massing Form Classification
+    if any(w in p_lower for w in ["stepped", "cascading", "terraced tower", "ziggurat", "setback", "tapering", "pyramid"]):
+        massing_form = "STEPPED_CASCADING"
+    elif any(w in p_lower for w in ["curved", "cylinder", "cylindrical", "circular", "round tower", "oval", "fluid"]):
+        massing_form = "CURVED_CYLINDRICAL"
+    elif any(w in p_lower for w in ["twist", "twisted", "spiral", "diagrid", "diamond lattice"]):
+        massing_form = "TWISTED_DIAGRID"
+    elif p_type == "INDUSTRIAL" or any(w in p_lower for w in ["warehouse", "shed", "factory", "hangar", "gantry"]):
+        massing_form = "INDUSTRIAL_SHED"
+    else:
+        massing_form = "RECTANGULAR"
+
+    # Facade Palette Classification
     if is_luxury_mansion:
         facade_palette = "GOLD_LUXURY"
+    elif is_cyber_obsidian:
+        facade_palette = "CYBER_OBSIDIAN"
     elif is_biophilic:
-        facade_palette = "EMERALD_ECO"
-    elif any(w in p_lower for w in ["nordic", "terracotta", "wood", "brick"]):
-        facade_palette = "BRONZE_NORDIC"
+        facade_palette = "EMERALD_BIOPHILIC"
+    elif is_white_marble:
+        facade_palette = "WHITE_MARBLE"
+    elif is_terracotta:
+        facade_palette = "TERRACOTTA_NORDIC"
     else:
         facade_palette = "AZURE_GLASS"
 
-    rooftop_feature = "HELIPAD" if has_helipad else ("PENTHOUSE_GARDEN" if has_rooftop_garden else "SOLAR_CORE")
-    balcony_type = "CANTILEVERED_FLOATING" if has_floating_balconies else ("UNIFORM_RUNNING" if "balcon" in p_lower else "NONE")
+    # Rooftop Feature Classification
+    if has_helipad:
+        rooftop_feature = "HELIPAD"
+    elif has_infinity_pool:
+        rooftop_feature = "INFINITY_POOL"
+    elif has_observatory_dome:
+        rooftop_feature = "OBSERVATORY_DOME"
+    elif has_gable_roof:
+        rooftop_feature = "GABLE_ROOF"
+    elif has_rooftop_garden:
+        rooftop_feature = "PENTHOUSE_GARDEN"
+    else:
+        rooftop_feature = "SOLAR_ARRAY"
+
+    # Balcony Type Classification
+    if has_wave_balconies:
+        balcony_type = "CURVED_WAVE"
+    elif has_wraparound_balconies:
+        balcony_type = "WRAPAROUND_RIBBON"
+    elif has_terraced_balconies:
+        balcony_type = "TERRACED_CASCADE"
+    elif has_floating_balconies:
+        balcony_type = "CANTILEVERED_FLOATING"
+    elif any(w in p_lower for w in ["flush", "no balcony", "curtain wall"]):
+        balcony_type = "MINIMAL_FLUSH"
+    else:
+        balcony_type = "CANTILEVERED_FLOATING" if p_type == "RESIDENTIAL" else "MINIMAL_FLUSH"
 
     # Attempt real Gemini AI Architect call
     gemini_spec = call_gemini_blueprint_designer(prompt, p_type, sqft, floors_count, gemini_api_key)
@@ -1237,6 +1291,12 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     if is_luxury_mansion:
         fallback_title = f"{floors_count}-Floor Ultra-Luxury Sky-Mansion Tower"
         fallback_facade = "Champagne Gold Double-Height Glazing & Frameless Glass"
+    elif is_cyber_obsidian:
+        fallback_title = f"{floors_count}-Story Cyberpunk Obsidian Skyscraper"
+        fallback_facade = "Smoke Obsidian Glazing with Neon Structural Exoskeleton"
+    elif is_biophilic:
+        fallback_title = f"{floors_count}-Floor Biophilic Vertical Forest Complex"
+        fallback_facade = "Living Green Wall Facade & Cascading Planted Terraces"
     elif "villa" in p_lower or p_type == "VILLA":
         fallback_title = f"{floors_count}-Story Luxury Villa with Floating Decks"
         fallback_facade = "Frameless Panoramic Glass & Cantilevered Timber Decks"
@@ -1264,12 +1324,27 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
         f"Designed by AI Chief Structural Architect: {floors_count}-story {architect_title} with {sqft:,.0f} sq.ft typical floor plate, complete IS 456 / IS 1893 seismic compliance, and high-efficiency curtain glazing."
     )
 
+    # Build highly responsive architectural highlights
     custom_highlights = [
-        f"{floors_count}-Story Extruded Reinforced Concrete Structure (IS 13920 SMRF)",
-        "Alternating double-height living room glazing with structural silicone mullions" if has_double_height else "High-performance acoustic low-E double curtain wall glazing",
-        "Cantilevered floating balconies with frameless laminated glass balustrades" if has_floating_balconies else "Integrated MEP service core with dual wet risers & HVAC shafts",
-        "Rooftop helipad with perimeter flight safety beacons & sky-mansion terrace garden" if has_helipad else (
-            "Landscaped sky-mansion terrace garden with infinity observation deck" if has_rooftop_garden else "Rooftop terrace with solar PV array & pressurized lift machine room"
+        f"{floors_count}-Story {massing_form.replace('_', ' ').title()} RCC Frame Structure",
+        "External diagonal structural steel diagrid exoskeleton" if has_diagrid else (
+            "Alternating double-height living room glazing with structural silicone mullions" if has_double_height else "High-performance acoustic Low-E double curtain wall glazing"
+        ),
+        "Curved wave sinusoidal organic balconies" if balcony_type == "CURVED_WAVE" else (
+            "Continuous 360-degree wrap-around panoramic ribbon balconies" if balcony_type == "WRAPAROUND_RIBBON" else (
+                "Cascading planted vertical garden terraces with automated drip misting" if balcony_type == "TERRACED_CASCADE" else (
+                    "Cantilevered floating balconies with frameless laminated glass balustrades" if balcony_type == "CANTILEVERED_FLOATING" else "Integrated MEP service core with dual wet risers & HVAC shafts"
+                )
+            )
+        ),
+        "Rooftop helipad with perimeter flight safety beacons & sky-mansion terrace" if rooftop_feature == "HELIPAD" else (
+            "Elevated infinity sky pool with glass overflow edge and wooden sundeck" if rooftop_feature == "INFINITY_POOL" else (
+                "Geodesic glass dome astronomical observatory & panoramic sky lounge" if rooftop_feature == "OBSERVATORY_DOME" else (
+                    "Architectural pitched timber gable roof with weather-sealed standing seams" if rooftop_feature == "GABLE_ROOF" else (
+                        "Landscaped sky-park botanical terrace garden with observation deck" if rooftop_feature == "PENTHOUSE_GARDEN" else "Rooftop terrace with monocrystalline solar PV array & pressurized lift core"
+                    )
+                )
+            )
         )
     ]
 
@@ -1296,13 +1371,20 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
             "foundationType": "Raft Foundation with Bored Cast-in-Situ Piles" if floors_count > 4 else "Isolated Combined Footings",
             "coreLiftCount": 2 if floors_count >= 5 else 1,
             "architecturalHighlights": gemini_spec.get("architecturalHighlights", custom_highlights) if gemini_spec else custom_highlights,
+            "massingForm": massing_form,
+            "rooftopFeature": rooftop_feature,
+            "balconyType": balcony_type,
+            "facadePalette": facade_palette,
             "hasHelipad": has_helipad,
+            "hasInfinityPool": has_infinity_pool,
+            "hasObservatoryDome": has_observatory_dome,
             "hasDoubleHeight": has_double_height,
             "hasFloatingBalconies": has_floating_balconies,
+            "hasWraparoundBalconies": has_wraparound_balconies,
             "hasRooftopGarden": has_rooftop_garden,
-            "facadePalette": facade_palette,
-            "rooftopFeature": rooftop_feature,
-            "balconyType": balcony_type
+            "hasDiagrid": has_diagrid,
+            "hasSkyCourt": has_sky_court,
+            "hasSunLouvers": has_sun_louvers
         },
         "dimensions": {
             "canvasWidth": 800,
