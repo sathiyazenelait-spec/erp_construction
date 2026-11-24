@@ -43,7 +43,7 @@ export interface Building3DSpec {
   foundationType: string;
   coreLiftCount: number;
   architecturalHighlights: string[];
-  massingForm?: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED" | "U_SHAPED" | "V_SHAPED" | "T_SHAPED" | "H_SHAPED" | "SPHERICAL_BALL" | "OPEN_SQUARE_DONUT" | "WIDE_LINEAR_RANGE";
+  massingForm?: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED" | "U_SHAPED" | "V_SHAPED" | "T_SHAPED" | "H_SHAPED" | "SPHERICAL_BALL" | "OPEN_SQUARE_DONUT" | "WIDE_LINEAR_RANGE" | "CIRCULAR_DONUT" | "ALDAR_COIN";
   isLShaped?: boolean;
   isUShaped?: boolean;
   isVShaped?: boolean;
@@ -51,6 +51,8 @@ export interface Building3DSpec {
   isHShaped?: boolean;
   isSphericalBall?: boolean;
   isOpenSquare?: boolean;
+  isCircularDonut?: boolean;
+  isAldarCoin?: boolean;
   isWideRange?: boolean;
   isCurvedRounded?: boolean;
   isHostel?: boolean;
@@ -325,10 +327,12 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const isTShaped = /\bt[-_\s]?(shape|shaped|block|layout)\b|\bt\s+building\b/i.test(pLower);
     const isHShaped = /\bh[-_\s]?(shape|shaped|block|layout)\b|\bh\s+building\b/i.test(pLower);
     const isSphericalBall = pLower.includes("ball shape") || pLower.includes("spherical") || pLower.includes("sphere") || pLower.includes("globe") || pLower.includes("orb") || pLower.includes("geodesic ball") || pLower.includes("ball building");
-    const isOpenSquare = pLower.includes("square open center") || pLower.includes("open center") || pLower.includes("donut") || pLower.includes("hollow square") || pLower.includes("courtyard ring") || pLower.includes("atrium square") || pLower.includes("square courtyard");
+    const isOpenSquare = pLower.includes("square open center") || pLower.includes("open center") || pLower.includes("hollow square") || pLower.includes("courtyard ring") || pLower.includes("atrium square") || pLower.includes("square courtyard") || (pLower.includes("donut") && !pLower.includes("circular"));
+    const isAldarCoin = pLower.includes("aldar") || pLower.includes("coin shape") || pLower.includes("standing disc") || pLower.includes("coin building") || pLower.includes("vertical circle");
+    const isCircularDonut = pLower.includes("cricle") || pLower.includes("circle") || pLower.includes("circular") || pLower.includes("ring shape") || pLower.includes("circular donut") || pLower.includes("circular courtyard");
     const isWideRange = pLower.includes("wide range") || pLower.includes("wide building") || pLower.includes("linear campus") || pLower.includes("wide span") || pLower.includes("extended pavilion") || pLower.includes("low-rise wide");
 
-    const isCurvedRounded = pLower.includes("rounded") || pLower.includes("curved") || pLower.includes("round") || pLower.includes("circular") || pLower.includes("cylinder") || pLower.includes("cylindrical") || pLower.includes("oval") || pLower.includes("crescent") || pLower.includes("arc");
+    const isCurvedRounded = pLower.includes("rounded") || pLower.includes("curved") || pLower.includes("round") || pLower.includes("cylinder") || pLower.includes("cylindrical") || pLower.includes("oval") || pLower.includes("crescent") || pLower.includes("arc");
     const isHostel = pLower.includes("hostel") || pLower.includes("dormitory") || pLower.includes("student") || pLower.includes("campus") || pLower.includes("coliving");
     const hasBasketball = pLower.includes("basketball") || pLower.includes("b-ball") || pLower.includes("hoop");
     const hasVolleyball = pLower.includes("volleyball") || pLower.includes("v-ball");
@@ -344,7 +348,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const isOneSideGlass = pLower.includes("one side glass") || pLower.includes("single side glass") || pLower.includes("one side glazed") || pLower.includes("front glass only") || pLower.includes("one side glassed");
 
     // Massing Form
-    let massingForm: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED" | "U_SHAPED" | "V_SHAPED" | "T_SHAPED" | "H_SHAPED" | "SPHERICAL_BALL" | "OPEN_SQUARE_DONUT" | "WIDE_LINEAR_RANGE" = "RECTANGULAR";
+    let massingForm: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED" | "U_SHAPED" | "V_SHAPED" | "T_SHAPED" | "H_SHAPED" | "SPHERICAL_BALL" | "OPEN_SQUARE_DONUT" | "WIDE_LINEAR_RANGE" | "CIRCULAR_DONUT" | "ALDAR_COIN" = "RECTANGULAR";
     if (isVShaped) {
       massingForm = "V_SHAPED";
     } else if (isUShaped) {
@@ -357,6 +361,10 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
       massingForm = "SPHERICAL_BALL";
     } else if (isOpenSquare) {
       massingForm = "OPEN_SQUARE_DONUT";
+    } else if (isAldarCoin) {
+      massingForm = "ALDAR_COIN";
+    } else if (isCircularDonut) {
+      massingForm = "CIRCULAR_DONUT";
     } else if (isWideRange) {
       massingForm = "WIDE_LINEAR_RANGE";
     } else if (isLShaped) {
@@ -1042,7 +1050,9 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const isTShaped = data?.building3D?.isTShaped ?? (/\bt[-_\s]?(shape|shaped|block|layout)\b|\bt\s+building\b/i.test(promptLower));
     const isHShaped = data?.building3D?.isHShaped ?? (/\bh[-_\s]?(shape|shaped|block|layout)\b|\bh\s+building\b/i.test(promptLower));
     const isSphericalBall = data?.building3D?.isSphericalBall ?? (promptLower.includes("ball shape") || promptLower.includes("spherical") || promptLower.includes("sphere") || promptLower.includes("globe") || promptLower.includes("orb"));
-    const isOpenSquare = data?.building3D?.isOpenSquare ?? (promptLower.includes("square open center") || promptLower.includes("open center") || promptLower.includes("donut") || promptLower.includes("hollow square") || promptLower.includes("atrium square"));
+    const isOpenSquare = data?.building3D?.isOpenSquare ?? (promptLower.includes("square open center") || promptLower.includes("open center") || promptLower.includes("hollow square") || promptLower.includes("atrium square") || (promptLower.includes("donut") && !promptLower.includes("circular")));
+    const isAldarCoin = data?.building3D?.isAldarCoin ?? (promptLower.includes("aldar") || promptLower.includes("coin shape") || promptLower.includes("standing disc") || promptLower.includes("coin building") || promptLower.includes("vertical circle"));
+    const isCircularDonut = data?.building3D?.isCircularDonut ?? (promptLower.includes("cricle") || promptLower.includes("circle") || promptLower.includes("circular") || promptLower.includes("ring shape") || promptLower.includes("circular donut") || promptLower.includes("circular courtyard"));
     const isWideRange = data?.building3D?.isWideRange ?? (promptLower.includes("wide range") || promptLower.includes("wide building") || promptLower.includes("linear campus") || promptLower.includes("wide span"));
     const hasPlayground = data?.building3D?.hasPlayground ?? (promptLower.includes("playgroud") || promptLower.includes("playground") || promptLower.includes("play ground") || promptLower.includes("play area") || promptLower.includes("park"));
     const hasAirplaneRoof = data?.building3D?.hasAirplaneRoof ?? (promptLower.includes("aeroplan") || promptLower.includes("airplane") || promptLower.includes("aeroplane") || promptLower.includes("wing design roof") || promptLower.includes("wing roof") || promptLower.includes("aviation roof"));
@@ -1069,6 +1079,10 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         ? "SPHERICAL_BALL"
         : isOpenSquare
         ? "OPEN_SQUARE_DONUT"
+        : isAldarCoin
+        ? "ALDAR_COIN"
+        : isCircularDonut
+        ? "CIRCULAR_DONUT"
         : isWideRange
         ? "WIDE_LINEAR_RANGE"
         : isCurvedRounded || isHostel
@@ -1084,7 +1098,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         : "RECTANGULAR"
     );
 
-    const isLShaped = !isCurvedRounded && !isVShaped && !isUShaped && !isTShaped && !isHShaped && !isSphericalBall && !isOpenSquare && (massingForm === "L_SHAPED" || !!data?.building3D?.isLShaped || (/\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b/i.test(promptLower)));
+    const isLShaped = !isCurvedRounded && !isVShaped && !isUShaped && !isTShaped && !isHShaped && !isSphericalBall && !isOpenSquare && !isCircularDonut && !isAldarCoin && (massingForm === "L_SHAPED" || !!data?.building3D?.isLShaped || (/\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b/i.test(promptLower)));
 
     // Active Rooftop Feature
     const rooftopFeature = data?.building3D?.rooftopFeature || (
@@ -1772,6 +1786,28 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             ctIn.push(project(xi, yi, topZ));
           }
 
+          // 16-Segment Complete Circular Courtyard Donut (Matches user's Reference Image 8)
+          const circSegs = 16;
+          const circOutB: { x: number; y: number }[] = [];
+          const circInB: { x: number; y: number }[] = [];
+          const circOutT: { x: number; y: number }[] = [];
+          const circInT: { x: number; y: number }[] = [];
+          const rxCircOut = 135 * widthScale;
+          const ryCircOut = 90 * depthScale;
+          const rxCircIn = 65 * widthScale;
+          const ryCircIn = 42 * depthScale;
+          for (let i = 0; i <= circSegs; i++) {
+            const ang = (i * 2 * Math.PI) / circSegs;
+            const xo = Math.cos(ang) * rxCircOut + twistX;
+            const yo = Math.sin(ang) * ryCircOut;
+            const xi = Math.cos(ang) * rxCircIn + twistX;
+            const yi = Math.sin(ang) * ryCircIn;
+            circOutB.push(project(xo, yo, baseZ));
+            circInB.push(project(xi, yi, baseZ));
+            circOutT.push(project(xo, yo, topZ));
+            circInT.push(project(xi, yi, topZ));
+          }
+
           // Balcony along inner concave curve facing courtyard
           const rxBalc = rxIn - 18 * widthScale;
           const ryBalc = ryIn - 13 * depthScale;
@@ -1808,33 +1844,49 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
           return (
             <g key={`floor-${floorNum}`} className="transition-all duration-300">
-              {/* Floor Slab Foundation Base */}
-              <polygon
-                points={
-                  massingForm === "V_SHAPED"
-                    ? `${vb1.x},${vb1.y} ${vb2.x},${vb2.y} ${vb3.x},${vb3.y} ${vb4.x},${vb4.y} ${vb5.x},${vb5.y} ${vb6.x},${vb6.y}`
-                    : massingForm === "U_SHAPED"
-                    ? `${ub1.x},${ub1.y} ${ub2.x},${ub2.y} ${ub3.x},${ub3.y} ${ub4.x},${ub4.y} ${ub5.x},${ub5.y} ${ub6.x},${ub6.y} ${ub7.x},${ub7.y} ${ub8.x},${ub8.y}`
-                    : massingForm === "T_SHAPED"
-                    ? `${tb1.x},${tb1.y} ${tb2.x},${tb2.y} ${tb3.x},${tb3.y} ${tb4.x},${tb4.y} ${tb5.x},${tb5.y} ${tb6.x},${tb6.y} ${tb7.x},${tb7.y} ${tb8.x},${tb8.y}`
-                    : massingForm === "H_SHAPED"
-                    ? `${hb1.x},${hb1.y} ${hb2.x},${hb2.y} ${hb3.x},${hb3.y} ${hb4.x},${hb4.y} ${hb5.x},${hb5.y} ${hb6.x},${hb6.y} ${hb7.x},${hb7.y} ${hb8.x},${hb8.y} ${hb9.x},${hb9.y} ${hb10.x},${hb10.y} ${hb11.x},${hb11.y} ${hb12.x},${hb12.y}`
-                    : massingForm === "SPHERICAL_BALL"
-                    ? sbOut.map(p => `${p.x},${p.y}`).join(" ")
-                    : massingForm === "OPEN_SQUARE_DONUT"
-                    ? `${qb1.x},${qb1.y} ${qb2.x},${qb2.y} ${qb3.x},${qb3.y} ${qb4.x},${qb4.y}`
-                    : massingForm === "WIDE_LINEAR_RANGE"
-                    ? `${wb1.x},${wb1.y} ${wb2.x},${wb2.y} ${wb3.x},${wb3.y} ${wb4.x},${wb4.y}`
-                    : isCurvedRounded
-                    ? [...cbOut, ...[...cbIn].reverse()].map(p => `${p.x},${p.y}`).join(" ")
-                    : isLShaped
-                    ? `${lb1.x},${lb1.y} ${lb2.x},${lb2.y} ${lb3.x},${lb3.y} ${lb4.x},${lb4.y} ${lb5.x},${lb5.y} ${lb6.x},${lb6.y}`
-                    : `${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y} ${b4.x},${b4.y}`
-                }
-                fill={isXRay ? "rgba(16, 185, 129, 0.15)" : (isNight ? "#334155" : "url(#slabGradient)")}
-                stroke={isXRay ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#B45309" : "#475569"))}
-                strokeWidth={isXRay ? 1 : 1.5}
-              />
+              {/* Floor Slab Foundation Base - Hollow shapes use SVG path with fillRule="evenodd" */}
+              {massingForm === "OPEN_SQUARE_DONUT" ? (
+                <path
+                  d={`M ${qb1.x} ${qb1.y} L ${qb2.x} ${qb2.y} L ${qb3.x} ${qb3.y} L ${qb4.x} ${qb4.y} Z M ${qHoleB1.x} ${qHoleB1.y} L ${qHoleB4.x} ${qHoleB4.y} L ${qHoleB3.x} ${qHoleB3.y} L ${qHoleB2.x} ${qHoleB2.y} Z`}
+                  fillRule="evenodd"
+                  fill={isXRay ? "rgba(16, 185, 129, 0.15)" : (isNight ? "#334155" : "url(#slabGradient)")}
+                  stroke={isXRay ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#B45309" : "#475569"))}
+                  strokeWidth={isXRay ? 1 : 1.5}
+                />
+              ) : massingForm === "CIRCULAR_DONUT" ? (
+                <path
+                  d={`M ${circOutB.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')} Z M ${circInB.slice().reverse().map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')} Z`}
+                  fillRule="evenodd"
+                  fill={isXRay ? "rgba(16, 185, 129, 0.15)" : (isNight ? "#334155" : "url(#slabGradient)")}
+                  stroke={isXRay ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#B45309" : "#475569"))}
+                  strokeWidth={isXRay ? 1 : 1.5}
+                />
+              ) : (
+                <polygon
+                  points={
+                    massingForm === "V_SHAPED"
+                      ? `${vb1.x},${vb1.y} ${vb2.x},${vb2.y} ${vb3.x},${vb3.y} ${vb4.x},${vb4.y} ${vb5.x},${vb5.y} ${vb6.x},${vb6.y}`
+                      : massingForm === "U_SHAPED"
+                      ? `${ub1.x},${ub1.y} ${ub2.x},${ub2.y} ${ub3.x},${ub3.y} ${ub4.x},${ub4.y} ${ub5.x},${ub5.y} ${ub6.x},${ub6.y} ${ub7.x},${ub7.y} ${ub8.x},${ub8.y}`
+                      : massingForm === "T_SHAPED"
+                      ? `${tb1.x},${tb1.y} ${tb2.x},${tb2.y} ${tb3.x},${tb3.y} ${tb4.x},${tb4.y} ${tb5.x},${tb5.y} ${tb6.x},${tb6.y} ${tb7.x},${tb7.y} ${tb8.x},${tb8.y}`
+                      : massingForm === "H_SHAPED"
+                      ? `${hb1.x},${hb1.y} ${hb2.x},${hb2.y} ${hb3.x},${hb3.y} ${hb4.x},${hb4.y} ${hb5.x},${hb5.y} ${hb6.x},${hb6.y} ${hb7.x},${hb7.y} ${hb8.x},${hb8.y} ${hb9.x},${hb9.y} ${hb10.x},${hb10.y} ${hb11.x},${hb11.y} ${hb12.x},${hb12.y}`
+                      : massingForm === "SPHERICAL_BALL"
+                      ? sbOut.map(p => `${p.x},${p.y}`).join(" ")
+                      : massingForm === "WIDE_LINEAR_RANGE"
+                      ? `${wb1.x},${wb1.y} ${wb2.x},${wb2.y} ${wb3.x},${wb3.y} ${wb4.x},${wb4.y}`
+                      : isCurvedRounded
+                      ? [...cbOut, ...[...cbIn].reverse()].map(p => `${p.x},${p.y}`).join(" ")
+                      : isLShaped
+                      ? `${lb1.x},${lb1.y} ${lb2.x},${lb2.y} ${lb3.x},${lb3.y} ${lb4.x},${lb4.y} ${lb5.x},${lb5.y} ${lb6.x},${lb6.y}`
+                      : `${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y} ${b4.x},${b4.y}`
+                  }
+                  fill={isXRay ? "rgba(16, 185, 129, 0.15)" : (isNight ? "#334155" : "url(#slabGradient)")}
+                  stroke={isXRay ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#B45309" : "#475569"))}
+                  strokeWidth={isXRay ? 1 : 1.5}
+                />
+              )}
 
               {/* Structural RCC Columns (if X-Ray or Shaded) */}
               {(isCurvedRounded ? [
@@ -2410,7 +2462,23 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     strokeWidth="1"
                     strokeOpacity="0.65"
                   />
-                  {/* Inner Atrium Hole Front Face */}
+                  {/* Inner Atrium Courtyard North Wall (Visible from top angle) */}
+                  <polygon
+                    points={`${qHoleB1.x},${qHoleB1.y} ${qHoleB2.x},${qHoleB2.y} ${qHoleT2.x},${qHoleT2.y} ${qHoleT1.x},${qHoleT1.y}`}
+                    fill={facadeFill}
+                    stroke={isNight ? "#FEF08A" : "#38BDF8"}
+                    strokeWidth="1"
+                    strokeOpacity="0.80"
+                  />
+                  {/* Inner Atrium Courtyard West Wall */}
+                  <polygon
+                    points={`${qHoleB1.x},${qHoleB1.y} ${qHoleB4.x},${qHoleB4.y} ${qHoleT4.x},${qHoleT4.y} ${qHoleT1.x},${qHoleT1.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.70"
+                  />
+                  {/* Inner Atrium Courtyard Front Wall */}
                   <polygon
                     points={`${qHoleB4.x},${qHoleB4.y} ${qHoleB3.x},${qHoleB3.y} ${qHoleT3.x},${qHoleT3.y} ${qHoleT4.x},${qHoleT4.y}`}
                     fill={facadeFill}
@@ -2434,6 +2502,58 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                         stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#E0F2FE"))}
                         strokeWidth="1"
                         strokeOpacity="0.6"
+                      />
+                    );
+                  })}
+                </g>
+              ) : massingForm === "CIRCULAR_DONUT" && !isXRay ? (
+                /* 360-DEGREE CIRCULAR COURTYARD DONUT FACADE (Matches Reference Image 8) */
+                <g id={`circ-donut-facade-floor-${floorNum}`}>
+                  {/* Inner Courtyard Rear Facade Segments (Visible looking into open donut) */}
+                  {Array.from({ length: 8 }).map((_, i) => {
+                    const idx = i + 8;
+                    const nextIdx = (idx + 1) % circSegs;
+                    return (
+                      <polygon
+                        key={`circ-in-${floorNum}-${i}`}
+                        points={`${circInB[idx].x},${circInB[idx].y} ${circInB[nextIdx].x},${circInB[nextIdx].y} ${circInT[nextIdx].x},${circInT[nextIdx].y} ${circInT[idx].x},${circInT[idx].y}`}
+                        fill={facadeFill}
+                        stroke={facadeStroke}
+                        strokeWidth="1"
+                        strokeOpacity="0.85"
+                      />
+                    );
+                  })}
+                  {/* Outer Panoramic Curved Facade Segments (Front half) */}
+                  {Array.from({ length: 8 }).map((_, i) => {
+                    const nextI = (i + 1) % circSegs;
+                    return (
+                      <polygon
+                        key={`circ-out-${floorNum}-${i}`}
+                        points={`${circOutB[i].x},${circOutB[i].y} ${circOutB[nextI].x},${circOutB[nextI].y} ${circOutT[nextI].x},${circOutT[nextI].y} ${circOutT[i].x},${circOutT[i].y}`}
+                        fill={facadeFill}
+                        stroke={facadeStroke}
+                        strokeWidth="1.2"
+                        strokeOpacity="0.88"
+                      />
+                    );
+                  })}
+                  {/* Vertical Window Mullions on Front Arc */}
+                  {Array.from({ length: 8 }).map((_, i) => {
+                    const mx1 = (circOutB[i].x + circOutB[(i + 1) % circSegs].x) / 2;
+                    const my1 = (circOutB[i].y + circOutB[(i + 1) % circSegs].y) / 2;
+                    const mx2 = (circOutT[i].x + circOutT[(i + 1) % circSegs].x) / 2;
+                    const my2 = (circOutT[i].y + circOutT[(i + 1) % circSegs].y) / 2;
+                    return (
+                      <line
+                        key={`circ-mullion-${floorNum}-${i}`}
+                        x1={mx1}
+                        y1={my1}
+                        x2={mx2}
+                        y2={my2}
+                        stroke={isNight ? "#FEF08A" : "#38BDF8"}
+                        strokeWidth="1"
+                        strokeOpacity="0.7"
                       />
                     );
                   })}
@@ -2651,6 +2771,129 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                         <line x1={brRearRight2.x} y1={brRearRight2.y} x2={brRearRight1.x} y2={brRearRight1.y} stroke="#FFFFFF" strokeWidth="2" />
                       </g>
                     );
+                  } else if (massingForm === "H_SHAPED") {
+                    // Dual Twin-Wing Balconies: Left Wing Front (hb12 -> hb11) and Right Wing Front (hb8 -> hb7)
+                    // ZERO balcony spanning across the central notch (hb11 -> hb8)!
+                    const hbL1 = project(-140 + twistX, 85 + 16, baseZ);
+                    const hbL2 = project(-50 + twistX, 85 + 16, baseZ);
+                    const hbrL1 = project(-140 + twistX, 85 + 16, baseZ + 12);
+                    const hbrL2 = project(-50 + twistX, 85 + 16, baseZ + 12);
+
+                    const hbR1 = project(50 + twistX, 85 + 16, baseZ);
+                    const hbR2 = project(140 + twistX, 85 + 16, baseZ);
+                    const hbrR1 = project(50 + twistX, 85 + 16, baseZ + 12);
+                    const hbrR2 = project(140 + twistX, 85 + 16, baseZ + 12);
+
+                    return (
+                      <g key={`hshape-balconies-${floorNum}`}>
+                        {/* Left Wing Front Balcony */}
+                        <polygon points={`${hb12.x},${hb12.y} ${hbL1.x},${hbL1.y} ${hbL2.x},${hbL2.y} ${hb11.x},${hb11.y}`} fill="#1E293B" stroke="#38BDF8" strokeWidth="1" />
+                        <polygon points={`${hbL1.x},${hbL1.y} ${hbL2.x},${hbL2.y} ${hbrL2.x},${hbrL2.y} ${hbrL1.x},${hbrL1.y}`} fill="rgba(56, 189, 248, 0.45)" stroke="#38BDF8" strokeWidth="1" />
+                        <line x1={hbrL1.x} y1={hbrL1.y} x2={hbrL2.x} y2={hbrL2.y} stroke="#FFFFFF" strokeWidth="2" />
+
+                        {/* Right Wing Front Balcony */}
+                        <polygon points={`${hb8.x},${hb8.y} ${hbR1.x},${hbR1.y} ${hbR2.x},${hbR2.y} ${hb7.x},${hb7.y}`} fill="#1E293B" stroke="#38BDF8" strokeWidth="1" />
+                        <polygon points={`${hbR1.x},${hbR1.y} ${hbR2.x},${hbR2.y} ${hbrR2.x},${hbrR2.y} ${hbrR1.x},${hbrR1.y}`} fill="rgba(56, 189, 248, 0.45)" stroke="#38BDF8" strokeWidth="1" />
+                        <line x1={hbrR1.x} y1={hbrR1.y} x2={hbrR2.x} y2={hbrR2.y} stroke="#FFFFFF" strokeWidth="2" />
+                      </g>
+                    );
+                  } else if (massingForm === "U_SHAPED") {
+                    // Dual Forward Wing Tip Balconies: Left Forward Tip (ub8 -> ub7) and Right Forward Tip (ub4 -> ub3)
+                    // ZERO balcony bridging across the central open courtyard (ub7 -> ub4)!
+                    const ubL1 = project(-halfW + twistX, halfD + 16, baseZ);
+                    const ubL2 = project(-halfW + uWingW + twistX, halfD + 16, baseZ);
+                    const ubrL1 = project(-halfW + twistX, halfD + 16, baseZ + 12);
+                    const ubrL2 = project(-halfW + uWingW + twistX, halfD + 16, baseZ + 12);
+
+                    const ubR1 = project(halfW - uWingW + twistX, halfD + 16, baseZ);
+                    const ubR2 = project(halfW + twistX, halfD + 16, baseZ);
+                    const ubrR1 = project(halfW - uWingW + twistX, halfD + 16, baseZ + 12);
+                    const ubrR2 = project(halfW + twistX, halfD + 16, baseZ + 12);
+
+                    return (
+                      <g key={`ushape-balconies-${floorNum}`}>
+                        {/* Left Tip Balcony */}
+                        <polygon points={`${ub8.x},${ub8.y} ${ubL1.x},${ubL1.y} ${ubL2.x},${ubL2.y} ${ub7.x},${ub7.y}`} fill="#1E293B" stroke="#38BDF8" strokeWidth="1" />
+                        <polygon points={`${ubL1.x},${ubL1.y} ${ubL2.x},${ubL2.y} ${ubrL2.x},${ubrL2.y} ${ubrL1.x},${ubrL1.y}`} fill="rgba(56, 189, 248, 0.45)" stroke="#38BDF8" strokeWidth="1" />
+                        <line x1={ubrL1.x} y1={ubrL1.y} x2={ubrL2.x} y2={ubrL2.y} stroke="#FFFFFF" strokeWidth="2" />
+
+                        {/* Right Tip Balcony */}
+                        <polygon points={`${ub4.x},${ub4.y} ${ubR1.x},${ubR1.y} ${ubR2.x},${ubR2.y} ${ub3.x},${ub3.y}`} fill="#1E293B" stroke="#38BDF8" strokeWidth="1" />
+                        <polygon points={`${ubR1.x},${ubR1.y} ${ubR2.x},${ubR2.y} ${ubrR2.x},${ubrR2.y} ${ubrR1.x},${ubrR1.y}`} fill="rgba(56, 189, 248, 0.45)" stroke="#38BDF8" strokeWidth="1" />
+                        <line x1={ubrR1.x} y1={ubrR1.y} x2={ubrR2.x} y2={ubrR2.y} stroke="#FFFFFF" strokeWidth="2" />
+                      </g>
+                    );
+                  } else if (massingForm === "V_SHAPED") {
+                    // Wing Tip Cantilever Balconies: Left Wing Tip (vb6 -> vb5) and Right Wing Tip (vb3 -> vb2)
+                    // ZERO balcony bridging across the V gap (vb6 -> vb2)!
+                    const vbL1 = project(-155 + twistX, 35 + 16, baseZ);
+                    const vbL2 = project(-125 + twistX, 60 + 16, baseZ);
+                    const vbrL1 = project(-155 + twistX, 35 + 16, baseZ + 12);
+                    const vbrL2 = project(-125 + twistX, 60 + 16, baseZ + 12);
+
+                    const vbR1 = project(125 + twistX, 60 + 16, baseZ);
+                    const vbR2 = project(155 + twistX, 35 + 16, baseZ);
+                    const vbrR1 = project(125 + twistX, 60 + 16, baseZ + 12);
+                    const vbrR2 = project(155 + twistX, 35 + 16, baseZ + 12);
+
+                    return (
+                      <g key={`vshape-balconies-${floorNum}`}>
+                        {/* Left Wing Tip Balcony */}
+                        <polygon points={`${vb6.x},${vb6.y} ${vbL1.x},${vbL1.y} ${vbL2.x},${vbL2.y} ${vb5.x},${vb5.y}`} fill="#1E293B" stroke="#38BDF8" strokeWidth="1" />
+                        <polygon points={`${vbL1.x},${vbL1.y} ${vbL2.x},${vbL2.y} ${vbrL2.x},${vbrL2.y} ${vbrL1.x},${vbrL1.y}`} fill="rgba(56, 189, 248, 0.45)" stroke="#38BDF8" strokeWidth="1" />
+                        <line x1={vbrL1.x} y1={vbrL1.y} x2={vbrL2.x} y2={vbrL2.y} stroke="#FFFFFF" strokeWidth="2" />
+
+                        {/* Right Wing Tip Balcony */}
+                        <polygon points={`${vb3.x},${vb3.y} ${vbR1.x},${vbR1.y} ${vbR2.x},${vbR2.y} ${vb2.x},${vb2.y}`} fill="#1E293B" stroke="#38BDF8" strokeWidth="1" />
+                        <polygon points={`${vbR1.x},${vbR1.y} ${vbR2.x},${vbR2.y} ${vbrR2.x},${vbrR2.y} ${vbrR1.x},${vbrR1.y}`} fill="rgba(56, 189, 248, 0.45)" stroke="#38BDF8" strokeWidth="1" />
+                        <line x1={vbrR1.x} y1={vbrR1.y} x2={vbrR2.x} y2={vbrR2.y} stroke="#FFFFFF" strokeWidth="2" />
+                      </g>
+                    );
+                  } else if (massingForm === "T_SHAPED") {
+                    // Front Flange Continuous Balcony: tb8 -> tb7 (does NOT spill into side voids tb1..tb6)
+                    const tbF1 = project(-140 + twistX, 80 + 16, baseZ);
+                    const tbF2 = project(140 + twistX, 80 + 16, baseZ);
+                    const tbrF1 = project(-140 + twistX, 80 + 16, baseZ + 12);
+                    const tbrF2 = project(140 + twistX, 80 + 16, baseZ + 12);
+
+                    return (
+                      <g key={`tshape-balconies-${floorNum}`}>
+                        <polygon points={`${tb8.x},${tb8.y} ${tbF1.x},${tbF1.y} ${tbF2.x},${tbF2.y} ${tb7.x},${tb7.y}`} fill="#1E293B" stroke="#38BDF8" strokeWidth="1" />
+                        <polygon points={`${tbF1.x},${tbF1.y} ${tbF2.x},${tbF2.y} ${tbrF2.x},${tbrF2.y} ${tbrF1.x},${tbrF1.y}`} fill="rgba(56, 189, 248, 0.45)" stroke="#38BDF8" strokeWidth="1" />
+                        <line x1={tbrF1.x} y1={tbrF1.y} x2={tbrF2.x} y2={tbrF2.y} stroke="#FFFFFF" strokeWidth="2" />
+                      </g>
+                    );
+                  } else if (massingForm === "OPEN_SQUARE_DONUT") {
+                    // Perimeter Outer Balcony along Front Face: qb4 -> qb3 (leaves inner atrium completely open!)
+                    const qbF1 = project(-125 + twistX, 85 + 16, baseZ);
+                    const qbF2 = project(125 + twistX, 85 + 16, baseZ);
+                    const qbrF1 = project(-125 + twistX, 85 + 16, baseZ + 12);
+                    const qbrF2 = project(125 + twistX, 85 + 16, baseZ + 12);
+
+                    return (
+                      <g key={`sqdonut-balconies-${floorNum}`}>
+                        <polygon points={`${qb4.x},${qb4.y} ${qbF1.x},${qbF1.y} ${qbF2.x},${qbF2.y} ${qb3.x},${qb3.y}`} fill="#1E293B" stroke="#38BDF8" strokeWidth="1" />
+                        <polygon points={`${qbF1.x},${qbF1.y} ${qbF2.x},${qbF2.y} ${qbrF2.x},${qbrF2.y} ${qbrF1.x},${qbrF1.y}`} fill="rgba(56, 189, 248, 0.45)" stroke="#38BDF8" strokeWidth="1" />
+                        <line x1={qbrF1.x} y1={qbrF1.y} x2={qbrF2.x} y2={qbrF2.y} stroke="#FFFFFF" strokeWidth="2" />
+                      </g>
+                    );
+                  } else if (massingForm === "CIRCULAR_DONUT") {
+                    // Inner courtyard perimeter viewing rail
+                    return (
+                      <g key={`circdonut-balconies-${floorNum}`}>
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <line
+                            key={`circ-balc-${floorNum}-${i}`}
+                            x1={circInB[i].x}
+                            y1={circInB[i].y - 8}
+                            x2={circInB[(i + 1) % circSegs].x}
+                            y2={circInB[(i + 1) % circSegs].y - 8}
+                            stroke="#38BDF8"
+                            strokeWidth="2"
+                          />
+                        ))}
+                      </g>
+                    );
                   } else if (balconyType === "WRAPAROUND_RIBBON") {
                     // Continuous wrap-around 360-deg ribbon balconies around front and right side
                     const wrapDepth = halfD + 20;
@@ -2748,33 +2991,49 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                 })()
               )}
 
-              {/* Top Slab Chamfer Edge */}
-              <polygon
-                points={
-                  massingForm === "V_SHAPED"
-                    ? `${vt1.x},${vt1.y} ${vt2.x},${vt2.y} ${vt3.x},${vt3.y} ${vt4.x},${vt4.y} ${vt5.x},${vt5.y} ${vt6.x},${vt6.y}`
-                    : massingForm === "U_SHAPED"
-                    ? `${ut1.x},${ut1.y} ${ut2.x},${ut2.y} ${ut3.x},${ut3.y} ${ut4.x},${ut4.y} ${ut5.x},${ut5.y} ${ut6.x},${ut6.y} ${ut7.x},${ut7.y} ${ut8.x},${ut8.y}`
-                    : massingForm === "T_SHAPED"
-                    ? `${tt1.x},${tt1.y} ${tt2.x},${tt2.y} ${tt3.x},${tt3.y} ${tt4.x},${tt4.y} ${tt5.x},${tt5.y} ${tt6.x},${tt6.y} ${tt7.x},${tt7.y} ${tt8.x},${tt8.y}`
-                    : massingForm === "H_SHAPED"
-                    ? `${ht1.x},${ht1.y} ${ht2.x},${ht2.y} ${ht3.x},${ht3.y} ${ht4.x},${ht4.y} ${ht5.x},${ht5.y} ${ht6.x},${ht6.y} ${ht7.x},${ht7.y} ${ht8.x},${ht8.y} ${ht9.x},${ht9.y} ${ht10.x},${ht10.y} ${ht11.x},${ht11.y} ${ht12.x},${ht12.y}`
-                    : massingForm === "SPHERICAL_BALL"
-                    ? stOut.map(p => `${p.x},${p.y}`).join(" ")
-                    : massingForm === "OPEN_SQUARE_DONUT"
-                    ? `${qt1.x},${qt1.y} ${qt2.x},${qt2.y} ${qt3.x},${qt3.y} ${qt4.x},${qt4.y}`
-                    : massingForm === "WIDE_LINEAR_RANGE"
-                    ? `${wt1.x},${wt1.y} ${wt2.x},${wt2.y} ${wt3.x},${wt3.y} ${wt4.x},${wt4.y}`
-                    : isCurvedRounded
-                    ? [...ctOut, ...[...ctIn].reverse()].map(p => `${p.x},${p.y}`).join(" ")
-                    : isLShaped
-                    ? `${lt1.x},${lt1.y} ${lt2.x},${lt2.y} ${lt3.x},${lt3.y} ${lt4.x},${lt4.y} ${lt5.x},${lt5.y} ${lt6.x},${lt6.y}`
-                    : `${t1.x},${t1.y} ${t2.x},${t2.y} ${t3.x},${t3.y} ${t4.x},${t4.y}`
-                }
-                fill={isXRay ? "rgba(16, 185, 129, 0.2)" : (isNight ? "#1E293B" : "url(#slabGradient)")}
-                stroke={isXRay ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#D97706" : "#94A3B8"))}
-                strokeWidth={isXRay ? 1 : 1.5}
-              />
+              {/* Top Slab Chamfer Edge - Hollow shapes use SVG path with fillRule="evenodd" */}
+              {massingForm === "OPEN_SQUARE_DONUT" ? (
+                <path
+                  d={`M ${qt1.x} ${qt1.y} L ${qt2.x} ${qt2.y} L ${qt3.x} ${qt3.y} L ${qt4.x} ${qt4.y} Z M ${qHoleT1.x} ${qHoleT1.y} L ${qHoleT4.x} ${qHoleT4.y} L ${qHoleT3.x} ${qHoleT3.y} L ${qHoleT2.x} ${qHoleT2.y} Z`}
+                  fillRule="evenodd"
+                  fill={isXRay ? "rgba(16, 185, 129, 0.2)" : (isNight ? "#1E293B" : "url(#slabGradient)")}
+                  stroke={isXRay ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#D97706" : "#94A3B8"))}
+                  strokeWidth={isXRay ? 1 : 1.5}
+                />
+              ) : massingForm === "CIRCULAR_DONUT" ? (
+                <path
+                  d={`M ${circOutT.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')} Z M ${circInT.slice().reverse().map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')} Z`}
+                  fillRule="evenodd"
+                  fill={isXRay ? "rgba(16, 185, 129, 0.2)" : (isNight ? "#1E293B" : "url(#slabGradient)")}
+                  stroke={isXRay ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#D97706" : "#94A3B8"))}
+                  strokeWidth={isXRay ? 1 : 1.5}
+                />
+              ) : (
+                <polygon
+                  points={
+                    massingForm === "V_SHAPED"
+                      ? `${vt1.x},${vt1.y} ${vt2.x},${vt2.y} ${vt3.x},${vt3.y} ${vt4.x},${vt4.y} ${vt5.x},${vt5.y} ${vt6.x},${vt6.y}`
+                      : massingForm === "U_SHAPED"
+                      ? `${ut1.x},${ut1.y} ${ut2.x},${ut2.y} ${ut3.x},${ut3.y} ${ut4.x},${ut4.y} ${ut5.x},${ut5.y} ${ut6.x},${ut6.y} ${ut7.x},${ut7.y} ${ut8.x},${ut8.y}`
+                      : massingForm === "T_SHAPED"
+                      ? `${tt1.x},${tt1.y} ${tt2.x},${tt2.y} ${tt3.x},${tt3.y} ${tt4.x},${tt4.y} ${tt5.x},${tt5.y} ${tt6.x},${tt6.y} ${tt7.x},${tt7.y} ${tt8.x},${tt8.y}`
+                      : massingForm === "H_SHAPED"
+                      ? `${ht1.x},${ht1.y} ${ht2.x},${ht2.y} ${ht3.x},${ht3.y} ${ht4.x},${ht4.y} ${ht5.x},${ht5.y} ${ht6.x},${ht6.y} ${ht7.x},${ht7.y} ${ht8.x},${ht8.y} ${ht9.x},${ht9.y} ${ht10.x},${ht10.y} ${ht11.x},${ht11.y} ${ht12.x},${ht12.y}`
+                      : massingForm === "SPHERICAL_BALL"
+                      ? stOut.map(p => `${p.x},${p.y}`).join(" ")
+                      : massingForm === "WIDE_LINEAR_RANGE"
+                      ? `${wt1.x},${wt1.y} ${wt2.x},${wt2.y} ${wt3.x},${wt3.y} ${wt4.x},${wt4.y}`
+                      : isCurvedRounded
+                      ? [...ctOut, ...[...ctIn].reverse()].map(p => `${p.x},${p.y}`).join(" ")
+                      : isLShaped
+                      ? `${lt1.x},${lt1.y} ${lt2.x},${lt2.y} ${lt3.x},${lt3.y} ${lt4.x},${lt4.y} ${lt5.x},${lt5.y} ${lt6.x},${lt6.y}`
+                      : `${t1.x},${t1.y} ${t2.x},${t2.y} ${t3.x},${t3.y} ${t4.x},${t4.y}`
+                  }
+                  fill={isXRay ? "rgba(16, 185, 129, 0.2)" : (isNight ? "#1E293B" : "url(#slabGradient)")}
+                  stroke={isXRay ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#D97706" : "#94A3B8"))}
+                  strokeWidth={isXRay ? 1 : 1.5}
+                />
+              )}
 
               {/* Structural FEM Grid Lines on H-Shape Roof Slab (matches ResearchGate structural model) */}
               {massingForm === "H_SHAPED" && floorNum === totalFlrs && (
@@ -2912,6 +3171,8 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           const halfD = (buildingDepth / 2) * topDepthScale;
           const xCorner = 10;
           const yCorner = -10;
+          const uWingW = halfW * 0.40;
+          const uRearD = halfD * 0.44;
 
           // Parapet wall coping (standard rectangular)
           const p1 = project(-halfW + topTwistX, -halfD, topZ + 8);
@@ -2926,6 +3187,70 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           const lp4 = project(xCorner + topTwistX, yCorner, topZ + 8);
           const lp5 = project(xCorner + topTwistX, halfD, topZ + 8);
           const lp6 = project(-halfW + topTwistX, halfD, topZ + 8);
+
+          // V-Shaped Parapet
+          const roof_vt1 = project(0 + topTwistX, -115, topZ + 8);
+          const roof_vt2 = project(155 + topTwistX, 35, topZ + 8);
+          const roof_vt3 = project(125 + topTwistX, 60, topZ + 8);
+          const roof_vt4 = project(0 + topTwistX, -50, topZ + 8);
+          const roof_vt5 = project(-125 + topTwistX, 60, topZ + 8);
+          const roof_vt6 = project(-155 + topTwistX, 35, topZ + 8);
+
+          // T-Shaped Parapet
+          const roof_tt1 = project(-140 + topTwistX, 20, topZ + 8);
+          const roof_tt2 = project(-45 + topTwistX, 20, topZ + 8);
+          const roof_tt3 = project(-45 + topTwistX, -100, topZ + 8);
+          const roof_tt4 = project(45 + topTwistX, -100, topZ + 8);
+          const roof_tt5 = project(45 + topTwistX, 20, topZ + 8);
+          const roof_tt6 = project(140 + topTwistX, 20, topZ + 8);
+          const roof_tt7 = project(140 + topTwistX, 80, topZ + 8);
+          const roof_tt8 = project(-140 + topTwistX, 80, topZ + 8);
+
+          // H-Shaped Parapet
+          const roof_ht1 = project(-140 + topTwistX, -85, topZ + 8);
+          const roof_ht2 = project(-50 + topTwistX, -85, topZ + 8);
+          const roof_ht3 = project(-50 + topTwistX, -28, topZ + 8);
+          const roof_ht4 = project(50 + topTwistX, -28, topZ + 8);
+          const roof_ht5 = project(50 + topTwistX, -85, topZ + 8);
+          const roof_ht6 = project(140 + topTwistX, -85, topZ + 8);
+          const roof_ht7 = project(140 + topTwistX, 85, topZ + 8);
+          const roof_ht8 = project(50 + topTwistX, 85, topZ + 8);
+          const roof_ht9 = project(50 + topTwistX, 28, topZ + 8);
+          const roof_ht10 = project(-50 + topTwistX, 28, topZ + 8);
+          const roof_ht11 = project(-50 + topTwistX, 85, topZ + 8);
+          const roof_ht12 = project(-140 + topTwistX, 85, topZ + 8);
+
+          // U-Shaped Parapet
+          const roof_ut1 = project(-halfW + topTwistX, -halfD, topZ + 8);
+          const roof_ut2 = project(halfW + topTwistX, -halfD, topZ + 8);
+          const roof_ut3 = project(halfW + topTwistX, halfD, topZ + 8);
+          const roof_ut4 = project(halfW - uWingW + topTwistX, halfD, topZ + 8);
+          const roof_ut5 = project(halfW - uWingW + topTwistX, -halfD + uRearD, topZ + 8);
+          const roof_ut6 = project(-halfW + uWingW + topTwistX, -halfD + uRearD, topZ + 8);
+          const roof_ut7 = project(-halfW + uWingW + topTwistX, halfD, topZ + 8);
+          const roof_ut8 = project(-halfW + topTwistX, halfD, topZ + 8);
+
+          // Open Square Donut Parapet
+          const roof_qt1 = project(-125 + topTwistX, -110, topZ + 8);
+          const roof_qt2 = project(125 + topTwistX, -110, topZ + 8);
+          const roof_qt3 = project(125 + topTwistX, 85, topZ + 8);
+          const roof_qt4 = project(-125 + topTwistX, 85, topZ + 8);
+          const roof_qHoleT1 = project(-50 + topTwistX, -45, topZ + 8);
+          const roof_qHoleT2 = project(50 + topTwistX, -45, topZ + 8);
+          const roof_qHoleT3 = project(50 + topTwistX, 35, topZ + 8);
+          const roof_qHoleT4 = project(-50 + topTwistX, 35, topZ + 8);
+
+          // Circular Donut Parapet
+          const roof_circSegs = 16;
+          const roof_circR_out = 135 * topWidthScale;
+          const roof_circR_in = 65 * topWidthScale;
+          const roof_circOutT: { x: number; y: number }[] = [];
+          const roof_circInT: { x: number; y: number }[] = [];
+          for (let i = 0; i < roof_circSegs; i++) {
+            const ang = (i * 2 * Math.PI) / roof_circSegs;
+            roof_circOutT.push(project(Math.cos(ang) * roof_circR_out + topTwistX, Math.sin(ang) * (roof_circR_out * 0.7) - 15, topZ + 8));
+            roof_circInT.push(project(Math.cos(ang) * roof_circR_in + topTwistX, Math.sin(ang) * (roof_circR_in * 0.7) - 15, topZ + 8));
+          }
 
           // Parapet wall coping (curved crescent)
           const cpTopOut: { x: number; y: number }[] = [];
@@ -2950,34 +3275,87 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             }
           }
 
-          // Central Core Lift Machine Room
-          const coreX = isLShaped ? -halfW * 0.45 : 0;
-          const coreY = isLShaped ? -halfD * 0.45 : 0;
-          const l1 = project(coreX - 25 + topTwistX, coreY - 20, topZ);
-          const l2 = project(coreX + 25 + topTwistX, coreY - 20, topZ);
-          const l3 = project(coreX + 25 + topTwistX, coreY + 20, topZ);
-          const l4 = project(coreX - 25 + topTwistX, coreY + 20, topZ);
+          // Central Core Lift Machine Room positioning per massing shape
+          let coreX = 0;
+          let coreY = 0;
+          let coreW = 25;
+          let coreD = 20;
+          if (isLShaped) {
+            coreX = -halfW * 0.45;
+            coreY = -halfD * 0.45;
+          } else if (massingForm === "U_SHAPED") {
+            coreX = 0;
+            coreY = -halfD + uRearD / 2;
+            coreW = 28;
+            coreD = 16;
+          } else if (massingForm === "H_SHAPED") {
+            coreX = 0;
+            coreY = 0;
+            coreW = 22;
+            coreD = 14;
+          } else if (massingForm === "OPEN_SQUARE_DONUT") {
+            coreX = 0;
+            coreY = -75;
+            coreW = 24;
+            coreD = 15;
+          } else if (massingForm === "V_SHAPED") {
+            coreX = 0;
+            coreY = -80;
+            coreW = 20;
+            coreD = 16;
+          } else if (massingForm === "T_SHAPED") {
+            coreX = 0;
+            coreY = 50;
+            coreW = 24;
+            coreD = 16;
+          }
 
-          const lt1 = project(coreX - 25 + topTwistX, coreY - 20, topZ + 26);
-          const lt2 = project(coreX + 25 + topTwistX, coreY - 20, topZ + 26);
-          const lt3 = project(coreX + 25 + topTwistX, coreY + 20, topZ + 26);
-          const lt4 = project(coreX - 25 + topTwistX, coreY + 20, topZ + 26);
+          const l1 = project(coreX - coreW + topTwistX, coreY - coreD, topZ);
+          const l2 = project(coreX + coreW + topTwistX, coreY - coreD, topZ);
+          const l3 = project(coreX + coreW + topTwistX, coreY + coreD, topZ);
+          const l4 = project(coreX - coreW + topTwistX, coreY + coreD, topZ);
+
+          const lt1 = project(coreX - coreW + topTwistX, coreY - coreD, topZ + 26);
+          const lt2 = project(coreX + coreW + topTwistX, coreY - coreD, topZ + 26);
+          const lt3 = project(coreX + coreW + topTwistX, coreY + coreD, topZ + 26);
+          const lt4 = project(coreX - coreW + topTwistX, coreY + coreD, topZ + 26);
 
           return (
             <g id="rooftop-feature-group">
               {/* Parapet Outline */}
-              <polygon
-                points={isCurvedRounded
-                  ? [...cpTopOut, ...[...cpTopIn].reverse()].map(p => `${p.x},${p.y}`).join(" ")
-                  : isLShaped
-                  ? `${lp1.x},${lp1.y} ${lp2.x},${lp2.y} ${lp3.x},${lp3.y} ${lp4.x},${lp4.y} ${lp5.x},${lp5.y} ${lp6.x},${lp6.y}`
-                  : `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`
-                }
-                fill={hasRooftopGarden ? "rgba(5, 150, 105, 0.25)" : "none"}
-                stroke={hasRooftopGarden ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#F59E0B" : "#38BDF8"))}
-                strokeWidth="1.5"
-                strokeDasharray="4 2"
-              />
+              {massingForm === "OPEN_SQUARE_DONUT" ? (
+                <g id="parapet-sq-donut">
+                  <polygon points={`${roof_qt1.x},${roof_qt1.y} ${roof_qt2.x},${roof_qt2.y} ${roof_qt3.x},${roof_qt3.y} ${roof_qt4.x},${roof_qt4.y}`} fill="none" stroke="#38BDF8" strokeWidth="1.5" strokeDasharray="4 2" />
+                  <polygon points={`${roof_qHoleT1.x},${roof_qHoleT1.y} ${roof_qHoleT2.x},${roof_qHoleT2.y} ${roof_qHoleT3.x},${roof_qHoleT3.y} ${roof_qHoleT4.x},${roof_qHoleT4.y}`} fill="none" stroke="#38BDF8" strokeWidth="1.5" strokeDasharray="4 2" />
+                </g>
+              ) : massingForm === "CIRCULAR_DONUT" ? (
+                <g id="parapet-circ-donut">
+                  <polygon points={roof_circOutT.map(p => `${p.x},${p.y}`).join(" ")} fill="none" stroke="#38BDF8" strokeWidth="1.5" strokeDasharray="4 2" />
+                  <polygon points={roof_circInT.map(p => `${p.x},${p.y}`).join(" ")} fill="none" stroke="#38BDF8" strokeWidth="1.5" strokeDasharray="4 2" />
+                </g>
+              ) : (
+                <polygon
+                  points={
+                    massingForm === "V_SHAPED"
+                      ? `${roof_vt1.x},${roof_vt1.y} ${roof_vt2.x},${roof_vt2.y} ${roof_vt3.x},${roof_vt3.y} ${roof_vt4.x},${roof_vt4.y} ${roof_vt5.x},${roof_vt5.y} ${roof_vt6.x},${roof_vt6.y}`
+                      : massingForm === "U_SHAPED"
+                      ? `${roof_ut1.x},${roof_ut1.y} ${roof_ut2.x},${roof_ut2.y} ${roof_ut3.x},${roof_ut3.y} ${roof_ut4.x},${roof_ut4.y} ${roof_ut5.x},${roof_ut5.y} ${roof_ut6.x},${roof_ut6.y} ${roof_ut7.x},${roof_ut7.y} ${roof_ut8.x},${roof_ut8.y}`
+                      : massingForm === "T_SHAPED"
+                      ? `${roof_tt1.x},${roof_tt1.y} ${roof_tt2.x},${roof_tt2.y} ${roof_tt3.x},${roof_tt3.y} ${roof_tt4.x},${roof_tt4.y} ${roof_tt5.x},${roof_tt5.y} ${roof_tt6.x},${roof_tt6.y} ${roof_tt7.x},${roof_tt7.y} ${roof_tt8.x},${roof_tt8.y}`
+                      : massingForm === "H_SHAPED"
+                      ? `${roof_ht1.x},${roof_ht1.y} ${roof_ht2.x},${roof_ht2.y} ${roof_ht3.x},${roof_ht3.y} ${roof_ht4.x},${roof_ht4.y} ${roof_ht5.x},${roof_ht5.y} ${roof_ht6.x},${roof_ht6.y} ${roof_ht7.x},${roof_ht7.y} ${roof_ht8.x},${roof_ht8.y} ${roof_ht9.x},${roof_ht9.y} ${roof_ht10.x},${roof_ht10.y} ${roof_ht11.x},${roof_ht11.y} ${roof_ht12.x},${roof_ht12.y}`
+                      : isCurvedRounded
+                      ? [...cpTopOut, ...[...cpTopIn].reverse()].map(p => `${p.x},${p.y}`).join(" ")
+                      : isLShaped
+                      ? `${lp1.x},${lp1.y} ${lp2.x},${lp2.y} ${lp3.x},${lp3.y} ${lp4.x},${lp4.y} ${lp5.x},${lp5.y} ${lp6.x},${lp6.y}`
+                      : `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`
+                  }
+                  fill={hasRooftopGarden ? "rgba(5, 150, 105, 0.25)" : "none"}
+                  stroke={hasRooftopGarden ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#F59E0B" : "#38BDF8"))}
+                  strokeWidth="1.5"
+                  strokeDasharray="4 2"
+                />
+              )}
 
               {/* Central Lift Core Box */}
               <polygon points={`${l1.x},${l1.y} ${l2.x},${l2.y} ${l3.x},${l3.y} ${l4.x},${l4.y}`} fill="#334155" />
@@ -3001,38 +3379,59 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               {/* 1. ROOFTOP HELIPAD */}
               {rooftopFeature === "HELIPAD" && (() => {
                 const padZ = topZ + 14;
-                const padRadius = 65;
+                let padRadius = 65;
+                let padCenterX = topTwistX;
+                let padCenterY = 0;
+
+                if (massingForm === "H_SHAPED") {
+                  padCenterX = -95 + topTwistX;
+                  padCenterY = 0;
+                  padRadius = 38;
+                } else if (massingForm === "U_SHAPED") {
+                  padCenterX = 0 + topTwistX;
+                  padCenterY = -halfD + uRearD / 2;
+                  padRadius = 36;
+                } else if (massingForm === "V_SHAPED") {
+                  padCenterX = 0 + topTwistX;
+                  padCenterY = -75;
+                  padRadius = 38;
+                } else if (massingForm === "OPEN_SQUARE_DONUT") {
+                  padCenterX = 85 + topTwistX;
+                  padCenterY = -15;
+                  padRadius = 34;
+                }
+
                 const numPoints = 12;
                 const padPoints = [];
                 for (let i = 0; i < numPoints; i++) {
                   const angle = (i * 2 * Math.PI) / numPoints;
-                  const px = Math.cos(angle) * padRadius + topTwistX;
-                  const py = Math.sin(angle) * padRadius;
+                  const px = Math.cos(angle) * padRadius + padCenterX;
+                  const py = Math.sin(angle) * padRadius + padCenterY;
                   padPoints.push(project(px, py, padZ));
                 }
 
-                const hCenter = project(topTwistX, 0, padZ);
-                const hH = 20;
-                const hW = 14;
-                const hLeftTop = project(-hW + topTwistX, -hH, padZ);
-                const hLeftBottom = project(-hW + topTwistX, hH, padZ);
-                const hRightTop = project(hW + topTwistX, -hH, padZ);
-                const hRightBottom = project(hW + topTwistX, hH, padZ);
-                const hMidLeft = project(-hW + topTwistX, 0, padZ);
-                const hMidRight = project(hW + topTwistX, 0, padZ);
+                const hCenter = project(padCenterX, padCenterY, padZ);
+                const hH = padRadius * 0.32;
+                const hW = padRadius * 0.22;
+                const hLeftTop = project(-hW + padCenterX, -hH + padCenterY, padZ);
+                const hLeftBottom = project(-hW + padCenterX, hH + padCenterY, padZ);
+                const hRightTop = project(hW + padCenterX, -hH + padCenterY, padZ);
+                const hRightBottom = project(hW + padCenterX, hH + padCenterY, padZ);
+                const hMidLeft = project(-hW + padCenterX, padCenterY, padZ);
+                const hMidRight = project(hW + padCenterX, padCenterY, padZ);
 
                 const beaconPoints = [
-                  project(-padRadius + 4 + topTwistX, 0, padZ),
-                  project(padRadius - 4 + topTwistX, 0, padZ),
-                  project(topTwistX, -padRadius + 4, padZ),
-                  project(topTwistX, padRadius - 4, padZ),
+                  project(-padRadius + 4 + padCenterX, padCenterY, padZ),
+                  project(padRadius - 4 + padCenterX, padCenterY, padZ),
+                  project(padCenterX, -padRadius + 4 + padCenterY, padZ),
+                  project(padCenterX, padRadius - 4 + padCenterY, padZ),
                 ];
 
                 return (
                   <g id="rooftop-helipad">
                     {/* Support Columns */}
                     {padPoints.filter((_, idx) => idx % 3 === 0).map((pt, pIdx) => {
-                      const basePt = project(Math.cos((pIdx * 3 * 2 * Math.PI) / numPoints) * padRadius + topTwistX, Math.sin((pIdx * 3 * 2 * Math.PI) / numPoints) * padRadius, topZ);
+                      const basePt = project(Math.cos((pIdx * 3 * 2 * Math.PI) / numPoints) * padRadius + padCenterX, Math.sin((pIdx * 3 * 2 * Math.PI) / numPoints) * padRadius + padCenterY, topZ);
                       return <line key={`helipad-ped-${pIdx}`} x1={basePt.x} y1={basePt.y} x2={pt.x} y2={pt.y} stroke="#64748B" strokeWidth="3.5" />;
                     })}
                     <polygon points={padPoints.map(p => `${p.x},${p.y}`).join(" ")} fill="url(#helipadTarmac)" stroke="#FACC15" strokeWidth="3.5" />
@@ -3058,16 +3457,58 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               {/* 2. ROOFTOP SKY INFINITY POOL */}
               {rooftopFeature === "INFINITY_POOL" && (() => {
                 const poolZ = topZ + 6;
-                const poolW1 = project(-halfW * 0.7 + topTwistX, -halfD * 0.3, poolZ);
-                const poolW2 = project(halfW * 0.7 + topTwistX, -halfD * 0.3, poolZ);
-                const poolW3 = project(halfW * 0.7 + topTwistX, halfD * 0.7, poolZ);
-                const poolW4 = project(-halfW * 0.7 + topTwistX, halfD * 0.7, poolZ);
+                let poolW1 = project(-halfW * 0.7 + topTwistX, -halfD * 0.3, poolZ);
+                let poolW2 = project(halfW * 0.7 + topTwistX, -halfD * 0.3, poolZ);
+                let poolW3 = project(halfW * 0.7 + topTwistX, halfD * 0.7, poolZ);
+                let poolW4 = project(-halfW * 0.7 + topTwistX, halfD * 0.7, poolZ);
 
                 // Wooden sundeck border
-                const deck1 = project(-halfW * 0.9 + topTwistX, -halfD * 0.5, poolZ - 2);
-                const deck2 = project(halfW * 0.9 + topTwistX, -halfD * 0.5, poolZ - 2);
-                const deck3 = project(halfW * 0.9 + topTwistX, halfD * 0.85, poolZ - 2);
-                const deck4 = project(-halfW * 0.9 + topTwistX, halfD * 0.85, poolZ - 2);
+                let deck1 = project(-halfW * 0.9 + topTwistX, -halfD * 0.5, poolZ - 2);
+                let deck2 = project(halfW * 0.9 + topTwistX, -halfD * 0.5, poolZ - 2);
+                let deck3 = project(halfW * 0.9 + topTwistX, halfD * 0.85, poolZ - 2);
+                let deck4 = project(-halfW * 0.9 + topTwistX, halfD * 0.85, poolZ - 2);
+
+                if (massingForm === "H_SHAPED") {
+                  // Placed on Right Wing
+                  poolW1 = project(65 + topTwistX, -30, poolZ);
+                  poolW2 = project(125 + topTwistX, -30, poolZ);
+                  poolW3 = project(125 + topTwistX, 65, poolZ);
+                  poolW4 = project(65 + topTwistX, 65, poolZ);
+                  deck1 = project(55 + topTwistX, -40, poolZ - 2);
+                  deck2 = project(135 + topTwistX, -40, poolZ - 2);
+                  deck3 = project(135 + topTwistX, 75, poolZ - 2);
+                  deck4 = project(55 + topTwistX, 75, poolZ - 2);
+                } else if (massingForm === "U_SHAPED") {
+                  // Placed on Rear Connecting Wing
+                  poolW1 = project(-60 + topTwistX, -halfD + 6, poolZ);
+                  poolW2 = project(60 + topTwistX, -halfD + 6, poolZ);
+                  poolW3 = project(60 + topTwistX, -halfD + uRearD - 8, poolZ);
+                  poolW4 = project(-60 + topTwistX, -halfD + uRearD - 8, poolZ);
+                  deck1 = project(-70 + topTwistX, -halfD + 2, poolZ - 2);
+                  deck2 = project(70 + topTwistX, -halfD + 2, poolZ - 2);
+                  deck3 = project(70 + topTwistX, -halfD + uRearD - 4, poolZ - 2);
+                  deck4 = project(-70 + topTwistX, -halfD + uRearD - 4, poolZ - 2);
+                } else if (massingForm === "OPEN_SQUARE_DONUT") {
+                  // Placed on South Roof Slab
+                  poolW1 = project(-80 + topTwistX, 48, poolZ);
+                  poolW2 = project(80 + topTwistX, 48, poolZ);
+                  poolW3 = project(80 + topTwistX, 75, poolZ);
+                  poolW4 = project(-80 + topTwistX, 75, poolZ);
+                  deck1 = project(-90 + topTwistX, 42, poolZ - 2);
+                  deck2 = project(90 + topTwistX, 42, poolZ - 2);
+                  deck3 = project(90 + topTwistX, 82, poolZ - 2);
+                  deck4 = project(-90 + topTwistX, 82, poolZ - 2);
+                } else if (massingForm === "V_SHAPED") {
+                  // Placed on Right Wing Tip
+                  poolW1 = project(80 + topTwistX, -10, poolZ);
+                  poolW2 = project(140 + topTwistX, 20, poolZ);
+                  poolW3 = project(120 + topTwistX, 45, poolZ);
+                  poolW4 = project(60 + topTwistX, 15, poolZ);
+                  deck1 = project(75 + topTwistX, -15, poolZ - 2);
+                  deck2 = project(145 + topTwistX, 15, poolZ - 2);
+                  deck3 = project(125 + topTwistX, 50, poolZ - 2);
+                  deck4 = project(55 + topTwistX, 20, poolZ - 2);
+                }
 
                 return (
                   <g id="rooftop-infinity-pool">
@@ -3225,7 +3666,96 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
               {/* 6. MONOCRYSTALLINE SOLAR PV ROOFTOP FARM */}
               {(rooftopFeature === "SOLAR_ARRAY" || hasSolarPanels) && (() => {
-                // 3 Racks of Solar PV panels
+                if (massingForm === "OPEN_SQUARE_DONUT") {
+                  // 4 Perimeter Solar Arrays framing the open atrium (matches Reference Image 9!)
+                  // North Slab Array
+                  const sN1 = project(-90 + topTwistX, -95, topZ + 8);
+                  const sN2 = project(90 + topTwistX, -95, topZ + 8);
+                  const sN3 = project(90 + topTwistX, -65, topZ + 14);
+                  const sN4 = project(-90 + topTwistX, -65, topZ + 14);
+                  // South Slab Array
+                  const sS1 = project(-90 + topTwistX, 50, topZ + 8);
+                  const sS2 = project(90 + topTwistX, 50, topZ + 8);
+                  const sS3 = project(90 + topTwistX, 75, topZ + 14);
+                  const sS4 = project(-90 + topTwistX, 75, topZ + 14);
+                  // West Slab Array
+                  const sW1 = project(-115 + topTwistX, -45, topZ + 8);
+                  const sW2 = project(-70 + topTwistX, -45, topZ + 8);
+                  const sW3 = project(-70 + topTwistX, 35, topZ + 14);
+                  const sW4 = project(-115 + topTwistX, 35, topZ + 14);
+                  // East Slab Array
+                  const sE1 = project(70 + topTwistX, -45, topZ + 8);
+                  const sE2 = project(115 + topTwistX, -45, topZ + 8);
+                  const sE3 = project(115 + topTwistX, 35, topZ + 14);
+                  const sE4 = project(70 + topTwistX, 35, topZ + 14);
+
+                  return (
+                    <g id="rooftop-solar-farm-donut">
+                      <polygon points={`${sN1.x},${sN1.y} ${sN2.x},${sN2.y} ${sN3.x},${sN3.y} ${sN4.x},${sN4.y}`} fill="#1E3A8A" stroke="#60A5FA" strokeWidth="1" />
+                      <polygon points={`${sS1.x},${sS1.y} ${sS2.x},${sS2.y} ${sS3.x},${sS3.y} ${sS4.x},${sS4.y}`} fill="#1E3A8A" stroke="#60A5FA" strokeWidth="1" />
+                      <polygon points={`${sW1.x},${sW1.y} ${sW2.x},${sW2.y} ${sW3.x},${sW3.y} ${sW4.x},${sW4.y}`} fill="#1E3A8A" stroke="#60A5FA" strokeWidth="1" />
+                      <polygon points={`${sE1.x},${sE1.y} ${sE2.x},${sE2.y} ${sE3.x},${sE3.y} ${sE4.x},${sE4.y}`} fill="#1E3A8A" stroke="#60A5FA" strokeWidth="1" />
+                      <g transform={`translate(${sN1.x - 10}, ${sN1.y - 25})`}>
+                        <rect x="0" y="-8" width="180" height="18" rx="4" fill="rgba(15, 23, 42, 0.95)" stroke="#F59E0B" strokeWidth="1.2" />
+                        <text x="90" y="4" fill="#FDE047" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                          ⚡ QUAD PERIMETER SOLAR PV (180 kWp)
+                        </text>
+                      </g>
+                    </g>
+                  );
+                } else if (massingForm === "H_SHAPED") {
+                  // Twin arrays on Left Wing and Right Wing, central bridge clear!
+                  const r1A = project(-125 + topTwistX, -45, topZ + 10);
+                  const r1B = project(-65 + topTwistX, -45, topZ + 10);
+                  const r1C = project(-65 + topTwistX, 45, topZ + 16);
+                  const r1D = project(-125 + topTwistX, 45, topZ + 16);
+
+                  const r2A = project(65 + topTwistX, -45, topZ + 10);
+                  const r2B = project(125 + topTwistX, -45, topZ + 10);
+                  const r2C = project(125 + topTwistX, 45, topZ + 16);
+                  const r2D = project(65 + topTwistX, 45, topZ + 16);
+
+                  return (
+                    <g id="rooftop-solar-farm-hshape">
+                      <polygon points={`${r1A.x},${r1A.y} ${r1B.x},${r1B.y} ${r1C.x},${r1C.y} ${r1D.x},${r1D.y}`} fill="#1E3A8A" stroke="#60A5FA" strokeWidth="1.2" />
+                      <line x1={(r1A.x + r1B.x) / 2} y1={(r1A.y + r1B.y) / 2} x2={(r1D.x + r1C.x) / 2} y2={(r1D.y + r1C.y) / 2} stroke="#93C5FD" strokeWidth="0.8" />
+                      <polygon points={`${r2A.x},${r2A.y} ${r2B.x},${r2B.y} ${r2C.x},${r2C.y} ${r2D.x},${r2D.y}`} fill="#1E3A8A" stroke="#60A5FA" strokeWidth="1.2" />
+                      <line x1={(r2A.x + r2B.x) / 2} y1={(r2A.y + r2B.y) / 2} x2={(r2D.x + r2C.x) / 2} y2={(r2D.y + r2C.y) / 2} stroke="#93C5FD" strokeWidth="0.8" />
+                      <g transform={`translate(${r1A.x - 10}, ${r1A.y - 25})`}>
+                        <rect x="0" y="-8" width="180" height="18" rx="4" fill="rgba(15, 23, 42, 0.95)" stroke="#F59E0B" strokeWidth="1.2" />
+                        <text x="90" y="4" fill="#FDE047" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                          ⚡ TWIN WING SOLAR PV FARM (150 kWp)
+                        </text>
+                      </g>
+                    </g>
+                  );
+                } else if (massingForm === "U_SHAPED") {
+                  // Arrays on Left Wing and Right Wing
+                  const r1A = project(-halfW + 8 + topTwistX, -halfD + 10, topZ + 10);
+                  const r1B = project(-halfW + uWingW - 8 + topTwistX, -halfD + 10, topZ + 10);
+                  const r1C = project(-halfW + uWingW - 8 + topTwistX, halfD - 10, topZ + 16);
+                  const r1D = project(-halfW + 8 + topTwistX, halfD - 10, topZ + 16);
+
+                  const r2A = project(halfW - uWingW + 8 + topTwistX, -halfD + 10, topZ + 10);
+                  const r2B = project(halfW - 8 + topTwistX, -halfD + 10, topZ + 10);
+                  const r2C = project(halfW - 8 + topTwistX, halfD - 10, topZ + 16);
+                  const r2D = project(halfW - uWingW + 8 + topTwistX, halfD - 10, topZ + 16);
+
+                  return (
+                    <g id="rooftop-solar-farm-ushape">
+                      <polygon points={`${r1A.x},${r1A.y} ${r1B.x},${r1B.y} ${r1C.x},${r1C.y} ${r1D.x},${r1D.y}`} fill="#1E3A8A" stroke="#60A5FA" strokeWidth="1.2" />
+                      <polygon points={`${r2A.x},${r2A.y} ${r2B.x},${r2B.y} ${r2C.x},${r2C.y} ${r2D.x},${r2D.y}`} fill="#1E3A8A" stroke="#60A5FA" strokeWidth="1.2" />
+                      <g transform={`translate(${r1A.x - 10}, ${r1A.y - 25})`}>
+                        <rect x="0" y="-8" width="180" height="18" rx="4" fill="rgba(15, 23, 42, 0.95)" stroke="#F59E0B" strokeWidth="1.2" />
+                        <text x="90" y="4" fill="#FDE047" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                          ⚡ U-WING SOLAR PV FARM (140 kWp)
+                        </text>
+                      </g>
+                    </g>
+                  );
+                }
+
+                // Default 3 Racks of Solar PV panels for standard buildings
                 const r1A = project(-110 + topTwistX, -40, topZ + 12);
                 const r1B = project(-30 + topTwistX, -40, topZ + 12);
                 const r1C = project(-30 + topTwistX, -5, topZ + 18);
@@ -3839,6 +4369,74 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                           <rect x="150" y="380" width="500" height="180" rx="8" fill="#064E3B" fillOpacity="0.25" stroke="#10B981" strokeWidth="1.5" strokeDasharray="5 3" />
                           <text x="400" y="475" fill="#34D399" fontSize="11" fontWeight="bold" textAnchor="middle">
                             ENTRANCE PLAZA & OPEN PLAYGROUND
+                          </text>
+                        </g>
+                      ) : (data.building3D?.massingForm === "U_SHAPED" || data.building3D?.isUShaped || data.prompt?.toLowerCase().includes("u shape") || data.prompt?.toLowerCase().includes("u-shape") || data.prompt?.toLowerCase().includes("u shaped")) ? (
+                        <g id="cad-ushape-outline">
+                          {/* U-Shaped Three-Wing Exterior Walls */}
+                          <polygon
+                            points="94,94 706,94 706,576 520,576 520,280 280,280 280,576 94,576"
+                            fill="none"
+                            stroke={themeColors.wallExterior}
+                            strokeWidth="12"
+                          />
+                          <polygon
+                            points="94,94 706,94 706,576 520,576 520,280 280,280 280,576 94,576"
+                            fill="none"
+                            stroke="url(#concreteHatch)"
+                            strokeWidth="8"
+                          />
+                          <polygon
+                            points="100,100 700,100 700,570 526,570 526,274 274,274 274,570 100,570"
+                            fill="none"
+                            stroke={themeColors.wallInterior}
+                            strokeWidth="2"
+                          />
+                          {/* Central Landscaped Courtyard with Sports Court */}
+                          <rect x="280" y="280" width="240" height="290" fill="#064E3B" fillOpacity="0.25" stroke="#10B981" strokeWidth="1.5" strokeDasharray="5 3" />
+                          <circle cx="400" cy="425" r="30" fill="none" stroke="#38BDF8" strokeWidth="1.5" />
+                          <text x="400" y="430" fill="#34D399" fontSize="10" fontWeight="bold" textAnchor="middle">
+                            CENTRAL COURTYARD PLAZA
+                          </text>
+                        </g>
+                      ) : (data.building3D?.massingForm === "T_SHAPED" || data.building3D?.isTShaped || data.prompt?.toLowerCase().includes("t shape") || data.prompt?.toLowerCase().includes("t-shape") || data.prompt?.toLowerCase().includes("t shaped")) ? (
+                        <g id="cad-tshape-outline">
+                          {/* T-Shaped Structural Walls */}
+                          <polygon
+                            points="94,94 706,94 706,260 480,260 480,576 320,576 320,260 94,260"
+                            fill="none"
+                            stroke={themeColors.wallExterior}
+                            strokeWidth="12"
+                          />
+                          <polygon
+                            points="94,94 706,94 706,260 480,260 480,576 320,576 320,260 94,260"
+                            fill="none"
+                            stroke="url(#concreteHatch)"
+                            strokeWidth="8"
+                          />
+                          <polygon
+                            points="100,100 700,100 700,254 474,254 474,570 326,570 326,254 100,254"
+                            fill="none"
+                            stroke={themeColors.wallInterior}
+                            strokeWidth="2"
+                          />
+                          {/* West & East Side Courtyards */}
+                          <rect x="94" y="260" width="220" height="310" fill="#064E3B" fillOpacity="0.2" stroke="#10B981" strokeWidth="1" strokeDasharray="4 2" />
+                          <rect x="486" y="260" width="220" height="310" fill="#064E3B" fillOpacity="0.2" stroke="#10B981" strokeWidth="1" strokeDasharray="4 2" />
+                          <text x="204" y="415" fill="#34D399" fontSize="9" fontWeight="bold" textAnchor="middle">WEST COURTYARD</text>
+                          <text x="596" y="415" fill="#34D399" fontSize="9" fontWeight="bold" textAnchor="middle">EAST COURTYARD</text>
+                        </g>
+                      ) : (data.building3D?.massingForm === "CIRCULAR_DONUT" || data.prompt?.toLowerCase().includes("circular donut") || data.prompt?.toLowerCase().includes("cricle") || (data.prompt?.toLowerCase().includes("circle") && !data.prompt?.toLowerCase().includes("semi"))) ? (
+                        <g id="cad-circ-donut-outline">
+                          {/* Outer Circle */}
+                          <circle cx="400" cy="335" r="260" fill="none" stroke={themeColors.wallExterior} strokeWidth="12" />
+                          <circle cx="400" cy="335" r="260" fill="none" stroke="url(#concreteHatch)" strokeWidth="8" />
+                          <circle cx="400" cy="335" r="254" fill="none" stroke={themeColors.wallInterior} strokeWidth="2" />
+                          {/* Inner Courtyard Circle */}
+                          <circle cx="400" cy="335" r="130" fill="#064E3B" fillOpacity="0.3" stroke="#10B981" strokeWidth="3" strokeDasharray="6 3" />
+                          <circle cx="400" cy="335" r="40" fill="none" stroke="#38BDF8" strokeWidth="2" />
+                          <text x="400" y="340" fill="#34D399" fontSize="10" fontWeight="bold" textAnchor="middle">
+                            CIRCULAR ATRIUM COURTYARD
                           </text>
                         </g>
                       ) : (data.building3D?.massingForm === "H_SHAPED" || data.building3D?.isHShaped || data.prompt?.toLowerCase().includes("h shape") || data.prompt?.toLowerCase().includes("h-shape") || data.prompt?.toLowerCase().includes("h shaped")) ? (

@@ -1090,10 +1090,12 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     is_t_shaped = bool(re.search(r'\bt[-_\s]?(shape|shaped|block|layout)\b|\bt\s+building\b', p_lower))
     is_h_shaped = bool(re.search(r'\bh[-_\s]?(shape|shaped|block|layout)\b|\bh\s+building\b', p_lower))
     is_spherical_ball = any(w in p_lower for w in ["ball shape", "spherical", "sphere", "globe", "orb", "geodesic ball", "ball building", "round company"])
-    is_open_square = any(w in p_lower for w in ["square open center", "open center", "donut", "hollow square", "courtyard ring", "atrium square", "square courtyard"])
+    is_open_square = any(w in p_lower for w in ["square open center", "open center", "hollow square", "courtyard ring", "atrium square", "square courtyard"]) or ("donut" in p_lower and "circular" not in p_lower)
+    is_aldar_coin = any(w in p_lower for w in ["aldar", "coin shape", "standing disc", "coin building", "vertical circle"])
+    is_circular_donut = any(w in p_lower for w in ["cricle", "circle", "circular", "ring shape", "circular donut", "circular courtyard"]) and not any(w in p_lower for w in ["semi", "half"])
     is_wide_range = any(w in p_lower for w in ["wide range", "wide building", "linear campus", "wide span", "extended pavilion", "low-rise wide", "long building"])
 
-    is_curved_rounded = any(w in p_lower for w in ["rounded", "curved", "curve", "round", "circular", "cylinder", "cylindrical", "oval", "crescent", "arc", "fluid"])
+    is_curved_rounded = any(w in p_lower for w in ["rounded", "curved", "curve", "round", "cylinder", "cylindrical", "oval", "crescent", "arc", "fluid"])
     is_hostel = any(w in p_lower for w in ["hostel", "dormitory", "student", "campus", "coliving", "co-living"])
     has_basketball = any(w in p_lower for w in ["basketball", "b-ball", "hoop"])
     has_volleyball = any(w in p_lower for w in ["volleyball", "v-ball"])
@@ -1121,6 +1123,10 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
         massing_form = "SPHERICAL_BALL"
     elif is_open_square:
         massing_form = "OPEN_SQUARE_DONUT"
+    elif is_aldar_coin:
+        massing_form = "ALDAR_COIN"
+    elif is_circular_donut:
+        massing_form = "CIRCULAR_DONUT"
     elif is_wide_range:
         massing_form = "WIDE_LINEAR_RANGE"
     elif is_l_shaped:
@@ -1833,6 +1839,8 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
             "isHShaped": is_h_shaped,
             "isSphericalBall": is_spherical_ball,
             "isOpenSquare": is_open_square,
+            "isCircularDonut": is_circular_donut,
+            "isAldarCoin": is_aldar_coin,
             "isWideRange": is_wide_range,
             "isCurvedRounded": is_curved_rounded,
             "isHostel": is_hostel,
