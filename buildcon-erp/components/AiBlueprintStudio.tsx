@@ -3907,13 +3907,26 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowPromptLibrary(false)}
-                className="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition"
-                title="Close Library"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <a
+                  href="/downloads/1000_Architectural_3D_Model_Generation_Prompts.pdf"
+                  download="1000_Architectural_3D_Model_Generation_Prompts.pdf"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 rounded-xl bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                  title="Download Official 1,000 Prompts PDF Document (171 Pages)"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download PDF (1,000 Prompts)</span>
+                </a>
+                <button
+                  onClick={() => setShowPromptLibrary(false)}
+                  className="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition"
+                  title="Close Library"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Filter & Search Bar */}
