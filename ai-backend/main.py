@@ -1085,14 +1085,42 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     
     # Accurate regex matching for L-shape to avoid false positives with words like 'hostel'
     is_l_shaped = bool(re.search(r'\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b', p_lower))
+    is_v_shaped = bool(re.search(r'\bv[-_\s]?(shape|shaped|block|layout)\b|\bv\s+building\b', p_lower))
+    is_t_shaped = bool(re.search(r'\bt[-_\s]?(shape|shaped|block|layout)\b|\bt\s+building\b', p_lower))
+    is_h_shaped = bool(re.search(r'\bh[-_\s]?(shape|shaped|block|layout)\b|\bh\s+building\b', p_lower))
+    is_spherical_ball = any(w in p_lower for w in ["ball shape", "spherical", "sphere", "globe", "orb", "geodesic ball", "ball building", "round company"])
+    is_open_square = any(w in p_lower for w in ["square open center", "open center", "donut", "hollow square", "courtyard ring", "atrium square", "square courtyard"])
+    is_wide_range = any(w in p_lower for w in ["wide range", "wide building", "linear campus", "wide span", "extended pavilion", "low-rise wide", "long building"])
+
     is_curved_rounded = any(w in p_lower for w in ["rounded", "curved", "curve", "round", "circular", "cylinder", "cylindrical", "oval", "crescent", "arc", "fluid"])
     is_hostel = any(w in p_lower for w in ["hostel", "dormitory", "student", "campus", "coliving", "co-living"])
     has_basketball = any(w in p_lower for w in ["basketball", "b-ball", "hoop"])
     has_volleyball = any(w in p_lower for w in ["volleyball", "v-ball"])
-    has_sports_court = has_basketball or has_volleyball or any(w in p_lower for w in ["sports court", "athletic", "court", "playground"])
+    has_playground = any(w in p_lower for w in ["playgroud", "playground", "play ground", "play area", "park", "children park", "student playground", "kids zone"])
+    has_sports_court = has_basketball or has_volleyball or has_playground or any(w in p_lower for w in ["sports court", "athletic", "court", "playground"])
+
+    has_airplane_roof = any(w in p_lower for w in ["aeroplan", "airplane", "aeroplane", "wing design roof", "wing roof", "aviation roof", "aerodynamic roof", "flight roof"])
+    has_solar_panels = any(w in p_lower for w in ["solar pannel", "solar panel", "solar rooftop", "photovoltaic", "solar array", "solar farm", "solar roof"])
+
+    is_full_glass = any(w in p_lower for w in ["full glass", "all glass", "fully glazed", "total glass", "glass curtain wall", "full glassed"])
+    is_right_front_glass = any(w in p_lower for w in ["right front glass", "right side glass", "right wing glazed", "right glazed", "right front glassed"])
+    is_left_front_glass = any(w in p_lower for w in ["left front glass", "left side glass", "left wing glazed", "left glazed", "left front glassed"])
+    is_one_side_glass = any(w in p_lower for w in ["one side glass", "single side glass", "one side glazed", "front glass only", "one side glassed"])
 
     # Massing Form Classification
-    if is_l_shaped:
+    if is_v_shaped:
+        massing_form = "V_SHAPED"
+    elif is_t_shaped:
+        massing_form = "T_SHAPED"
+    elif is_h_shaped:
+        massing_form = "H_SHAPED"
+    elif is_spherical_ball:
+        massing_form = "SPHERICAL_BALL"
+    elif is_open_square:
+        massing_form = "OPEN_SQUARE_DONUT"
+    elif is_wide_range:
+        massing_form = "WIDE_LINEAR_RANGE"
+    elif is_l_shaped:
         massing_form = "L_SHAPED"
     elif is_curved_rounded:
         massing_form = "CURVED_CYLINDRICAL"
@@ -1104,6 +1132,18 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
         massing_form = "INDUSTRIAL_SHED"
     else:
         massing_form = "RECTANGULAR"
+
+    # Glass Distribution Classification
+    if is_right_front_glass:
+        glass_distribution = "RIGHT_FRONT_GLASS"
+    elif is_left_front_glass:
+        glass_distribution = "LEFT_FRONT_GLASS"
+    elif is_one_side_glass:
+        glass_distribution = "ONE_SIDE_GLASS"
+    elif is_full_glass:
+        glass_distribution = "FULL_GLASS"
+    else:
+        glass_distribution = "BALANCED_DUAL_CURTAIN"
 
     # Facade Palette Classification
     if is_luxury_mansion:
@@ -1120,7 +1160,9 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
         facade_palette = "AZURE_GLASS"
 
     # Rooftop Feature Classification
-    if has_helipad:
+    if has_airplane_roof:
+        rooftop_feature = "AIRPLANE_WING_ROOF"
+    elif has_helipad:
         rooftop_feature = "HELIPAD"
     elif has_infinity_pool:
         rooftop_feature = "INFINITY_POOL"
@@ -1130,6 +1172,8 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
         rooftop_feature = "GABLE_ROOF"
     elif has_rooftop_garden:
         rooftop_feature = "PENTHOUSE_GARDEN"
+    elif has_solar_panels:
+        rooftop_feature = "SOLAR_ARRAY"
     else:
         rooftop_feature = "SOLAR_ARRAY"
 
@@ -1150,7 +1194,127 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     # Attempt real Gemini AI Architect call
     gemini_spec = call_gemini_blueprint_designer(prompt, p_type, sqft, floors_count, gemini_api_key)
     
-    if is_hostel:
+    if is_v_shaped:
+        title = f"{floors_count}-Story V-Shaped Iconic Dual-Wing Headquarters"
+        dwg_no = "DWG-AI-VSHP-001"
+        rooms = [
+            {"id": "R1", "name": "Executive West Wing Suites", "x": 100, "y": 140, "w": 260, "h": 220, "areaSqft": round(sqft * 0.30), "flooring": "Smoked Oak Hardwood", "type": "OFFICE"},
+            {"id": "R2", "name": "Creative East Wing Innovation Labs", "x": 440, "y": 140, "w": 260, "h": 220, "areaSqft": round(sqft * 0.30), "flooring": "Polished Concrete", "type": "LAB"},
+            {"id": "R3", "name": "Central V-Apex Foyer & Glass Rotunda", "x": 300, "y": 100, "w": 200, "h": 120, "areaSqft": round(sqft * 0.16), "flooring": "Statuario Italian Marble", "type": "FOYER"},
+            {"id": "R4", "name": "Front Converging Garden Plaza & Cafe", "x": 100, "y": 380, "w": 600, "h": 120, "areaSqft": round(sqft * 0.14), "flooring": "Granite Pavers & Lawn", "type": "COURTYARD"},
+            {"id": "R5", "name": "Service Core & Dual Elevators", "x": 350, "y": 520, "w": 100, "h": 70, "areaSqft": round(sqft * 0.10), "flooring": "Heavy Duty Kota Stone", "type": "CIRCULATION"}
+        ]
+        columns = [
+            {"grid": "V-1", "x": 95, "y": 135, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "V-2", "x": 395, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "V-3", "x": 695, "y": 135, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "V-4", "x": 195, "y": 355, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "V-5", "x": 595, "y": 355, "size": "500x500mm", "rebar": "12-T25 Fe550D"}
+        ]
+        hvac_path = "M 120 160 L 400 120 L 680 160"
+        sprinklers = [{"x": 150, "y": 180}, {"x": 400, "y": 140}, {"x": 650, "y": 180}, {"x": 220, "y": 320}, {"x": 580, "y": 320}]
+    elif is_t_shaped:
+        title = f"{floors_count}-Story T-Shaped Axial Corporate Complex"
+        dwg_no = "DWG-AI-TSHP-001"
+        rooms = [
+            {"id": "R1", "name": "Transverse Front Bar (West Wing)", "x": 100, "y": 100, "w": 280, "h": 180, "areaSqft": round(sqft * 0.28), "flooring": "Engineered Hardwood", "type": "OFFICE"},
+            {"id": "R2", "name": "Transverse Front Bar (East Wing)", "x": 420, "y": 100, "w": 280, "h": 180, "areaSqft": round(sqft * 0.28), "flooring": "Engineered Hardwood", "type": "OFFICE"},
+            {"id": "R3", "name": "Central Perpendicular Axial Spine", "x": 280, "y": 300, "w": 240, "h": 240, "areaSqft": round(sqft * 0.24), "flooring": "Vitrified Porcelain", "type": "CONFERENCE"},
+            {"id": "R4", "name": "West Landscaped Courtyard", "x": 100, "y": 320, "w": 160, "h": 220, "areaSqft": round(sqft * 0.10), "flooring": "Natural Turf Lawn", "type": "OUTDOOR"},
+            {"id": "R5", "name": "East Recreational Courtyard", "x": 540, "y": 320, "w": 160, "h": 220, "areaSqft": round(sqft * 0.10), "flooring": "Natural Turf Lawn", "type": "OUTDOOR"}
+        ]
+        columns = [
+            {"grid": "T-1", "x": 95, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "T-2", "x": 395, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "T-3", "x": 695, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "T-4", "x": 275, "y": 295, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "T-5", "x": 515, "y": 295, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "T-6", "x": 275, "y": 535, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "T-7", "x": 515, "y": 535, "size": "500x500mm", "rebar": "12-T25 Fe550D"}
+        ]
+        hvac_path = "M 120 180 L 680 180 M 400 180 L 400 500"
+        sprinklers = [{"x": 180, "y": 150}, {"x": 400, "y": 150}, {"x": 620, "y": 150}, {"x": 400, "y": 350}, {"x": 400, "y": 480}]
+    elif is_h_shaped:
+        title = f"{floors_count}-Floor H-Shaped Connected Dual-Tower Hub"
+        dwg_no = "DWG-AI-HSHP-001"
+        rooms = [
+            {"id": "R1", "name": "Tower Alpha Executive Suites (West)", "x": 100, "y": 100, "w": 200, "h": 460, "areaSqft": round(sqft * 0.38), "flooring": "Imported Marble", "type": "OFFICE"},
+            {"id": "R2", "name": "Tower Beta Innovation Wing (East)", "x": 500, "y": 100, "w": 200, "h": 460, "areaSqft": round(sqft * 0.38), "flooring": "Acoustic Vinyl", "type": "OFFICE"},
+            {"id": "R3", "name": "Central Glass Skybridge Link Corridor", "x": 300, "y": 280, "w": 200, "h": 100, "areaSqft": round(sqft * 0.12), "flooring": "Glass Floor Panels & Teak", "type": "LOUNGE"},
+            {"id": "R4", "name": "North Forecourt Landscaped Entrance", "x": 310, "y": 100, "w": 180, "h": 160, "areaSqft": round(sqft * 0.06), "flooring": "Granite Cobblestone", "type": "FOYER"},
+            {"id": "R5", "name": "South Sunken Amphitheatre Garden", "x": 310, "y": 400, "w": 180, "h": 160, "areaSqft": round(sqft * 0.06), "flooring": "Stepped Stone & Greenery", "type": "COURTYARD"}
+        ]
+        columns = [
+            {"grid": "HA-1", "x": 95, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "HA-2", "x": 295, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "HB-1", "x": 495, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "HB-2", "x": 695, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "HA-3", "x": 95, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "HA-4", "x": 295, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "HB-3", "x": 495, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "HB-4", "x": 695, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"}
+        ]
+        hvac_path = "M 180 120 L 180 540 M 600 120 L 600 540 M 180 330 L 600 330"
+        sprinklers = [{"x": 180, "y": 180}, {"x": 180, "y": 460}, {"x": 400, "y": 330}, {"x": 600, "y": 180}, {"x": 600, "y": 460}]
+    elif is_spherical_ball:
+        title = f"{floors_count}-Story Futuristic Spherical Orb Corporate HQ"
+        dwg_no = "DWG-AI-ORB-001"
+        rooms = [
+            {"id": "R1", "name": "Equator 360° Panoramic Main Chamber", "x": 150, "y": 150, "w": 500, "h": 220, "areaSqft": round(sqft * 0.42), "flooring": "Seamless Terrazzo Orb Grade", "type": "EXECUTIVE"},
+            {"id": "R2", "name": "Northern Geodesic Think-Tank Pods", "x": 200, "y": 100, "w": 400, "h": 100, "areaSqft": round(sqft * 0.22), "flooring": "Acoustic Cork", "type": "LAB"},
+            {"id": "R3", "name": "Southern Amphitheatre & Media Dome", "x": 200, "y": 380, "w": 400, "h": 120, "areaSqft": round(sqft * 0.22), "flooring": "Acoustic Stepped Timber", "type": "AUDITORIUM"},
+            {"id": "R4", "name": "Central Core Gravitational Elevator", "x": 360, "y": 220, "w": 80, "h": 80, "areaSqft": round(sqft * 0.14), "flooring": "Stainless Steel Checkerplate", "type": "CIRCULATION"}
+        ]
+        columns = [
+            {"grid": "O-1", "x": 250, "y": 180, "size": "450x450mm", "rebar": "10-T20 Fe550D"},
+            {"grid": "O-2", "x": 550, "y": 180, "size": "450x450mm", "rebar": "10-T20 Fe550D"},
+            {"grid": "O-3", "x": 250, "y": 440, "size": "450x450mm", "rebar": "10-T20 Fe550D"},
+            {"grid": "O-4", "x": 550, "y": 440, "size": "450x450mm", "rebar": "10-T20 Fe550D"}
+        ]
+        hvac_path = "M 400 100 L 400 520 M 150 260 L 650 260"
+        sprinklers = [{"x": 300, "y": 200}, {"x": 500, "y": 200}, {"x": 300, "y": 400}, {"x": 500, "y": 400}]
+    elif is_open_square:
+        title = f"{floors_count}-Floor Hollow Square Courtyard Ring Complex"
+        dwg_no = "DWG-AI-RING-001"
+        rooms = [
+            {"id": "R1", "name": "North Quad Living / Work Suites", "x": 100, "y": 100, "w": 600, "h": 110, "areaSqft": round(sqft * 0.28), "flooring": "Hardwood Plank", "type": "OFFICE"},
+            {"id": "R2", "name": "South Quad Living / Tech Hub", "x": 100, "y": 450, "w": 600, "h": 110, "areaSqft": round(sqft * 0.28), "flooring": "Hardwood Plank", "type": "OFFICE"},
+            {"id": "R3", "name": "West Quad Conference & Cafeteria", "x": 100, "y": 210, "w": 120, "h": 240, "areaSqft": round(sqft * 0.16), "flooring": "Polished Vitrified Tile", "type": "KITCHEN"},
+            {"id": "R4", "name": "East Quad Library & Research Suites", "x": 580, "y": 210, "w": 120, "h": 240, "areaSqft": round(sqft * 0.16), "flooring": "Acoustic Carpet", "type": "LIBRARY"},
+            {"id": "R5", "name": "Central Open-Air Playground & Garden Quad", "x": 240, "y": 230, "w": 320, "h": 200, "areaSqft": round(sqft * 0.12), "flooring": "Turf Grass & Rubber Playground Tiles", "type": "COURTYARD"}
+        ]
+        columns = [
+            {"grid": "Q-1", "x": 95, "y": 95, "size": "450x450mm", "rebar": "8-T20 Fe550D"},
+            {"grid": "Q-2", "x": 695, "y": 95, "size": "450x450mm", "rebar": "8-T20 Fe550D"},
+            {"grid": "Q-3", "x": 95, "y": 555, "size": "450x450mm", "rebar": "8-T20 Fe550D"},
+            {"grid": "Q-4", "x": 695, "y": 555, "size": "450x450mm", "rebar": "8-T20 Fe550D"},
+            {"grid": "Q-5", "x": 225, "y": 215, "size": "450x450mm", "rebar": "8-T20 Fe550D"},
+            {"grid": "Q-6", "x": 575, "y": 215, "size": "450x450mm", "rebar": "8-T20 Fe550D"},
+            {"grid": "Q-7", "x": 225, "y": 435, "size": "450x450mm", "rebar": "8-T20 Fe550D"},
+            {"grid": "Q-8", "x": 575, "y": 435, "size": "450x450mm", "rebar": "8-T20 Fe550D"}
+        ]
+        hvac_path = "M 140 140 L 660 140 L 660 500 L 140 500 Z"
+        sprinklers = [{"x": 160, "y": 140}, {"x": 640, "y": 140}, {"x": 160, "y": 500}, {"x": 640, "y": 500}, {"x": 160, "y": 320}, {"x": 640, "y": 320}]
+    elif is_wide_range:
+        title = f"{floors_count}-Story Wide-Range Linear Architectural Campus"
+        dwg_no = "DWG-AI-WIDE-001"
+        rooms = [
+            {"id": "R1", "name": "West Linear Pavilion Wing", "x": 80, "y": 140, "w": 280, "h": 280, "areaSqft": round(sqft * 0.35), "flooring": "Polished Terrazzo", "type": "OFFICE"},
+            {"id": "R2", "name": "Central Grand Portico & High-Bay Atrium", "x": 370, "y": 100, "w": 180, "h": 360, "areaSqft": round(sqft * 0.25), "flooring": "Flamed Fluted Granite", "type": "FOYER"},
+            {"id": "R3", "name": "East Linear Innovation & Labs Wing", "x": 560, "y": 140, "w": 280, "h": 280, "areaSqft": round(sqft * 0.35), "flooring": "Anti-Static Epoxy", "type": "LAB"},
+            {"id": "R4", "name": "Front Broad Promenade & Drop-off Plaza", "x": 80, "y": 480, "w": 760, "h": 80, "areaSqft": round(sqft * 0.05), "flooring": "Interlocking Pavers", "type": "OUTDOOR"}
+        ]
+        columns = [
+            {"grid": "W-1", "x": 75, "y": 135, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "W-2", "x": 365, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "W-3", "x": 555, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "W-4", "x": 835, "y": 135, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "W-5", "x": 75, "y": 455, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "W-6", "x": 835, "y": 455, "size": "500x500mm", "rebar": "12-T25 Fe550D"}
+        ]
+        hvac_path = "M 80 280 L 840 280"
+        sprinklers = [{"x": 150, "y": 280}, {"x": 350, "y": 280}, {"x": 550, "y": 280}, {"x": 750, "y": 280}]
+    elif is_hostel:
         title = f"{floors_count}-Floor Rounded Luxury Campus Hostel Residence"
         dwg_no = "DWG-AI-HST-001"
         rooms = [
@@ -1343,7 +1507,146 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     gfa_sqft = round(sqft * floors_count)
 
     # Dynamic Architecture Title and Facade System based on prompt
-    if is_hostel:
+    if is_v_shaped:
+        title = f"{floors_count}-Story V-Shaped Iconic Dual-Wing Headquarters"
+        dwg_no = "DWG-AI-VSHP-001"
+        rooms = [
+            {"id": "R1", "name": "Executive West Wing Suites", "x": 100, "y": 140, "w": 260, "h": 220, "areaSqft": round(sqft * 0.30), "flooring": "Smoked Oak Hardwood", "type": "OFFICE"},
+            {"id": "R2", "name": "Creative East Wing Innovation Labs", "x": 440, "y": 140, "w": 260, "h": 220, "areaSqft": round(sqft * 0.30), "flooring": "Polished Concrete", "type": "LAB"},
+            {"id": "R3", "name": "Central V-Apex Foyer & Glass Rotunda", "x": 300, "y": 100, "w": 200, "h": 120, "areaSqft": round(sqft * 0.16), "flooring": "Statuario Italian Marble", "type": "FOYER"},
+            {"id": "R4", "name": "Front Converging Garden Plaza & Cafe", "x": 100, "y": 380, "w": 600, "h": 120, "areaSqft": round(sqft * 0.14), "flooring": "Granite Pavers & Lawn", "type": "COURTYARD"},
+            {"id": "R5", "name": "Service Core & Dual Elevators", "x": 350, "y": 520, "w": 100, "h": 70, "areaSqft": round(sqft * 0.10), "flooring": "Heavy Duty Kota Stone", "type": "CIRCULATION"}
+        ]
+        columns = [
+            {"grid": "V-1", "x": 95, "y": 135, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "V-2", "x": 395, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "V-3", "x": 695, "y": 135, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "V-4", "x": 195, "y": 355, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "V-5", "x": 595, "y": 355, "size": "500x500mm", "rebar": "12-T25 Fe550D"}
+        ]
+        hvac_path = "M 120 160 L 400 120 L 680 160"
+        sprinklers = [{"x": 150, "y": 180}, {"x": 400, "y": 140}, {"x": 650, "y": 180}, {"x": 220, "y": 320}, {"x": 580, "y": 320}]
+    elif is_t_shaped:
+        title = f"{floors_count}-Story T-Shaped Axial Corporate Complex"
+        dwg_no = "DWG-AI-TSHP-001"
+        rooms = [
+            {"id": "R1", "name": "Transverse Front Bar (West Wing)", "x": 100, "y": 100, "w": 280, "h": 180, "areaSqft": round(sqft * 0.28), "flooring": "Engineered Hardwood", "type": "OFFICE"},
+            {"id": "R2", "name": "Transverse Front Bar (East Wing)", "x": 420, "y": 100, "w": 280, "h": 180, "areaSqft": round(sqft * 0.28), "flooring": "Engineered Hardwood", "type": "OFFICE"},
+            {"id": "R3", "name": "Central Perpendicular Axial Spine", "x": 280, "y": 300, "w": 240, "h": 240, "areaSqft": round(sqft * 0.24), "flooring": "Vitrified Porcelain", "type": "CONFERENCE"},
+            {"id": "R4", "name": "West Landscaped Courtyard", "x": 100, "y": 320, "w": 160, "h": 220, "areaSqft": round(sqft * 0.10), "flooring": "Natural Turf Lawn", "type": "OUTDOOR"},
+            {"id": "R5", "name": "East Recreational Courtyard", "x": 540, "y": 320, "w": 160, "h": 220, "areaSqft": round(sqft * 0.10), "flooring": "Natural Turf Lawn", "type": "OUTDOOR"}
+        ]
+        columns = [
+            {"grid": "T-1", "x": 95, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "T-2", "x": 395, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "T-3", "x": 695, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "T-4", "x": 275, "y": 295, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "T-5", "x": 515, "y": 295, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "T-6", "x": 275, "y": 535, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "T-7", "x": 515, "y": 535, "size": "500x500mm", "rebar": "12-T25 Fe550D"}
+        ]
+        hvac_path = "M 120 180 L 680 180 M 400 180 L 400 500"
+        sprinklers = [{"x": 180, "y": 150}, {"x": 400, "y": 150}, {"x": 620, "y": 150}, {"x": 400, "y": 350}, {"x": 400, "y": 480}]
+    elif is_h_shaped:
+        title = f"{floors_count}-Floor H-Shaped Connected Dual-Tower Hub"
+        dwg_no = "DWG-AI-HSHP-001"
+        rooms = [
+            {"id": "R1", "name": "Tower Alpha Executive Suites (West)", "x": 100, "y": 100, "w": 200, "h": 460, "areaSqft": round(sqft * 0.38), "flooring": "Imported Marble", "type": "OFFICE"},
+            {"id": "R2", "name": "Tower Beta Innovation Wing (East)", "x": 500, "y": 100, "w": 200, "h": 460, "areaSqft": round(sqft * 0.38), "flooring": "Acoustic Vinyl", "type": "OFFICE"},
+            {"id": "R3", "name": "Central Glass Skybridge Link Corridor", "x": 300, "y": 280, "w": 200, "h": 100, "areaSqft": round(sqft * 0.12), "flooring": "Glass Floor Panels & Teak", "type": "LOUNGE"},
+            {"id": "R4", "name": "North Forecourt Landscaped Entrance", "x": 310, "y": 100, "w": 180, "h": 160, "areaSqft": round(sqft * 0.06), "flooring": "Granite Cobblestone", "type": "FOYER"},
+            {"id": "R5", "name": "South Sunken Amphitheatre Garden", "x": 310, "y": 400, "w": 180, "h": 160, "areaSqft": round(sqft * 0.06), "flooring": "Stepped Stone & Greenery", "type": "COURTYARD"}
+        ]
+        columns = [
+            {"grid": "HA-1", "x": 95, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "HA-2", "x": 295, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "HB-1", "x": 495, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "HB-2", "x": 695, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "HA-3", "x": 95, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "HA-4", "x": 295, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "HB-3", "x": 495, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "HB-4", "x": 695, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"}
+        ]
+        hvac_path = "M 180 120 L 180 540 M 600 120 L 600 540 M 180 330 L 600 330"
+        sprinklers = [{"x": 180, "y": 180}, {"x": 180, "y": 460}, {"x": 400, "y": 330}, {"x": 600, "y": 180}, {"x": 600, "y": 460}]
+    elif is_spherical_ball:
+        title = f"{floors_count}-Story Futuristic Spherical Orb Corporate HQ"
+        dwg_no = "DWG-AI-ORB-001"
+        rooms = [
+            {"id": "R1", "name": "Equator 360° Panoramic Main Chamber", "x": 150, "y": 150, "w": 500, "h": 220, "areaSqft": round(sqft * 0.42), "flooring": "Seamless Terrazzo Orb Grade", "type": "EXECUTIVE"},
+            {"id": "R2", "name": "Northern Geodesic Think-Tank Pods", "x": 200, "y": 100, "w": 400, "h": 100, "areaSqft": round(sqft * 0.22), "flooring": "Acoustic Cork", "type": "LAB"},
+            {"id": "R3", "name": "Southern Amphitheatre & Media Dome", "x": 200, "y": 380, "w": 400, "h": 120, "areaSqft": round(sqft * 0.22), "flooring": "Acoustic Stepped Timber", "type": "AUDITORIUM"},
+            {"id": "R4", "name": "Central Core Gravitational Elevator", "x": 360, "y": 220, "w": 80, "h": 80, "areaSqft": round(sqft * 0.14), "flooring": "Stainless Steel Checkerplate", "type": "CIRCULATION"}
+        ]
+        columns = [
+            {"grid": "O-1", "x": 250, "y": 180, "size": "450x450mm", "rebar": "10-T20 Fe550D"},
+            {"grid": "O-2", "x": 550, "y": 180, "size": "450x450mm", "rebar": "10-T20 Fe550D"},
+            {"grid": "O-3", "x": 250, "y": 440, "size": "450x450mm", "rebar": "10-T20 Fe550D"},
+            {"grid": "O-4", "x": 550, "y": 440, "size": "450x450mm", "rebar": "10-T20 Fe550D"}
+        ]
+        hvac_path = "M 400 100 L 400 520 M 150 260 L 650 260"
+        sprinklers = [{"x": 300, "y": 200}, {"x": 500, "y": 200}, {"x": 300, "y": 400}, {"x": 500, "y": 400}]
+    elif is_open_square:
+        title = f"{floors_count}-Floor Hollow Square Courtyard Ring Complex"
+        dwg_no = "DWG-AI-RING-001"
+        rooms = [
+            {"id": "R1", "name": "North Quad Living / Work Suites", "x": 100, "y": 100, "w": 600, "h": 110, "areaSqft": round(sqft * 0.28), "flooring": "Hardwood Plank", "type": "OFFICE"},
+            {"id": "R2", "name": "South Quad Living / Tech Hub", "x": 100, "y": 450, "w": 600, "h": 110, "areaSqft": round(sqft * 0.28), "flooring": "Hardwood Plank", "type": "OFFICE"},
+            {"id": "R3", "name": "West Quad Conference & Cafeteria", "x": 100, "y": 210, "w": 120, "h": 240, "areaSqft": round(sqft * 0.16), "flooring": "Polished Vitrified Tile", "type": "KITCHEN"},
+            {"id": "R4", "name": "East Quad Library & Research Suites", "x": 580, "y": 210, "w": 120, "h": 240, "areaSqft": round(sqft * 0.16), "flooring": "Acoustic Carpet", "type": "LIBRARY"},
+            {"id": "R5", "name": "Central Open-Air Playground & Garden Quad", "x": 240, "y": 230, "w": 320, "h": 200, "areaSqft": round(sqft * 0.12), "flooring": "Turf Grass & Rubber Playground Tiles", "type": "COURTYARD"}
+        ]
+        columns = [
+            {"grid": "Q-1", "x": 95, "y": 95, "size": "450x450mm", "rebar": "8-T20 Fe550D"},
+            {"grid": "Q-2", "x": 695, "y": 95, "size": "450x450mm", "rebar": "8-T20 Fe550D"},
+            {"grid": "Q-3", "x": 95, "y": 555, "size": "450x450mm", "rebar": "8-T20 Fe550D"},
+            {"grid": "Q-4", "x": 695, "y": 555, "size": "450x450mm", "rebar": "8-T20 Fe550D"},
+            {"grid": "Q-5", "x": 225, "y": 215, "size": "450x450mm", "rebar": "8-T20 Fe550D"},
+            {"grid": "Q-6", "x": 575, "y": 215, "size": "450x450mm", "rebar": "8-T20 Fe550D"},
+            {"grid": "Q-7", "x": 225, "y": 435, "size": "450x450mm", "rebar": "8-T20 Fe550D"},
+            {"grid": "Q-8", "x": 575, "y": 435, "size": "450x450mm", "rebar": "8-T20 Fe550D"}
+        ]
+        hvac_path = "M 140 140 L 660 140 L 660 500 L 140 500 Z"
+        sprinklers = [{"x": 160, "y": 140}, {"x": 640, "y": 140}, {"x": 160, "y": 500}, {"x": 640, "y": 500}, {"x": 160, "y": 320}, {"x": 640, "y": 320}]
+    elif is_wide_range:
+        title = f"{floors_count}-Story Wide-Range Linear Architectural Campus"
+        dwg_no = "DWG-AI-WIDE-001"
+        rooms = [
+            {"id": "R1", "name": "West Linear Pavilion Wing", "x": 80, "y": 140, "w": 280, "h": 280, "areaSqft": round(sqft * 0.35), "flooring": "Polished Terrazzo", "type": "OFFICE"},
+            {"id": "R2", "name": "Central Grand Portico & High-Bay Atrium", "x": 370, "y": 100, "w": 180, "h": 360, "areaSqft": round(sqft * 0.25), "flooring": "Flamed Fluted Granite", "type": "FOYER"},
+            {"id": "R3", "name": "East Linear Innovation & Labs Wing", "x": 560, "y": 140, "w": 280, "h": 280, "areaSqft": round(sqft * 0.35), "flooring": "Anti-Static Epoxy", "type": "LAB"},
+            {"id": "R4", "name": "Front Broad Promenade & Drop-off Plaza", "x": 80, "y": 480, "w": 760, "h": 80, "areaSqft": round(sqft * 0.05), "flooring": "Interlocking Pavers", "type": "OUTDOOR"}
+        ]
+        columns = [
+            {"grid": "W-1", "x": 75, "y": 135, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "W-2", "x": 365, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "W-3", "x": 555, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "W-4", "x": 835, "y": 135, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "W-5", "x": 75, "y": 455, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "W-6", "x": 835, "y": 455, "size": "500x500mm", "rebar": "12-T25 Fe550D"}
+        ]
+        hvac_path = "M 80 280 L 840 280"
+        sprinklers = [{"x": 150, "y": 280}, {"x": 350, "y": 280}, {"x": 550, "y": 280}, {"x": 750, "y": 280}]
+
+    if is_v_shaped:
+        fallback_title = f"{floors_count}-Story V-Shaped Iconic Dual-Wing Headquarters"
+        fallback_facade = "Converging V-Angle Glazed Wings with Central Plaza Foyer"
+    elif is_t_shaped:
+        fallback_title = f"{floors_count}-Story T-Shaped Axial Corporate Complex"
+        fallback_facade = "T-Configuration Curtain Wall with Perpendicular Spine"
+    elif is_h_shaped:
+        fallback_title = f"{floors_count}-Floor H-Shaped Connected Dual-Tower Hub"
+        fallback_facade = "Twin Parallel Towers with Skybridge Link Atrium"
+    elif is_spherical_ball:
+        fallback_title = f"{floors_count}-Story Futuristic Spherical Orb Corporate HQ"
+        fallback_facade = "Geodesic Spherical Glass Shell with Structural Latitudinal Rings"
+    elif is_open_square:
+        fallback_title = f"{floors_count}-Floor Hollow Square Courtyard Ring Complex"
+        fallback_facade = "Open-Center Quadrangle Envelope with Inner Glass Walls"
+    elif is_wide_range:
+        fallback_title = f"{floors_count}-Story Wide-Range Linear Architectural Campus"
+        fallback_facade = "Continuous Low-Rise Panoramic Ribbon Glazing & Portico"
+    elif is_hostel:
         fallback_title = f"{floors_count}-Floor Rounded Luxury Campus Hostel Residence"
         fallback_facade = "Aerodynamic Curved Glass Envelope with Panoramic Balconies"
     elif is_curved_rounded:
@@ -1391,29 +1694,45 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     # Build highly responsive architectural highlights
     custom_highlights = [
         f"{floors_count}-Story {massing_form.replace('_', ' ').title()} RCC Frame Structure",
-        "Central athletic courtyard featuring regulation basketball & volleyball courts" if has_sports_court else (
-            "L-Shaped dual wing geometry with open-air central courtyard plaza" if massing_form == "L_SHAPED" else (
-                "Aerodynamic cylindrical curved architectural facade with continuous panoramic glazing" if massing_form == "CURVED_CYLINDRICAL" else (
-                    "External diagonal structural steel diagrid exoskeleton" if has_diagrid else (
-                        "Alternating double-height living room glazing with structural silicone mullions" if has_double_height else "High-performance acoustic Low-E double curtain wall glazing"
+        "Aerodynamic supersonic swept-back airplane wing canopy roof with navigation lighting beacons" if rooftop_feature == "AIRPLANE_WING_ROOF" else (
+            "Rooftop high-efficiency monocrystalline solar PV panel array (450 kWp grid-tied)" if rooftop_feature == "SOLAR_ARRAY" or has_solar_panels else (
+                "Rooftop helipad with perimeter flight safety beacons & sky-mansion terrace" if rooftop_feature == "HELIPAD" else (
+                    "Elevated infinity sky pool with glass overflow edge and wooden sundeck" if rooftop_feature == "INFINITY_POOL" else (
+                        "Geodesic glass dome astronomical observatory & panoramic sky lounge" if rooftop_feature == "OBSERVATORY_DOME" else (
+                            "Architectural pitched timber gable roof with weather-sealed standing seams" if rooftop_feature == "GABLE_ROOF" else (
+                                "Landscaped sky-park botanical terrace garden with observation deck" if rooftop_feature == "PENTHOUSE_GARDEN" else "Rooftop terrace with solar PV array & pressurized lift core"
+                            )
+                        )
                     )
                 )
             )
         ),
-        "Curved wave sinusoidal organic balconies" if balcony_type == "CURVED_WAVE" else (
+        "360-Degree full curtain wall double glazing with acoustic Low-E laminated panes" if glass_distribution == "FULL_GLASS" else (
+            "Asymmetric architectural envelope: right front wing fully glazed curtain wall, left wing precast concrete" if glass_distribution == "RIGHT_FRONT_GLASS" else (
+                "Asymmetric architectural envelope: left front wing fully glazed curtain wall, right wing precast concrete" if glass_distribution == "LEFT_FRONT_GLASS" else (
+                    "Unidirectional solar optimization: single front facade fully glazed, thermal mass flanks" if glass_distribution == "ONE_SIDE_GLASS" else (
+                        "Converging V-Angle dual wings framing an open central entrance plaza" if massing_form == "V_SHAPED" else (
+                            "T-Configuration axial spine with balanced transverse wing blocks" if massing_form == "T_SHAPED" else (
+                                "Twin parallel towers linked by a central skybridge atrium corridor" if massing_form == "H_SHAPED" else (
+                                    "Geodesic spherical glass orb envelope with latitudinal tension rings" if massing_form == "SPHERICAL_BALL" else (
+                                        "Hollow square quadrangle perimeter enclosing an open-to-sky central courtyard" if massing_form == "OPEN_SQUARE_DONUT" else (
+                                            "Extended wide-span linear campus with high-bay pavilion portico" if massing_form == "WIDE_LINEAR_RANGE" else (
+                                                "Aerodynamic cylindrical curved architectural facade with continuous panoramic glazing" if massing_form == "CURVED_CYLINDRICAL" else (
+                                                    "L-Shaped dual wing geometry with open-air central courtyard plaza" if massing_form == "L_SHAPED" else "High-performance acoustic Low-E double curtain wall glazing"
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        ),
+        "Landscaped central courtyard featuring open playground, recreation lawn, and athletic hardcourts" if (has_playground or has_sports_court) else (
             "Continuous 360-degree wrap-around panoramic ribbon balconies" if balcony_type == "WRAPAROUND_RIBBON" else (
-                "Cascading planted vertical garden terraces with automated drip misting" if balcony_type == "TERRACED_CASCADE" else (
-                    "Cantilevered floating balconies with frameless laminated glass balustrades" if balcony_type == "CANTILEVERED_FLOATING" else "Integrated MEP service core with dual wet risers & HVAC shafts"
-                )
-            )
-        ),
-        "Rooftop helipad with perimeter flight safety beacons & sky-mansion terrace" if rooftop_feature == "HELIPAD" else (
-            "Elevated infinity sky pool with glass overflow edge and wooden sundeck" if rooftop_feature == "INFINITY_POOL" else (
-                "Geodesic glass dome astronomical observatory & panoramic sky lounge" if rooftop_feature == "OBSERVATORY_DOME" else (
-                    "Architectural pitched timber gable roof with weather-sealed standing seams" if rooftop_feature == "GABLE_ROOF" else (
-                        "Landscaped sky-park botanical terrace garden with observation deck" if rooftop_feature == "PENTHOUSE_GARDEN" else "Rooftop terrace with monocrystalline solar PV array & pressurized lift core"
-                    )
-                )
+                "Cantilevered floating balconies with frameless laminated glass balustrades" if balcony_type == "CANTILEVERED_FLOATING" else "Integrated MEP service core with dual wet risers & HVAC shafts"
             )
         )
     ]
@@ -1443,12 +1762,22 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
             "architecturalHighlights": gemini_spec.get("architecturalHighlights", custom_highlights) if gemini_spec else custom_highlights,
             "massingForm": massing_form,
             "isLShaped": is_l_shaped,
+            "isVShaped": is_v_shaped,
+            "isTShaped": is_t_shaped,
+            "isHShaped": is_h_shaped,
+            "isSphericalBall": is_spherical_ball,
+            "isOpenSquare": is_open_square,
+            "isWideRange": is_wide_range,
             "isCurvedRounded": is_curved_rounded,
             "isHostel": is_hostel,
             "hasBasketball": has_basketball,
             "hasVolleyball": has_volleyball,
             "hasSportsCourt": has_sports_court,
+            "hasPlayground": has_playground,
             "rooftopFeature": rooftop_feature,
+            "hasAirplaneRoof": has_airplane_roof,
+            "hasSolarPanels": has_solar_panels,
+            "glassDistribution": glass_distribution,
             "balconyType": balcony_type,
             "facadePalette": facade_palette,
             "hasHelipad": has_helipad,

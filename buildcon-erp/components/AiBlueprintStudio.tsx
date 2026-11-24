@@ -43,14 +43,24 @@ export interface Building3DSpec {
   foundationType: string;
   coreLiftCount: number;
   architecturalHighlights: string[];
-  massingForm?: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED";
+  massingForm?: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED" | "V_SHAPED" | "T_SHAPED" | "H_SHAPED" | "SPHERICAL_BALL" | "OPEN_SQUARE_DONUT" | "WIDE_LINEAR_RANGE";
   isLShaped?: boolean;
+  isVShaped?: boolean;
+  isTShaped?: boolean;
+  isHShaped?: boolean;
+  isSphericalBall?: boolean;
+  isOpenSquare?: boolean;
+  isWideRange?: boolean;
   isCurvedRounded?: boolean;
   isHostel?: boolean;
   hasBasketball?: boolean;
   hasVolleyball?: boolean;
   hasSportsCourt?: boolean;
-  rooftopFeature?: "HELIPAD" | "INFINITY_POOL" | "OBSERVATORY_DOME" | "PENTHOUSE_GARDEN" | "GABLE_ROOF" | "SOLAR_ARRAY";
+  hasPlayground?: boolean;
+  hasAirplaneRoof?: boolean;
+  hasSolarPanels?: boolean;
+  glassDistribution?: "FULL_GLASS" | "LEFT_FRONT_GLASS" | "RIGHT_FRONT_GLASS" | "ONE_SIDE_GLASS" | "BALANCED_DUAL_CURTAIN";
+  rooftopFeature?: "HELIPAD" | "INFINITY_POOL" | "OBSERVATORY_DOME" | "PENTHOUSE_GARDEN" | "GABLE_ROOF" | "SOLAR_ARRAY" | "AIRPLANE_WING_ROOF";
   balconyType?: "CANTILEVERED_FLOATING" | "WRAPAROUND_RIBBON" | "CURVED_WAVE" | "TERRACED_CASCADE" | "MINIMAL_FLUSH";
   facadePalette?: "GOLD_LUXURY" | "CYBER_OBSIDIAN" | "EMERALD_BIOPHILIC" | "TERRACOTTA_NORDIC" | "WHITE_MARBLE" | "AZURE_GLASS";
   hasHelipad?: boolean;
@@ -291,15 +301,43 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const hasSkyCourt = pLower.includes("sky court") || pLower.includes("sky-court") || pLower.includes("mid-level garden") || pLower.includes("void") || pLower.includes("cutout") || pLower.includes("hollow") || pLower.includes("sky bridge");
     const hasSunLouvers = pLower.includes("louver") || pLower.includes("louvers") || pLower.includes("shading") || pLower.includes("brise-soleil") || pLower.includes("fins") || pLower.includes("slats");
     const isLShaped = /\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b/i.test(pLower);
+    const isVShaped = /\bv[-_\s]?(shape|shaped|block|layout)\b|\bv\s+building\b/i.test(pLower);
+    const isTShaped = /\bt[-_\s]?(shape|shaped|block|layout)\b|\bt\s+building\b/i.test(pLower);
+    const isHShaped = /\bh[-_\s]?(shape|shaped|block|layout)\b|\bh\s+building\b/i.test(pLower);
+    const isSphericalBall = pLower.includes("ball shape") || pLower.includes("spherical") || pLower.includes("sphere") || pLower.includes("globe") || pLower.includes("orb") || pLower.includes("geodesic ball") || pLower.includes("ball building");
+    const isOpenSquare = pLower.includes("square open center") || pLower.includes("open center") || pLower.includes("donut") || pLower.includes("hollow square") || pLower.includes("courtyard ring") || pLower.includes("atrium square") || pLower.includes("square courtyard");
+    const isWideRange = pLower.includes("wide range") || pLower.includes("wide building") || pLower.includes("linear campus") || pLower.includes("wide span") || pLower.includes("extended pavilion") || pLower.includes("low-rise wide");
+
     const isCurvedRounded = pLower.includes("rounded") || pLower.includes("curved") || pLower.includes("round") || pLower.includes("circular") || pLower.includes("cylinder") || pLower.includes("cylindrical") || pLower.includes("oval") || pLower.includes("crescent") || pLower.includes("arc");
     const isHostel = pLower.includes("hostel") || pLower.includes("dormitory") || pLower.includes("student") || pLower.includes("campus") || pLower.includes("coliving");
     const hasBasketball = pLower.includes("basketball") || pLower.includes("b-ball") || pLower.includes("hoop");
     const hasVolleyball = pLower.includes("volleyball") || pLower.includes("v-ball");
-    const hasSportsCourt = hasBasketball || hasVolleyball || pLower.includes("sports court") || pLower.includes("court");
+    const hasPlayground = pLower.includes("playgroud") || pLower.includes("playground") || pLower.includes("play ground") || pLower.includes("play area") || pLower.includes("park") || pLower.includes("kids zone");
+    const hasSportsCourt = hasBasketball || hasVolleyball || hasPlayground || pLower.includes("sports court") || pLower.includes("court");
+
+    const hasAirplaneRoof = pLower.includes("aeroplan") || pLower.includes("airplane") || pLower.includes("aeroplane") || pLower.includes("wing design roof") || pLower.includes("wing roof") || pLower.includes("aviation roof") || pLower.includes("aerodynamic roof");
+    const hasSolarPanels = pLower.includes("solar pannel") || pLower.includes("solar panel") || pLower.includes("solar rooftop") || pLower.includes("photovoltaic") || pLower.includes("solar array") || pLower.includes("solar farm");
+
+    const isFullGlass = pLower.includes("full glass") || pLower.includes("all glass") || pLower.includes("fully glazed") || pLower.includes("total glass") || pLower.includes("glass curtain wall") || pLower.includes("full glassed");
+    const isRightFrontGlass = pLower.includes("right front glass") || pLower.includes("right side glass") || pLower.includes("right wing glazed") || pLower.includes("right glazed") || pLower.includes("right front glassed");
+    const isLeftFrontGlass = pLower.includes("left front glass") || pLower.includes("left side glass") || pLower.includes("left wing glazed") || pLower.includes("left glazed") || pLower.includes("left front glassed");
+    const isOneSideGlass = pLower.includes("one side glass") || pLower.includes("single side glass") || pLower.includes("one side glazed") || pLower.includes("front glass only") || pLower.includes("one side glassed");
 
     // Massing Form
-    let massingForm: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED" = "RECTANGULAR";
-    if (isLShaped) {
+    let massingForm: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED" | "V_SHAPED" | "T_SHAPED" | "H_SHAPED" | "SPHERICAL_BALL" | "OPEN_SQUARE_DONUT" | "WIDE_LINEAR_RANGE" = "RECTANGULAR";
+    if (isVShaped) {
+      massingForm = "V_SHAPED";
+    } else if (isTShaped) {
+      massingForm = "T_SHAPED";
+    } else if (isHShaped) {
+      massingForm = "H_SHAPED";
+    } else if (isSphericalBall) {
+      massingForm = "SPHERICAL_BALL";
+    } else if (isOpenSquare) {
+      massingForm = "OPEN_SQUARE_DONUT";
+    } else if (isWideRange) {
+      massingForm = "WIDE_LINEAR_RANGE";
+    } else if (isLShaped) {
       massingForm = "L_SHAPED";
     } else if (isCurvedRounded || isHostel) {
       massingForm = "CURVED_CYLINDRICAL";
@@ -313,6 +351,13 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
       massingForm = "INDUSTRIAL_SHED";
     }
 
+    // Glass Distribution
+    let glassDistribution: "FULL_GLASS" | "LEFT_FRONT_GLASS" | "RIGHT_FRONT_GLASS" | "ONE_SIDE_GLASS" | "BALANCED_DUAL_CURTAIN" = "BALANCED_DUAL_CURTAIN";
+    if (isRightFrontGlass) glassDistribution = "RIGHT_FRONT_GLASS";
+    else if (isLeftFrontGlass) glassDistribution = "LEFT_FRONT_GLASS";
+    else if (isOneSideGlass) glassDistribution = "ONE_SIDE_GLASS";
+    else if (isFullGlass) glassDistribution = "FULL_GLASS";
+
     // Facade Palette
     let facadePalette: "GOLD_LUXURY" | "CYBER_OBSIDIAN" | "EMERALD_BIOPHILIC" | "TERRACOTTA_NORDIC" | "WHITE_MARBLE" | "AZURE_GLASS" = "AZURE_GLASS";
     if (isLuxuryMansion) facadePalette = "GOLD_LUXURY";
@@ -322,12 +367,14 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     else if (isTerracotta) facadePalette = "TERRACOTTA_NORDIC";
 
     // Rooftop Feature
-    let rooftopFeature: "HELIPAD" | "INFINITY_POOL" | "OBSERVATORY_DOME" | "PENTHOUSE_GARDEN" | "GABLE_ROOF" | "SOLAR_ARRAY" = "SOLAR_ARRAY";
-    if (hasHelipad) rooftopFeature = "HELIPAD";
+    let rooftopFeature: "HELIPAD" | "INFINITY_POOL" | "OBSERVATORY_DOME" | "PENTHOUSE_GARDEN" | "GABLE_ROOF" | "SOLAR_ARRAY" | "AIRPLANE_WING_ROOF" = "SOLAR_ARRAY";
+    if (hasAirplaneRoof) rooftopFeature = "AIRPLANE_WING_ROOF";
+    else if (hasHelipad) rooftopFeature = "HELIPAD";
     else if (hasInfinityPool) rooftopFeature = "INFINITY_POOL";
     else if (hasObservatoryDome) rooftopFeature = "OBSERVATORY_DOME";
     else if (hasGableRoof || pType === "VILLA") rooftopFeature = "GABLE_ROOF";
     else if (hasRooftopGarden) rooftopFeature = "PENTHOUSE_GARDEN";
+    else if (hasSolarPanels) rooftopFeature = "SOLAR_ARRAY";
 
     // Balcony Type
     let balconyType: "CANTILEVERED_FLOATING" | "WRAPAROUND_RIBBON" | "CURVED_WAVE" | "TERRACED_CASCADE" | "MINIMAL_FLUSH" = "MINIMAL_FLUSH";
@@ -341,7 +388,31 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     let dwg = `DWG-AI-RES-00${effectiveFloors}`;
     let facadeStyle = "Terracotta Louvers & Glazed Balconies";
 
-    if (isHostel) {
+    if (isVShaped) {
+      title = `${effectiveFloors}-Story Modern V-Shaped Iconic Tower`;
+      facadeStyle = "V-Shaped Dual Wing Glazed Facade with Central Entrance Plaza";
+      dwg = `DWG-AI-VSHP-00${effectiveFloors}`;
+    } else if (isTShaped) {
+      title = `${effectiveFloors}-Floor T-Shaped Commercial Complex`;
+      facadeStyle = "T-Shaped Extruded Structural Frame with Front Glass Curtain";
+      dwg = `DWG-AI-TSHP-00${effectiveFloors}`;
+    } else if (isHShaped) {
+      title = `${effectiveFloors}-Story H-Shaped Twin-Tower with Glazed Skybridge`;
+      facadeStyle = "H-Shaped Dual Tower Envelope with Central Connecting Skybridge";
+      dwg = `DWG-AI-HSHP-00${effectiveFloors}`;
+    } else if (isSphericalBall) {
+      title = `${effectiveFloors}-Floor Spherical Geodesic Orb Corporate Headquarters`;
+      facadeStyle = "Spherical Geodesic Glass & Carbon Exoskeleton Globe";
+      dwg = `DWG-AI-ORB-00${effectiveFloors}`;
+    } else if (isOpenSquare) {
+      title = `${effectiveFloors}-Story Square Open-Center Quadrangle Atrium Complex`;
+      facadeStyle = "Continuous Quadrangle Glazed Ring with Open Central Courtyard";
+      dwg = `DWG-AI-SQAT-00${effectiveFloors}`;
+    } else if (isWideRange) {
+      title = `${effectiveFloors}-Story Wide-Range Linear Innovation Campus`;
+      facadeStyle = "Wide Multi-Bay Structural Steel Frame & Ribbon Glazing";
+      dwg = `DWG-AI-WIDE-00${effectiveFloors}`;
+    } else if (isHostel) {
       title = `${effectiveFloors}-Floor Rounded Luxury Campus Hostel Residence`;
       facadeStyle = "Aerodynamic Curved Glass Envelope with Panoramic Balconies";
       dwg = `DWG-AI-HSTL-00${effectiveFloors}`;
@@ -383,10 +454,76 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
       dwg = `DWG-AI-IND-00${effectiveFloors}`;
     }
 
+    if (hasAirplaneRoof) {
+      facadeStyle += " + Airplane Wing Aerodynamic Roof";
+    }
+    if (hasSolarPanels) {
+      facadeStyle += " + Solar Photovoltaic Rooftop Farm";
+    }
+    if (glassDistribution === "FULL_GLASS") {
+      facadeStyle = "Full Glass Curtain Wall Panoramic Facade";
+    } else if (glassDistribution === "LEFT_FRONT_GLASS") {
+      facadeStyle = "Left Front Glazed Curtain Wall (Precast Flank)";
+    } else if (glassDistribution === "RIGHT_FRONT_GLASS") {
+      facadeStyle = "Right Front Glazed Curtain Wall (Precast Flank)";
+    } else if (glassDistribution === "ONE_SIDE_GLASS") {
+      facadeStyle = "One-Side Glazed Front Envelope (Solid Side Walls)";
+    }
+
     let rooms: BlueprintRoom[] = [];
     let cols: BlueprintColumn[] = [];
 
-    if (isHostel) {
+    if (isVShaped) {
+      rooms = [
+        { id: "R1", name: "Executive Suite (West Wing)", x: 100, y: 140, w: 260, h: 220, areaSqft: Math.round(sqft * 0.32), flooring: "Imported Italian Botticino", type: "LIVING" },
+        { id: "R2", name: "Corporate Hub (East Wing)", x: 440, y: 140, w: 260, h: 220, areaSqft: Math.round(sqft * 0.32), flooring: "Acoustic Oak Parquet", type: "OFFICE" },
+        { id: "R3", name: "Central Apex Glazed Rotunda & Atrium", x: 280, y: 100, w: 240, h: 160, areaSqft: Math.round(sqft * 0.20), flooring: "Polished Granite Pavers", type: "FOYER" },
+        { id: "R4", name: "Entrance Plaza & Open Playground", x: 100, y: 440, w: 600, h: 120, areaSqft: Math.round(sqft * 0.16), flooring: "Landscaped Turf Lawn", type: "COURTYARD" }
+      ];
+      cols = [
+        { grid: "V-1", x: 95, y: 135, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "V-2", x: 355, y: 135, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "V-3", x: 695, y: 135, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "V-4", x: 275, y: 95, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "V-5", x: 515, y: 95, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "V-6", x: 95, y: 355, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "V-7", x: 695, y: 355, size: "500x500mm", rebar: "12-T25 Fe550D" }
+      ];
+    } else if (isHShaped) {
+      rooms = [
+        { id: "R1", name: "Tower West Living Suites", x: 100, y: 100, w: 200, h: 440, areaSqft: Math.round(sqft * 0.40), flooring: "Engineered Oak Plank", type: "BEDROOM" },
+        { id: "R2", name: "Tower East Corporate Pods", x: 500, y: 100, w: 200, h: 440, areaSqft: Math.round(sqft * 0.40), flooring: "Statuario Glazed Vitrified", type: "OFFICE" },
+        { id: "R3", name: "Central Connecting Skybridge Lounge", x: 300, y: 240, w: 200, h: 140, areaSqft: Math.round(sqft * 0.20), flooring: "Structural Glass Flooring", type: "LIVING" }
+      ];
+      cols = [
+        { grid: "H-1", x: 95, y: 95, size: "550x550mm", rebar: "16-T25 Fe550D" },
+        { grid: "H-2", x: 295, y: 95, size: "550x550mm", rebar: "16-T25 Fe550D" },
+        { grid: "H-3", x: 495, y: 95, size: "550x550mm", rebar: "16-T25 Fe550D" },
+        { grid: "H-4", x: 695, y: 95, size: "550x550mm", rebar: "16-T25 Fe550D" },
+        { grid: "H-5", x: 95, y: 535, size: "550x550mm", rebar: "16-T25 Fe550D" },
+        { grid: "H-6", x: 295, y: 535, size: "550x550mm", rebar: "16-T25 Fe550D" },
+        { grid: "H-7", x: 495, y: 535, size: "550x550mm", rebar: "16-T25 Fe550D" },
+        { grid: "H-8", x: 695, y: 535, size: "550x550mm", rebar: "16-T25 Fe550D" }
+      ];
+    } else if (isOpenSquare) {
+      rooms = [
+        { id: "R1", name: "North Wing Academic Suites", x: 100, y: 100, w: 600, h: 120, areaSqft: Math.round(sqft * 0.28), flooring: "Acoustic Vinyl Tile", type: "OFFICE" },
+        { id: "R2", name: "South Wing Innovation Lab", x: 100, y: 440, w: 600, h: 120, areaSqft: Math.round(sqft * 0.28), flooring: "Anti-Static Epoxy", type: "OFFICE" },
+        { id: "R3", name: "West Wing Living Quarters", x: 100, y: 220, w: 140, h: 220, areaSqft: Math.round(sqft * 0.16), flooring: "European Hardwood", type: "BEDROOM" },
+        { id: "R4", name: "East Wing Dining & Wellness", x: 560, y: 220, w: 140, h: 220, areaSqft: Math.round(sqft * 0.16), flooring: "Ceramic Matte Anti-Skid", type: "KITCHEN" },
+        { id: "R5", name: "Central Open Sky Garden Atrium", x: 240, y: 220, w: 320, h: 220, areaSqft: Math.round(sqft * 0.12), flooring: "Granite Pavers & Zen Lawn", type: "COURTYARD" }
+      ];
+      cols = [
+        { grid: "Q-1", x: 95, y: 95, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "Q-2", x: 695, y: 95, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "Q-3", x: 235, y: 215, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "Q-4", x: 555, y: 215, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "Q-5", x: 235, y: 435, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "Q-6", x: 555, y: 435, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "Q-7", x: 95, y: 555, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "Q-8", x: 695, y: 555, size: "500x500mm", rebar: "12-T25 Fe550D" }
+      ];
+    } else if (isHostel) {
       rooms = [
         { id: "R1", name: "Student Living Suites (Wing A)", x: 100, y: 100, w: 290, h: 220, areaSqft: Math.round(sqft * 0.32), flooring: "Acoustic Luxury Vinyl Tile", type: "BEDROOM" },
         { id: "R2", name: "Student Living Suites (Wing B)", x: 410, y: 100, w: 290, h: 220, areaSqft: Math.round(sqft * 0.32), flooring: "Acoustic Luxury Vinyl Tile", type: "BEDROOM" },
@@ -514,12 +651,22 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         coreLiftCount: effectiveFloors >= 5 ? 2 : 1,
         architecturalHighlights: customHighlights,
         massingForm,
+        isVShaped,
+        isTShaped,
+        isHShaped,
+        isSphericalBall,
+        isOpenSquare,
+        isWideRange,
         isLShaped,
         isCurvedRounded,
         isHostel,
         hasBasketball,
         hasVolleyball,
         hasSportsCourt,
+        hasPlayground,
+        hasAirplaneRoof,
+        hasSolarPanels,
+        glassDistribution,
         rooftopFeature,
         balconyType,
         facadePalette,
@@ -863,9 +1010,38 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const hasVolleyball = data?.building3D?.hasVolleyball ?? (promptLower.includes("volleyball") || promptLower.includes("v-ball"));
     const hasSportsCourt = data?.building3D?.hasSportsCourt ?? (hasBasketball || hasVolleyball || promptLower.includes("sports court") || promptLower.includes("court"));
 
+    const isVShaped = data?.building3D?.isVShaped ?? (/\bv[-_\s]?(shape|shaped|block|layout)\b|\bv\s+building\b/i.test(promptLower));
+    const isTShaped = data?.building3D?.isTShaped ?? (/\bt[-_\s]?(shape|shaped|block|layout)\b|\bt\s+building\b/i.test(promptLower));
+    const isHShaped = data?.building3D?.isHShaped ?? (/\bh[-_\s]?(shape|shaped|block|layout)\b|\bh\s+building\b/i.test(promptLower));
+    const isSphericalBall = data?.building3D?.isSphericalBall ?? (promptLower.includes("ball shape") || promptLower.includes("spherical") || promptLower.includes("sphere") || promptLower.includes("globe") || promptLower.includes("orb"));
+    const isOpenSquare = data?.building3D?.isOpenSquare ?? (promptLower.includes("square open center") || promptLower.includes("open center") || promptLower.includes("donut") || promptLower.includes("hollow square") || promptLower.includes("atrium square"));
+    const isWideRange = data?.building3D?.isWideRange ?? (promptLower.includes("wide range") || promptLower.includes("wide building") || promptLower.includes("linear campus") || promptLower.includes("wide span"));
+    const hasPlayground = data?.building3D?.hasPlayground ?? (promptLower.includes("playgroud") || promptLower.includes("playground") || promptLower.includes("play ground") || promptLower.includes("play area") || promptLower.includes("park"));
+    const hasAirplaneRoof = data?.building3D?.hasAirplaneRoof ?? (promptLower.includes("aeroplan") || promptLower.includes("airplane") || promptLower.includes("aeroplane") || promptLower.includes("wing design roof") || promptLower.includes("wing roof") || promptLower.includes("aviation roof"));
+    const hasSolarPanels = data?.building3D?.hasSolarPanels ?? (promptLower.includes("solar pannel") || promptLower.includes("solar panel") || promptLower.includes("solar rooftop") || promptLower.includes("solar array") || promptLower.includes("solar farm"));
+    const glassDistribution = data?.building3D?.glassDistribution || (
+      promptLower.includes("left front glass") || promptLower.includes("left front glassed") ? "LEFT_FRONT_GLASS" :
+      promptLower.includes("right front glass") || promptLower.includes("right front glassed") ? "RIGHT_FRONT_GLASS" :
+      promptLower.includes("one side glass") || promptLower.includes("one side glassed") ? "ONE_SIDE_GLASS" :
+      promptLower.includes("full glass") || promptLower.includes("full glassed") ? "FULL_GLASS" :
+      "BALANCED_DUAL_CURTAIN"
+    );
+
     // Active Massing Form
     const massingForm = data?.building3D?.massingForm || (
-      isCurvedRounded || isHostel
+      isVShaped
+        ? "V_SHAPED"
+        : isTShaped
+        ? "T_SHAPED"
+        : isHShaped
+        ? "H_SHAPED"
+        : isSphericalBall
+        ? "SPHERICAL_BALL"
+        : isOpenSquare
+        ? "OPEN_SQUARE_DONUT"
+        : isWideRange
+        ? "WIDE_LINEAR_RANGE"
+        : isCurvedRounded || isHostel
         ? "CURVED_CYLINDRICAL"
         : (/\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b/i.test(promptLower))
         ? "L_SHAPED"
@@ -878,11 +1054,11 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         : "RECTANGULAR"
     );
 
-    const isLShaped = !isCurvedRounded && (massingForm === "L_SHAPED" || !!data?.building3D?.isLShaped || (/\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b/i.test(promptLower)));
+    const isLShaped = !isCurvedRounded && !isVShaped && !isTShaped && !isHShaped && !isSphericalBall && !isOpenSquare && (massingForm === "L_SHAPED" || !!data?.building3D?.isLShaped || (/\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b/i.test(promptLower)));
 
     // Active Rooftop Feature
     const rooftopFeature = data?.building3D?.rooftopFeature || (
-      hasHelipad ? "HELIPAD" : hasInfinityPool ? "INFINITY_POOL" : hasObservatoryDome ? "OBSERVATORY_DOME" : hasGableRoof || selectedPreset === "VILLA" ? "GABLE_ROOF" : hasRooftopGarden ? "PENTHOUSE_GARDEN" : "SOLAR_ARRAY"
+      hasAirplaneRoof ? "AIRPLANE_WING_ROOF" : hasHelipad ? "HELIPAD" : hasInfinityPool ? "INFINITY_POOL" : hasObservatoryDome ? "OBSERVATORY_DOME" : hasGableRoof || selectedPreset === "VILLA" ? "GABLE_ROOF" : hasRooftopGarden ? "PENTHOUSE_GARDEN" : "SOLAR_ARRAY"
     );
 
     // Active Balcony Type
@@ -1259,6 +1435,101 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               </g>
             );
           })()}
+
+          {/* Open Playground / Children's & Campus Recreational Park */}
+          {(hasPlayground || (!hasSportsCourt && !isLShaped && (isVShaped || promptLower.includes("playground")))) && (() => {
+            const pg1 = project(-155, 30, 2);
+            const pg2 = project(155, 30, 2);
+            const pg3 = project(155, 150, 2);
+            const pg4 = project(-155, 150, 2);
+            const pgCenter = project(0, 90, 2);
+
+            // Double A-frame swing set on West side
+            const swA1 = project(-115, 60, 2);
+            const swA2 = project(-115, 120, 2);
+            const swTop1 = project(-115, 60, 26);
+            const swTop2 = project(-115, 120, 26);
+            const swSeat1 = project(-115, 80, 8);
+            const swSeat2 = project(-115, 100, 8);
+
+            // Playground Slide on East side
+            const slBase = project(110, 60, 2);
+            const slTop = project(110, 60, 24);
+            const slEnd = project(110, 125, 2);
+
+            // Circular sandbox / soft play pit in center
+            const sandCenter = project(0, 90, 2.5);
+
+            return (
+              <g id="central-open-playground">
+                {/* Lush Green Park Turf Lawn */}
+                <polygon
+                  points={`${pg1.x},${pg1.y} ${pg2.x},${pg2.y} ${pg3.x},${pg3.y} ${pg4.x},${pg4.y}`}
+                  fill="#047857"
+                  stroke="#10B981"
+                  strokeWidth="1.8"
+                />
+                {/* Soft Play Safety Rubber Perimeter */}
+                <line x1={pg1.x} y1={pg1.y} x2={pg2.x} y2={pg2.y} stroke="#34D399" strokeWidth="2" strokeDasharray="6 3" />
+                <line x1={pg4.x} y1={pg4.y} x2={pg3.x} y2={pg3.y} stroke="#34D399" strokeWidth="2" strokeDasharray="6 3" />
+
+                {/* Central Soft Play Sandbox */}
+                <ellipse cx={sandCenter.x} cy={sandCenter.y} rx="32" ry="16" fill="#FDE047" fillOpacity="0.85" stroke="#CA8A04" strokeWidth="1.5" />
+                <ellipse cx={sandCenter.x} cy={sandCenter.y} rx="22" ry="11" fill="#FEF08A" stroke="#EAB308" strokeWidth="1" strokeDasharray="4 2" />
+
+                {/* 3D Swing Set (West) */}
+                <g id="playground-swings">
+                  <line x1={swA1.x} y1={swA1.y} x2={swTop1.x} y2={swTop1.y} stroke="#E2E8F0" strokeWidth="3" />
+                  <line x1={swA2.x} y1={swA2.y} x2={swTop2.x} y2={swTop2.y} stroke="#E2E8F0" strokeWidth="3" />
+                  <line x1={swTop1.x} y1={swTop1.y} x2={swTop2.x} y2={swTop2.y} stroke="#CBD5E1" strokeWidth="3.5" />
+                  {/* Chains & Swing Seats */}
+                  <line x1={swTop1.x + (swTop2.x - swTop1.x) * 0.35} y1={swTop1.y + (swTop2.y - swTop1.y) * 0.35} x2={swSeat1.x} y2={swSeat1.y} stroke="#94A3B8" strokeWidth="1.2" />
+                  <line x1={swTop1.x + (swTop2.x - swTop1.x) * 0.65} y1={swTop1.y + (swTop2.y - swTop1.y) * 0.65} x2={swSeat2.x} y2={swSeat2.y} stroke="#94A3B8" strokeWidth="1.2" />
+                  <rect x={swSeat1.x - 7} y={swSeat1.y - 2} width="14" height="4" rx="1.5" fill="#EF4444" stroke="#DC2626" strokeWidth="0.8" />
+                  <rect x={swSeat2.x - 7} y={swSeat2.y - 2} width="14" height="4" rx="1.5" fill="#3B82F6" stroke="#2563EB" strokeWidth="0.8" />
+                </g>
+
+                {/* 3D Playground Slide (East) */}
+                <g id="playground-slide">
+                  {/* Ladder */}
+                  <line x1={slBase.x} y1={slBase.y} x2={slTop.x} y2={slTop.y} stroke="#64748B" strokeWidth="3" />
+                  {/* Chute */}
+                  <line x1={slTop.x} y1={slTop.y} x2={slEnd.x} y2={slEnd.y} stroke="#F97316" strokeWidth="4.5" strokeLinecap="round" />
+                  <line x1={slTop.x} y1={slTop.y - 1} x2={slEnd.x} y2={slEnd.y - 1} stroke="#FDBA74" strokeWidth="2" strokeLinecap="round" />
+                </g>
+
+                {/* Playground Badge */}
+                <g transform={`translate(${pgCenter.x - 90}, ${pgCenter.y + 30})`}>
+                  <rect x="0" y="-8" width="180" height="17" rx="4" fill="rgba(15, 23, 42, 0.95)" stroke="#10B981" strokeWidth="1" />
+                  <text x="90" y="4" fill="#34D399" fontSize="8" fontWeight="bold" textAnchor="middle">
+                    🛝 OPEN RECREATIONAL PLAYGROUND
+                  </text>
+                </g>
+              </g>
+            );
+          })()}
+
+          {/* Open Square Center Atrium Plinth Garden */}
+          {isOpenSquare && (() => {
+            const sq1 = project(-48, -43, 2);
+            const sq2 = project(48, -43, 2);
+            const sq3 = project(48, 33, 2);
+            const sq4 = project(-48, 33, 2);
+            const sqCenter = project(0, -5, 3);
+            return (
+              <g id="open-square-atrium-plinth">
+                <polygon points={`${sq1.x},${sq1.y} ${sq2.x},${sq2.y} ${sq3.x},${sq3.y} ${sq4.x},${sq4.y}`} fill="#065F46" stroke="#34D399" strokeWidth="1.5" />
+                <ellipse cx={sqCenter.x} cy={sqCenter.y} rx="22" ry="11" fill="#0284C7" stroke="#38BDF8" strokeWidth="1.5" />
+                <circle cx={sqCenter.x} cy={sqCenter.y} r="2.5" fill="#FFFFFF" />
+                <g transform={`translate(${sqCenter.x - 65}, ${sqCenter.y + 18})`}>
+                  <rect x="0" y="-7" width="130" height="14" rx="3" fill="rgba(15, 23, 42, 0.92)" stroke="#10B981" strokeWidth="0.8" />
+                  <text x="65" y="3" fill="#34D399" fontSize="7" fontWeight="bold" textAnchor="middle">
+                    🌳 OPEN CENTER ATRIUM QUAD
+                  </text>
+                </g>
+              </g>
+            );
+          })()}
         </g>
 
         {/* 2. Multi-Story Floors Extrusion */}
@@ -1314,6 +1585,114 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           const lt4 = project(xCorner + twistX, yCorner, topZ);
           const lt5 = project(xCorner + twistX, halfD, topZ);
           const lt6 = project(-halfW + twistX, halfD, topZ);
+
+          // V-Shaped Dual Wing Vertices
+          const vb1 = project(0 + twistX, -115, baseZ);      // outer apex
+          const vb2 = project(155 + twistX, 35, baseZ);      // right wing outer tip
+          const vb3 = project(125 + twistX, 60, baseZ);      // right wing inner tip
+          const vb4 = project(0 + twistX, -50, baseZ);       // inner apex
+          const vb5 = project(-125 + twistX, 60, baseZ);     // left wing inner tip
+          const vb6 = project(-155 + twistX, 35, baseZ);     // left wing outer tip
+
+          const vt1 = project(0 + twistX, -115, topZ);
+          const vt2 = project(155 + twistX, 35, topZ);
+          const vt3 = project(125 + twistX, 60, topZ);
+          const vt4 = project(0 + twistX, -50, topZ);
+          const vt5 = project(-125 + twistX, 60, topZ);
+          const vt6 = project(-155 + twistX, 35, topZ);
+
+          // T-Shaped Structural Vertices
+          const tb1 = project(-145 + twistX, -25, baseZ);
+          const tb2 = project(-45 + twistX, -25, baseZ);
+          const tb3 = project(-45 + twistX, -130, baseZ);
+          const tb4 = project(45 + twistX, -130, baseZ);
+          const tb5 = project(45 + twistX, -25, baseZ);
+          const tb6 = project(145 + twistX, -25, baseZ);
+          const tb7 = project(145 + twistX, 35, baseZ);
+          const tb8 = project(-145 + twistX, 35, baseZ);
+
+          const tt1 = project(-145 + twistX, -25, topZ);
+          const tt2 = project(-45 + twistX, -25, topZ);
+          const tt3 = project(-45 + twistX, -130, topZ);
+          const tt4 = project(45 + twistX, -130, topZ);
+          const tt5 = project(45 + twistX, -25, topZ);
+          const tt6 = project(145 + twistX, -25, topZ);
+          const tt7 = project(145 + twistX, 35, topZ);
+          const tt8 = project(-145 + twistX, 35, topZ);
+
+          // H-Shaped Twin-Tower & Skybridge Vertices
+          const hb1 = project(-145 + twistX, -120, baseZ);
+          const hb2 = project(-55 + twistX, -120, baseZ);
+          const hb3 = project(-55 + twistX, -35, baseZ);
+          const hb4 = project(55 + twistX, -35, baseZ);
+          const hb5 = project(55 + twistX, -120, baseZ);
+          const hb6 = project(145 + twistX, -120, baseZ);
+          const hb7 = project(145 + twistX, 55, baseZ);
+          const hb8 = project(55 + twistX, 55, baseZ);
+          const hb9 = project(55 + twistX, 15, baseZ);
+          const hb10 = project(-55 + twistX, 15, baseZ);
+          const hb11 = project(-55 + twistX, 55, baseZ);
+          const hb12 = project(-145 + twistX, 55, baseZ);
+
+          const ht1 = project(-145 + twistX, -120, topZ);
+          const ht2 = project(-55 + twistX, -120, topZ);
+          const ht3 = project(-55 + twistX, -35, topZ);
+          const ht4 = project(55 + twistX, -35, topZ);
+          const ht5 = project(55 + twistX, -120, topZ);
+          const ht6 = project(145 + twistX, -120, topZ);
+          const ht7 = project(145 + twistX, 55, topZ);
+          const ht8 = project(55 + twistX, 55, topZ);
+          const ht9 = project(55 + twistX, 15, topZ);
+          const ht10 = project(-55 + twistX, 15, topZ);
+          const ht11 = project(-55 + twistX, 55, topZ);
+          const ht12 = project(-145 + twistX, 55, topZ);
+
+          // Spherical Geodesic Globe Floor Coordinates
+          const sphereDelta = (floorNum - 0.5 - totalFlrs / 2) / (totalFlrs / 2 + 0.5);
+          const sphereRad = 135 * Math.sqrt(Math.max(0.18, 1 - sphereDelta * sphereDelta)) * widthScale;
+          const sbOut: { x: number; y: number }[] = [];
+          const stOut: { x: number; y: number }[] = [];
+          const sphereSegs = 12;
+          for (let i = 0; i < sphereSegs; i++) {
+            const ang = (i * 2 * Math.PI) / sphereSegs;
+            const xo = Math.cos(ang) * sphereRad + twistX;
+            const yo = Math.sin(ang) * (sphereRad * 0.72) - 15;
+            sbOut.push(project(xo, yo, baseZ));
+            stOut.push(project(xo, yo, topZ));
+          }
+
+          // Open-Center Quadrangle Donut Vertices
+          const qb1 = project(-125 + twistX, -110, baseZ);
+          const qb2 = project(125 + twistX, -110, baseZ);
+          const qb3 = project(125 + twistX, 85, baseZ);
+          const qb4 = project(-125 + twistX, 85, baseZ);
+
+          const qt1 = project(-125 + twistX, -110, topZ);
+          const qt2 = project(125 + twistX, -110, topZ);
+          const qt3 = project(125 + twistX, 85, topZ);
+          const qt4 = project(-125 + twistX, 85, topZ);
+
+          const qHoleB1 = project(-50 + twistX, -45, baseZ);
+          const qHoleB2 = project(50 + twistX, -45, baseZ);
+          const qHoleB3 = project(50 + twistX, 35, baseZ);
+          const qHoleB4 = project(-50 + twistX, 35, baseZ);
+
+          const qHoleT1 = project(-50 + twistX, -45, topZ);
+          const qHoleT2 = project(50 + twistX, -45, topZ);
+          const qHoleT3 = project(50 + twistX, 35, topZ);
+          const qHoleT4 = project(-50 + twistX, 35, topZ);
+
+          // Wide-Range Linear Campus Vertices
+          const wideSpan = 185 * widthScale;
+          const wb1 = project(-wideSpan + twistX, -55, baseZ);
+          const wb2 = project(wideSpan + twistX, -55, baseZ);
+          const wb3 = project(wideSpan + twistX, 55, baseZ);
+          const wb4 = project(-wideSpan + twistX, 55, baseZ);
+
+          const wt1 = project(-wideSpan + twistX, -55, topZ);
+          const wt2 = project(wideSpan + twistX, -55, topZ);
+          const wt3 = project(wideSpan + twistX, 55, topZ);
+          const wt4 = project(-wideSpan + twistX, 55, topZ);
 
           // 8-segment curved crescent geometry for rounded architectural massing
           const arcSegs = 8;
@@ -1380,11 +1759,24 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             <g key={`floor-${floorNum}`} className="transition-all duration-300">
               {/* Floor Slab Foundation Base */}
               <polygon
-                points={isCurvedRounded
-                  ? [...cbOut, ...[...cbIn].reverse()].map(p => `${p.x},${p.y}`).join(" ")
-                  : isLShaped
-                  ? `${lb1.x},${lb1.y} ${lb2.x},${lb2.y} ${lb3.x},${lb3.y} ${lb4.x},${lb4.y} ${lb5.x},${lb5.y} ${lb6.x},${lb6.y}`
-                  : `${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y} ${b4.x},${b4.y}`
+                points={
+                  massingForm === "V_SHAPED"
+                    ? `${vb1.x},${vb1.y} ${vb2.x},${vb2.y} ${vb3.x},${vb3.y} ${vb4.x},${vb4.y} ${vb5.x},${vb5.y} ${vb6.x},${vb6.y}`
+                    : massingForm === "T_SHAPED"
+                    ? `${tb1.x},${tb1.y} ${tb2.x},${tb2.y} ${tb3.x},${tb3.y} ${tb4.x},${tb4.y} ${tb5.x},${tb5.y} ${tb6.x},${tb6.y} ${tb7.x},${tb7.y} ${tb8.x},${tb8.y}`
+                    : massingForm === "H_SHAPED"
+                    ? `${hb1.x},${hb1.y} ${hb2.x},${hb2.y} ${hb3.x},${hb3.y} ${hb4.x},${hb4.y} ${hb5.x},${hb5.y} ${hb6.x},${hb6.y} ${hb7.x},${hb7.y} ${hb8.x},${hb8.y} ${hb9.x},${hb9.y} ${hb10.x},${hb10.y} ${hb11.x},${hb11.y} ${hb12.x},${hb12.y}`
+                    : massingForm === "SPHERICAL_BALL"
+                    ? sbOut.map(p => `${p.x},${p.y}`).join(" ")
+                    : massingForm === "OPEN_SQUARE_DONUT"
+                    ? `${qb1.x},${qb1.y} ${qb2.x},${qb2.y} ${qb3.x},${qb3.y} ${qb4.x},${qb4.y}`
+                    : massingForm === "WIDE_LINEAR_RANGE"
+                    ? `${wb1.x},${wb1.y} ${wb2.x},${wb2.y} ${wb3.x},${wb3.y} ${wb4.x},${wb4.y}`
+                    : isCurvedRounded
+                    ? [...cbOut, ...[...cbIn].reverse()].map(p => `${p.x},${p.y}`).join(" ")
+                    : isLShaped
+                    ? `${lb1.x},${lb1.y} ${lb2.x},${lb2.y} ${lb3.x},${lb3.y} ${lb4.x},${lb4.y} ${lb5.x},${lb5.y} ${lb6.x},${lb6.y}`
+                    : `${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y} ${b4.x},${b4.y}`
                 }
                 fill={isXRay ? "rgba(16, 185, 129, 0.15)" : (isNight ? "#334155" : "url(#slabGradient)")}
                 stroke={isXRay ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#B45309" : "#475569"))}
@@ -1580,6 +1972,276 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     })
                   ))}
                 </g>
+              ) : massingForm === "V_SHAPED" && !isXRay ? (
+                /* V-SHAPED DUAL WING ARCHITECTURAL FACADE */
+                <g id={`vshape-facade-floor-${floorNum}`}>
+                  {/* Left Wing Front Face */}
+                  <polygon
+                    points={`${vb6.x},${vb6.y} ${vb5.x},${vb5.y} ${vt5.x},${vt5.y} ${vt6.x},${vt6.y}`}
+                    fill={glassDistribution === "RIGHT_FRONT_GLASS" ? "#1E293B" : facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1.2"
+                    strokeOpacity="0.88"
+                  />
+                  {/* Right Wing Front Face */}
+                  <polygon
+                    points={`${vb4.x},${vb4.y} ${vb3.x},${vb3.y} ${vt3.x},${vt3.y} ${vt4.x},${vt4.y}`}
+                    fill={glassDistribution === "LEFT_FRONT_GLASS" ? "#1E293B" : facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1.2"
+                    strokeOpacity="0.88"
+                  />
+                  {/* Central Apex Rotunda Glazed Foyer */}
+                  <polygon
+                    points={`${vb5.x},${vb5.y} ${vb4.x},${vb4.y} ${vt4.x},${vt4.y} ${vt5.x},${vt5.y}`}
+                    fill={facadeFill}
+                    stroke={isNight ? "#FEF08A" : "#38BDF8"}
+                    strokeWidth="1.5"
+                    strokeOpacity="0.95"
+                  />
+                  {/* Right Wing Outer Flank */}
+                  <polygon
+                    points={`${vb3.x},${vb3.y} ${vb2.x},${vb2.y} ${vt2.x},${vt2.y} ${vt3.x},${vt3.y}`}
+                    fill={glassDistribution === "LEFT_FRONT_GLASS" || glassDistribution === "ONE_SIDE_GLASS" ? "#1E293B" : facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.65"
+                  />
+                  {/* Vertical Mullions on V Wings */}
+                  {[
+                    { p1: vb6, p2: vb5, t1: vt6, t2: vt5 },
+                    { p1: vb4, p2: vb3, t1: vt4, t2: vt3 }
+                  ].map((face, fIdx) => (
+                    [0.25, 0.5, 0.75].map((ratio, mIdx) => {
+                      const mx1 = face.p1.x + (face.p2.x - face.p1.x) * ratio;
+                      const my1 = face.p1.y + (face.p2.y - face.p1.y) * ratio;
+                      const mx2 = face.t1.x + (face.t2.x - face.t1.x) * ratio;
+                      const my2 = face.t1.y + (face.t2.y - face.t1.y) * ratio;
+                      return (
+                        <line
+                          key={`mullion-v-${floorNum}-${fIdx}-${mIdx}`}
+                          x1={mx1}
+                          y1={my1}
+                          x2={mx2}
+                          y2={my2}
+                          stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#E0F2FE"))}
+                          strokeWidth="1"
+                          strokeOpacity="0.6"
+                        />
+                      );
+                    })
+                  ))}
+                </g>
+              ) : massingForm === "T_SHAPED" && !isXRay ? (
+                /* T-SHAPED FACADE */
+                <g id={`tshape-facade-floor-${floorNum}`}>
+                  {/* Front Long Bar Face */}
+                  <polygon
+                    points={`${tb8.x},${tb8.y} ${tb7.x},${tb7.y} ${tt7.x},${tt7.y} ${tt8.x},${tt8.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1.2"
+                    strokeOpacity="0.88"
+                  />
+                  {/* Right End Face */}
+                  <polygon
+                    points={`${tb6.x},${tb6.y} ${tb7.x},${tb7.y} ${tt7.x},${tt7.y} ${tt6.x},${tt6.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.70"
+                  />
+                  {/* Stem Right Wall */}
+                  <polygon
+                    points={`${tb4.x},${tb4.y} ${tb5.x},${tb5.y} ${tt5.x},${tt5.y} ${tt4.x},${tt4.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.60"
+                  />
+                  {/* Front Transom Mullions */}
+                  {[0.2, 0.4, 0.6, 0.8].map((ratio, mIdx) => {
+                    const mx1 = tb8.x + (tb7.x - tb8.x) * ratio;
+                    const my1 = tb8.y + (tb7.y - tb8.y) * ratio;
+                    const mx2 = tt8.x + (tt7.x - tt8.x) * ratio;
+                    const my2 = tt7.y + (tt7.y - tt8.y) * ratio;
+                    return (
+                      <line
+                        key={`mullion-t-${floorNum}-${mIdx}`}
+                        x1={mx1}
+                        y1={my1}
+                        x2={mx2}
+                        y2={my2}
+                        stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#E0F2FE"))}
+                        strokeWidth="1"
+                        strokeOpacity="0.6"
+                      />
+                    );
+                  })}
+                </g>
+              ) : massingForm === "H_SHAPED" && !isXRay ? (
+                /* H-SHAPED TWIN TOWERS & SKYBRIDGE FACADE */
+                <g id={`hshape-facade-floor-${floorNum}`}>
+                  {/* Left Tower Front */}
+                  <polygon
+                    points={`${hb12.x},${hb12.y} ${hb11.x},${hb11.y} ${ht11.x},${ht11.y} ${ht12.x},${ht12.y}`}
+                    fill={glassDistribution === "RIGHT_FRONT_GLASS" ? "#1E293B" : facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1.2"
+                    strokeOpacity="0.88"
+                  />
+                  {/* Right Tower Front */}
+                  <polygon
+                    points={`${hb8.x},${hb8.y} ${hb7.x},${hb7.y} ${ht7.x},${ht7.y} ${ht8.x},${ht8.y}`}
+                    fill={glassDistribution === "LEFT_FRONT_GLASS" ? "#1E293B" : facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1.2"
+                    strokeOpacity="0.88"
+                  />
+                  {/* Central Connecting Skybridge */}
+                  <polygon
+                    points={`${hb10.x},${hb10.y} ${hb9.x},${hb9.y} ${ht9.x},${ht9.y} ${ht10.x},${ht10.y}`}
+                    fill="url(#glassFacadeDay)"
+                    stroke="#38BDF8"
+                    strokeWidth="1.5"
+                    strokeOpacity="0.95"
+                  />
+                  {/* Right Tower Side Flank */}
+                  <polygon
+                    points={`${hb6.x},${hb6.y} ${hb7.x},${hb7.y} ${ht7.x},${ht7.y} ${ht6.x},${ht6.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.65"
+                  />
+                  {/* Skybridge Label on Middle Floor */}
+                  {floorNum === Math.ceil(totalFlrs / 2) && (() => {
+                    const sbMid = {
+                      x: (hb10.x + hb9.x) / 2,
+                      y: (hb10.y + hb9.y + ht10.y + ht9.y) / 4
+                    };
+                    return (
+                      <g transform={`translate(${sbMid.x - 45}, ${sbMid.y - 6})`}>
+                        <rect x="0" y="-7" width="90" height="14" rx="3" fill="rgba(15, 23, 42, 0.95)" stroke="#38BDF8" strokeWidth="0.8" />
+                        <text x="45" y="3" fill="#38BDF8" fontSize="7" fontWeight="bold" textAnchor="middle">
+                          🌉 SKYBRIDGE
+                        </text>
+                      </g>
+                    );
+                  })()}
+                </g>
+              ) : massingForm === "SPHERICAL_BALL" && !isXRay ? (
+                /* SPHERICAL GEODESIC GLOBE FACADE */
+                <g id={`sphere-facade-floor-${floorNum}`}>
+                  {Array.from({ length: sphereSegs }).map((_, i) => {
+                    const nextI = (i + 1) % sphereSegs;
+                    return (
+                      <polygon
+                        key={`sphere-panel-${floorNum}-${i}`}
+                        points={`${sbOut[i].x},${sbOut[i].y} ${sbOut[nextI].x},${sbOut[nextI].y} ${stOut[nextI].x},${stOut[nextI].y} ${stOut[i].x},${stOut[i].y}`}
+                        fill={facadeFill}
+                        stroke={facadeStroke}
+                        strokeWidth="1"
+                        strokeOpacity="0.75"
+                      />
+                    );
+                  })}
+                  {/* Equatorial Structural Ring on Equator Floor */}
+                  {floorNum === Math.ceil(totalFlrs / 2) && (
+                    <polygon
+                      points={stOut.map(p => `${p.x},${p.y}`).join(" ")}
+                      fill="none"
+                      stroke="#38BDF8"
+                      strokeWidth="3"
+                    />
+                  )}
+                </g>
+              ) : massingForm === "OPEN_SQUARE_DONUT" && !isXRay ? (
+                /* OPEN-CENTER SQUARE ATRIUM FACADE */
+                <g id={`square-donut-facade-floor-${floorNum}`}>
+                  {/* Outer Front Face */}
+                  <polygon
+                    points={`${qb4.x},${qb4.y} ${qb3.x},${qb3.y} ${qt3.x},${qt3.y} ${qt4.x},${qt4.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1.2"
+                    strokeOpacity="0.85"
+                  />
+                  {/* Outer Right Face */}
+                  <polygon
+                    points={`${qb2.x},${qb2.y} ${qb3.x},${qb3.y} ${qt3.x},${qt3.y} ${qt2.x},${qt2.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.65"
+                  />
+                  {/* Inner Atrium Hole Front Face */}
+                  <polygon
+                    points={`${qHoleB4.x},${qHoleB4.y} ${qHoleB3.x},${qHoleB3.y} ${qHoleT3.x},${qHoleT3.y} ${qHoleT4.x},${qHoleT4.y}`}
+                    fill={facadeFill}
+                    stroke={isNight ? "#FEF08A" : "#38BDF8"}
+                    strokeWidth="1"
+                    strokeOpacity="0.75"
+                  />
+                  {/* Window Mullions on Front */}
+                  {[0.25, 0.5, 0.75].map((ratio, mIdx) => {
+                    const mx1 = qb4.x + (qb3.x - qb4.x) * ratio;
+                    const my1 = qb4.y + (qb3.y - qb4.y) * ratio;
+                    const mx2 = qt4.x + (qt3.x - qt4.x) * ratio;
+                    const my2 = qt4.y + (qt3.y - qt4.y) * ratio;
+                    return (
+                      <line
+                        key={`mullion-sq-${floorNum}-${mIdx}`}
+                        x1={mx1}
+                        y1={my1}
+                        x2={mx2}
+                        y2={my2}
+                        stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#E0F2FE"))}
+                        strokeWidth="1"
+                        strokeOpacity="0.6"
+                      />
+                    );
+                  })}
+                </g>
+              ) : massingForm === "WIDE_LINEAR_RANGE" && !isXRay ? (
+                /* WIDE-RANGE LINEAR CAMPUS FACADE */
+                <g id={`wide-facade-floor-${floorNum}`}>
+                  {/* Front Wide Span Face */}
+                  <polygon
+                    points={`${wb4.x},${wb4.y} ${wb3.x},${wb3.y} ${wt3.x},${wt3.y} ${wt4.x},${wt4.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1.2"
+                    strokeOpacity="0.88"
+                  />
+                  {/* Right End Face */}
+                  <polygon
+                    points={`${wb2.x},${wb2.y} ${wb3.x},${wb3.y} ${wt3.x},${wt3.y} ${wt2.x},${wt2.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.65"
+                  />
+                  {/* Multi-Bay Vertical Expansion Joints */}
+                  {[0.16, 0.33, 0.5, 0.66, 0.83].map((ratio, jIdx) => {
+                    const jx1 = wb4.x + (wb3.x - wb4.x) * ratio;
+                    const jy1 = wb4.y + (wb3.y - wb4.y) * ratio;
+                    const jx2 = wt4.x + (wt3.x - wt4.x) * ratio;
+                    const jy2 = wt4.y + (wt3.y - wt4.y) * ratio;
+                    return (
+                      <line
+                        key={`wide-joint-${floorNum}-${jIdx}`}
+                        x1={jx1}
+                        y1={jy1}
+                        x2={jx2}
+                        y2={jy2}
+                        stroke={isNight ? "#FEF08A" : "#38BDF8"}
+                        strokeWidth="1.8"
+                        strokeOpacity="0.7"
+                      />
+                    );
+                  })}
+                </g>
               ) : (
                 /* Curtain Wall Glazed Facade Panels (Front & Side) */
                 !isXRay && (
@@ -1587,7 +2249,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     {/* Facade Face 1 (Front) */}
                     <polygon
                       points={`${b3.x},${b3.y} ${b4.x},${b4.y} ${t4.x},${t4.y} ${t3.x},${t3.y}`}
-                      fill={facadeFill}
+                      fill={glassDistribution === "RIGHT_FRONT_GLASS" ? "#1E293B" : facadeFill}
                       stroke={facadeStroke}
                       strokeWidth="1"
                       strokeOpacity="0.8"
@@ -1595,7 +2257,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     {/* Facade Face 2 (Right Side) */}
                     <polygon
                       points={`${b2.x},${b2.y} ${b3.x},${b3.y} ${t3.x},${t3.y} ${t2.x},${t2.y}`}
-                      fill={facadeFill}
+                      fill={glassDistribution === "LEFT_FRONT_GLASS" || glassDistribution === "ONE_SIDE_GLASS" ? "#1E293B" : facadeFill}
                       stroke={facadeStroke}
                       strokeWidth="1"
                       strokeOpacity="0.6"
@@ -1853,11 +2515,24 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
               {/* Top Slab Chamfer Edge */}
               <polygon
-                points={isCurvedRounded
-                  ? [...ctOut, ...[...ctIn].reverse()].map(p => `${p.x},${p.y}`).join(" ")
-                  : isLShaped
-                  ? `${lt1.x},${lt1.y} ${lt2.x},${lt2.y} ${lt3.x},${lt3.y} ${lt4.x},${lt4.y} ${lt5.x},${lt5.y} ${lt6.x},${lt6.y}`
-                  : `${t1.x},${t1.y} ${t2.x},${t2.y} ${t3.x},${t3.y} ${t4.x},${t4.y}`
+                points={
+                  massingForm === "V_SHAPED"
+                    ? `${vt1.x},${vt1.y} ${vt2.x},${vt2.y} ${vt3.x},${vt3.y} ${vt4.x},${vt4.y} ${vt5.x},${vt5.y} ${vt6.x},${vt6.y}`
+                    : massingForm === "T_SHAPED"
+                    ? `${tt1.x},${tt1.y} ${tt2.x},${tt2.y} ${tt3.x},${tt3.y} ${tt4.x},${tt4.y} ${tt5.x},${tt5.y} ${tt6.x},${tt6.y} ${tt7.x},${tt7.y} ${tt8.x},${tt8.y}`
+                    : massingForm === "H_SHAPED"
+                    ? `${ht1.x},${ht1.y} ${ht2.x},${ht2.y} ${ht3.x},${ht3.y} ${ht4.x},${ht4.y} ${ht5.x},${ht5.y} ${ht6.x},${ht6.y} ${ht7.x},${ht7.y} ${ht8.x},${ht8.y} ${ht9.x},${ht9.y} ${ht10.x},${ht10.y} ${ht11.x},${ht11.y} ${ht12.x},${ht12.y}`
+                    : massingForm === "SPHERICAL_BALL"
+                    ? stOut.map(p => `${p.x},${p.y}`).join(" ")
+                    : massingForm === "OPEN_SQUARE_DONUT"
+                    ? `${qt1.x},${qt1.y} ${qt2.x},${qt2.y} ${qt3.x},${qt3.y} ${qt4.x},${qt4.y}`
+                    : massingForm === "WIDE_LINEAR_RANGE"
+                    ? `${wt1.x},${wt1.y} ${wt2.x},${wt2.y} ${wt3.x},${wt3.y} ${wt4.x},${wt4.y}`
+                    : isCurvedRounded
+                    ? [...ctOut, ...[...ctIn].reverse()].map(p => `${p.x},${p.y}`).join(" ")
+                    : isLShaped
+                    ? `${lt1.x},${lt1.y} ${lt2.x},${lt2.y} ${lt3.x},${lt3.y} ${lt4.x},${lt4.y} ${lt5.x},${lt5.y} ${lt6.x},${lt6.y}`
+                    : `${t1.x},${t1.y} ${t2.x},${t2.y} ${t3.x},${t3.y} ${t4.x},${t4.y}`
                 }
                 fill={isXRay ? "rgba(16, 185, 129, 0.2)" : (isNight ? "#1E293B" : "url(#slabGradient)")}
                 stroke={isXRay ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#D97706" : "#94A3B8"))}
@@ -2125,19 +2800,122 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                 );
               })()}
 
-              {/* 5. STANDARD SOLAR PV ARRAY */}
-              {rooftopFeature === "SOLAR_ARRAY" && (() => {
-                const s1 = project(-100 + topTwistX, -20, topZ + 12);
-                const s2 = project(-55 + topTwistX, -20, topZ + 12);
-                const s3 = project(-55 + topTwistX, 35, topZ + 18);
-                const s4 = project(-100 + topTwistX, 35, topZ + 18);
+              {/* 5. AERODYNAMIC AIRPLANE WING ROOF */}
+              {rooftopFeature === "AIRPLANE_WING_ROOF" && (() => {
+                const wingZ = topZ + 12;
+                // Fuselage Center Cabin
+                const fuse1 = project(-32 + topTwistX, -50, wingZ);
+                const fuse2 = project(32 + topTwistX, -50, wingZ);
+                const fuse3 = project(32 + topTwistX, 40, wingZ);
+                const fuse4 = project(-32 + topTwistX, 40, wingZ);
+                const noseTip = project(0 + topTwistX, 75, wingZ + 4);
+
+                // Swept Left Wing
+                const wingLRootFront = project(-28 + topTwistX, 20, wingZ);
+                const wingLRootRear = project(-28 + topTwistX, -35, wingZ);
+                const wingLTipFront = project(-195 + topTwistX, -30, wingZ + 6);
+                const wingLTipRear = project(-185 + topTwistX, -55, wingZ + 6);
+                const wingletL = project(-195 + topTwistX, -30, wingZ + 20);
+
+                // Swept Right Wing
+                const wingRRootFront = project(28 + topTwistX, 20, wingZ);
+                const wingRRootRear = project(28 + topTwistX, -35, wingZ);
+                const wingRTipFront = project(195 + topTwistX, -30, wingZ + 6);
+                const wingRTipRear = project(185 + topTwistX, -55, wingZ + 6);
+                const wingletR = project(195 + topTwistX, -30, wingZ + 20);
+
                 return (
-                  <g id="rooftop-solar">
-                    <polygon points={`${s1.x},${s1.y} ${s2.x},${s2.y} ${s3.x},${s3.y} ${s4.x},${s4.y}`} fill="#1E40AF" stroke="#60A5FA" strokeWidth="1" />
-                    <g transform={`translate(${lt3.x + 10}, ${lt3.y - 10})`}>
-                      <rect x="0" y="-8" width="85" height="16" rx="4" fill="rgba(15, 23, 42, 0.9)" stroke="#F59E0B" strokeWidth="1" />
-                      <text x="42" y="3" fill="#F59E0B" fontSize="8" fontWeight="bold" textAnchor="middle">
-                        ROOFTOP + OHWT
+                  <g id="rooftop-airplane-wing">
+                    {/* Swept Left Wing Surface */}
+                    <polygon
+                      points={`${wingLRootRear.x},${wingLRootRear.y} ${wingLRootFront.x},${wingLRootFront.y} ${wingLTipFront.x},${wingLTipFront.y} ${wingLTipRear.x},${wingLTipRear.y}`}
+                      fill="#1E293B"
+                      stroke="#38BDF8"
+                      strokeWidth="1.8"
+                    />
+                    {/* Left Winglet (Canted Upwards) with Red Port Aviation Beacon */}
+                    <polygon
+                      points={`${wingLTipRear.x},${wingLTipRear.y} ${wingLTipFront.x},${wingLTipFront.y} ${wingletL.x},${wingletL.y}`}
+                      fill="#0284C7"
+                      stroke="#EF4444"
+                      strokeWidth="1.5"
+                    />
+                    <circle cx={wingletL.x} cy={wingletL.y} r="3.5" fill="#EF4444" className="animate-ping" />
+                    <circle cx={wingletL.x} cy={wingletL.y} r="3" fill="#EF4444" />
+
+                    {/* Swept Right Wing Surface */}
+                    <polygon
+                      points={`${wingRRootRear.x},${wingRRootRear.y} ${wingRRootFront.x},${wingRRootFront.y} ${wingRTipFront.x},${wingRTipFront.y} ${wingRTipRear.x},${wingRTipRear.y}`}
+                      fill="#0F172A"
+                      stroke="#38BDF8"
+                      strokeWidth="1.8"
+                    />
+                    {/* Right Winglet (Canted Upwards) with Green Starboard Aviation Beacon */}
+                    <polygon
+                      points={`${wingRTipRear.x},${wingRTipRear.y} ${wingRTipFront.x},${wingRTipFront.y} ${wingletR.x},${wingletR.y}`}
+                      fill="#0284C7"
+                      stroke="#10B981"
+                      strokeWidth="1.5"
+                    />
+                    <circle cx={wingletR.x} cy={wingletR.y} r="3.5" fill="#10B981" className="animate-ping" />
+                    <circle cx={wingletR.x} cy={wingletR.y} r="3" fill="#10B981" />
+
+                    {/* Aerodynamic Fuselage Cockpit / Observation Deck */}
+                    <polygon
+                      points={`${fuse1.x},${fuse1.y} ${fuse2.x},${fuse2.y} ${fuse3.x},${fuse3.y} ${noseTip.x},${noseTip.y} ${fuse4.x},${fuse4.y}`}
+                      fill="url(#glassFacadeDay)"
+                      stroke="#38BDF8"
+                      strokeWidth="2"
+                    />
+                    <line x1={fuse4.x} y1={fuse4.y} x2={noseTip.x} y2={noseTip.y} stroke="#FFFFFF" strokeWidth="2" />
+                    <line x1={fuse3.x} y1={fuse3.y} x2={noseTip.x} y2={noseTip.y} stroke="#FFFFFF" strokeWidth="2" />
+
+                    {/* Callout Badge */}
+                    <g transform={`translate(${noseTip.x - 105}, ${noseTip.y + 16})`}>
+                      <rect x="0" y="-8" width="210" height="18" rx="4" fill="rgba(15, 23, 42, 0.95)" stroke="#38BDF8" strokeWidth="1.2" />
+                      <text x="105" y="4" fill="#38BDF8" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                        ✈️ AERODYNAMIC AIRPLANE WING ROOF
+                      </text>
+                    </g>
+                  </g>
+                );
+              })()}
+
+              {/* 6. MONOCRYSTALLINE SOLAR PV ROOFTOP FARM */}
+              {(rooftopFeature === "SOLAR_ARRAY" || hasSolarPanels) && (() => {
+                // 3 Racks of Solar PV panels
+                const r1A = project(-110 + topTwistX, -40, topZ + 12);
+                const r1B = project(-30 + topTwistX, -40, topZ + 12);
+                const r1C = project(-30 + topTwistX, -5, topZ + 18);
+                const r1D = project(-110 + topTwistX, -5, topZ + 18);
+
+                const r2A = project(-110 + topTwistX, 5, topZ + 12);
+                const r2B = project(-30 + topTwistX, 5, topZ + 12);
+                const r2C = project(-30 + topTwistX, 40, topZ + 18);
+                const r2D = project(-110 + topTwistX, 40, topZ + 18);
+
+                const r3A = project(30 + topTwistX, -40, topZ + 12);
+                const r3B = project(110 + topTwistX, -40, topZ + 12);
+                const r3C = project(110 + topTwistX, 20, topZ + 18);
+                const r3D = project(30 + topTwistX, 20, topZ + 18);
+
+                return (
+                  <g id="rooftop-solar-farm">
+                    {/* Rack 1 */}
+                    <polygon points={`${r1A.x},${r1A.y} ${r1B.x},${r1B.y} ${r1C.x},${r1C.y} ${r1D.x},${r1D.y}`} fill="#1E3A8A" stroke="#60A5FA" strokeWidth="1.2" />
+                    <line x1={(r1A.x + r1B.x) / 2} y1={(r1A.y + r1B.y) / 2} x2={(r1D.x + r1C.x) / 2} y2={(r1D.y + r1C.y) / 2} stroke="#93C5FD" strokeWidth="0.8" />
+                    {/* Rack 2 */}
+                    <polygon points={`${r2A.x},${r2A.y} ${r2B.x},${r2B.y} ${r2C.x},${r2C.y} ${r2D.x},${r2D.y}`} fill="#1E3A8A" stroke="#60A5FA" strokeWidth="1.2" />
+                    <line x1={(r2A.x + r2B.x) / 2} y1={(r2A.y + r2B.y) / 2} x2={(r2D.x + r2C.x) / 2} y2={(r2D.y + r2C.y) / 2} stroke="#93C5FD" strokeWidth="0.8" />
+                    {/* Rack 3 */}
+                    <polygon points={`${r3A.x},${r3A.y} ${r3B.x},${r3B.y} ${r3C.x},${r3C.y} ${r3D.x},${r3D.y}`} fill="#1E3A8A" stroke="#60A5FA" strokeWidth="1.2" />
+                    <line x1={(r3A.x + r3B.x) / 2} y1={(r3A.y + r3B.y) / 2} x2={(r3D.x + r3C.x) / 2} y2={(r3D.y + r3C.y) / 2} stroke="#93C5FD" strokeWidth="0.8" />
+
+                    {/* Solar PV Farm Badge */}
+                    <g transform={`translate(${r1A.x - 10}, ${r1A.y - 25})`}>
+                      <rect x="0" y="-8" width="180" height="18" rx="4" fill="rgba(15, 23, 42, 0.95)" stroke="#F59E0B" strokeWidth="1.2" />
+                      <text x="90" y="4" fill="#FDE047" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                        ⚡ SOLAR PV ROOFTOP FARM (120 kWp)
                       </text>
                     </g>
                   </g>
@@ -2348,13 +3126,24 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             Quick Models:
           </span>
           {[
+            { label: "📐 V-Shape Tower", prompt: "6-Floor V-Shaped Modern Iconic Commercial Tower with central entrance rotunda, panoramic glazed wings, and open recreational playground", floors: 6 },
+            { label: "🏗️ T-Shape Complex", prompt: "5-Floor T-Shape Architectural Office Building with front curtain glazing and structural RCC frame", floors: 5 },
+            { label: "🏢 H-Shape Skybridge", prompt: "7-Floor H-Shaped Twin-Tower Residential Complex with central connecting glass skybridge lounge", floors: 7 },
+            { label: "🔮 Spherical Orb Globe", prompt: "6-Floor Spherical Geodesic Ball Company Headquarters with carbon exoskeleton and glass globe facade", floors: 6 },
+            { label: "🔲 Square Open-Center", prompt: "5-Floor Square Open Center Quadrangle Building with continuous glass envelope and central open-sky atrium", floors: 5 },
+            { label: "✈️ Airplane Wing Roof", prompt: "6-Floor Contemporary Tower with aerodynamic swept airplane wing roof, navigation beacons, and curtain wall glazing", floors: 6 },
+            { label: "☀️ Solar Farm Rooftop", prompt: "7-Floor Green Energy Commercial Complex with monocrystalline solar panel rooftop farm array", floors: 7 },
+            { label: "🪟 Full Glass Curtain", prompt: "7-Floor Ultra-Modern Full Glassed Corporate Tower with double-glazed low-E blue curtain wall on all sides", floors: 7 },
+            { label: "🌓 Left Front Glassed", prompt: "6-Floor Contemporary Office Building with left front glass curtain wall and precast right wing", floors: 6 },
+            { label: "🌗 Right Front Glassed", prompt: "6-Floor Contemporary Office Building with right front glass curtain wall and precast left wing", floors: 6 },
+            { label: "⚽ Open Playground Hostel", prompt: "5-Floor Rounded Luxury Hostel Building with modern balconies and center open playground with sports court", floors: 5 },
+            { label: "🏛️ Wide Linear Campus", prompt: "4-Floor Wide-Range Linear Innovation Campus Building with multi-bay structural frame and ribbon windows", floors: 4 },
             { label: "🌿 L-Shaped Courtyard", prompt: "7-Floor Modern L-Shaped Building Model with central landscaped courtyard and cantilevered balconies", floors: 7 },
             { label: "🚁 Helipad Sky-Mansion", prompt: "7-Floor Ultra-Luxury Sky-Mansion Tower with champagne gold glazing, cantilevered floating balconies, and rooftop helipad terrace", floors: 7 },
             { label: "🏊 Infinity Sky Pool", prompt: "6-Floor Contemporary Waterfront Tower with elevated glass infinity sky pool, wooden sundeck, and azure glass facade", floors: 6 },
             { label: "🌀 Twisted Spiral Diagrid", prompt: "8-Floor Futuristic Spiral Twisted Tower with diamond diagrid exoskeleton and obsidian glass curtain wall", floors: 8 },
             { label: "🔭 Observatory Dome", prompt: "5-Floor Sky Observatory Tower with geodesic glass dome astronomical observatory and panoramic sky lounge", floors: 5 },
-            { label: "🌲 Biophilic Vertical Forest", prompt: "6-Floor Biophilic Vertical Forest Residential Complex with cascading planted terraces and living green wall facade", floors: 6 },
-            { label: "🏭 PEB Logistics Warehouse", prompt: "High-Bay PEB Logistics Warehouse with insulated sandwich panels and translucent roof skylights", floors: 2 },
+            { label: "🌲 Biophilic Vertical Forest", prompt: "6-Floor Biophilic Vertical Forest Residential Complex with cascading planted terraces and living green wall facade", floors: 6 }
           ].map((chip, idx) => (
             <button
               key={`chip-${idx}`}
@@ -2552,7 +3341,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                       {data.title}
                     </div>
                     <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                      {floors} Stories • Height: {(floors * 3.2).toFixed(1)}m / {(floors * 3.2 * 3.28084).toFixed(0)}ft • {data.building3D?.rooftopFeature === "HELIPAD" ? "🚁 Rooftop Helipad" : (data.building3D?.rooftopFeature === "INFINITY_POOL" ? "🏊 Sky Infinity Pool" : (data.building3D?.rooftopFeature === "OBSERVATORY_DOME" ? "🔭 Panoramic Dome" : (data.building3D?.rooftopFeature === "GABLE_ROOF" ? "🏠 Pitched Gable Roof" : "SMRF Frame")))}
+                      {floors} Stories • Height: {(floors * 3.2).toFixed(1)}m / {(floors * 3.2 * 3.28084).toFixed(0)}ft • {data.building3D?.rooftopFeature === "AIRPLANE_WING_ROOF" ? "✈️ Airplane Wing Roof" : (data.building3D?.rooftopFeature === "HELIPAD" ? "🚁 Rooftop Helipad" : (data.building3D?.rooftopFeature === "INFINITY_POOL" ? "🏊 Sky Infinity Pool" : (data.building3D?.rooftopFeature === "OBSERVATORY_DOME" ? "🔭 Panoramic Dome" : (data.building3D?.rooftopFeature === "GABLE_ROOF" ? "🏠 Pitched Gable Roof" : (data.building3D?.hasSolarPanels || data.building3D?.rooftopFeature === "SOLAR_ARRAY" ? "⚡ Solar PV Rooftop" : "SMRF Core Frame")))))}
                     </div>
                   </div>
                 </div>
@@ -2657,6 +3446,93 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                               VOLLEYBALL COURT (REGULATION)
                             </text>
                           </g>
+                        </g>
+                      ) : (data.building3D?.massingForm === "V_SHAPED" || data.building3D?.isVShaped || data.prompt?.toLowerCase().includes("v shape") || data.prompt?.toLowerCase().includes("v-shape") || data.prompt?.toLowerCase().includes("v shaped")) ? (
+                        <g id="cad-vshape-outline">
+                          {/* V-Shaped Exterior Dual Wing Walls */}
+                          <polygon
+                            points="400,100 680,140 640,320 440,240 400,280 360,240 160,320 120,140"
+                            fill="none"
+                            stroke={themeColors.wallExterior}
+                            strokeWidth="12"
+                          />
+                          <polygon
+                            points="400,100 680,140 640,320 440,240 400,280 360,240 160,320 120,140"
+                            fill="none"
+                            stroke="url(#concreteHatch)"
+                            strokeWidth="8"
+                          />
+                          <polygon
+                            points="400,108 672,146 634,314 438,236 400,274 362,236 166,314 128,146"
+                            fill="none"
+                            stroke={themeColors.wallInterior}
+                            strokeWidth="2"
+                          />
+                          {/* Central Apex Rotunda Glass Entrance */}
+                          <circle cx="400" cy="274" r="26" fill="none" stroke="#38BDF8" strokeWidth="2" />
+                          <circle cx="400" cy="274" r="14" fill="none" stroke="#7DD3FC" strokeWidth="1" strokeDasharray="3 2" />
+                          <text x="400" y="278" fill="#38BDF8" fontSize="8" fontWeight="bold" textAnchor="middle">
+                            ROTUNDA
+                          </text>
+                          {/* Entrance Plaza & Open Playground */}
+                          <rect x="150" y="380" width="500" height="180" rx="8" fill="#064E3B" fillOpacity="0.25" stroke="#10B981" strokeWidth="1.5" strokeDasharray="5 3" />
+                          <text x="400" y="475" fill="#34D399" fontSize="11" fontWeight="bold" textAnchor="middle">
+                            ENTRANCE PLAZA & OPEN PLAYGROUND
+                          </text>
+                        </g>
+                      ) : (data.building3D?.massingForm === "H_SHAPED" || data.building3D?.isHShaped || data.prompt?.toLowerCase().includes("h shape") || data.prompt?.toLowerCase().includes("h-shape") || data.prompt?.toLowerCase().includes("h shaped")) ? (
+                        <g id="cad-hshape-outline">
+                          {/* H-Shaped Twin-Towers with Central Skybridge */}
+                          <polygon
+                            points="94,94 280,94 280,240 520,240 520,94 706,94 706,576 520,576 520,380 280,380 280,576 94,576"
+                            fill="none"
+                            stroke={themeColors.wallExterior}
+                            strokeWidth="12"
+                          />
+                          <polygon
+                            points="94,94 280,94 280,240 520,240 520,94 706,94 706,576 520,576 520,380 280,380 280,576 94,576"
+                            fill="none"
+                            stroke="url(#concreteHatch)"
+                            strokeWidth="8"
+                          />
+                          <polygon
+                            points="100,100 274,100 274,246 526,246 526,100 700,100 700,570 526,570 526,374 274,374 274,570 100,570"
+                            fill="none"
+                            stroke={themeColors.wallInterior}
+                            strokeWidth="2"
+                          />
+                          {/* Skybridge Linking Corridor */}
+                          <rect x="280" y="246" width="240" height="128" fill="none" stroke="#38BDF8" strokeWidth="1.5" strokeDasharray="4 2" />
+                          <text x="400" y="315" fill="#38BDF8" fontSize="10" fontWeight="bold" textAnchor="middle">
+                            🌉 GLAZED SKYBRIDGE
+                          </text>
+                        </g>
+                      ) : (data.building3D?.massingForm === "OPEN_SQUARE_DONUT" || data.building3D?.isOpenSquare || data.prompt?.toLowerCase().includes("square open center") || data.prompt?.toLowerCase().includes("open center") || data.prompt?.toLowerCase().includes("donut")) ? (
+                        <g id="cad-open-square-outline">
+                          {/* Square Open-Center Quadrangle */}
+                          <rect x="94" y="94" width="612" height="482" fill="none" stroke={themeColors.wallExterior} strokeWidth="12" />
+                          <rect x="94" y="94" width="612" height="482" fill="none" stroke="url(#concreteHatch)" strokeWidth="8" />
+                          <rect x="100" y="100" width="600" height="470" fill="none" stroke={themeColors.wallInterior} strokeWidth="2" />
+                          {/* Inner Quadrangle Open Atrium Cutout */}
+                          <rect x="260" y="220" width="280" height="230" fill="#064E3B" fillOpacity="0.3" stroke="#10B981" strokeWidth="2" strokeDasharray="4 2" />
+                          <ellipse cx="400" cy="335" rx="35" ry="20" fill="none" stroke="#38BDF8" strokeWidth="1.5" />
+                          <text x="400" y="340" fill="#34D399" fontSize="10" fontWeight="bold" textAnchor="middle">
+                            OPEN-TO-SKY ATRIUM QUAD
+                          </text>
+                        </g>
+                      ) : (data.building3D?.massingForm === "SPHERICAL_BALL" || data.building3D?.isSphericalBall || data.prompt?.toLowerCase().includes("ball shape") || data.prompt?.toLowerCase().includes("spherical") || data.prompt?.toLowerCase().includes("sphere")) ? (
+                        <g id="cad-sphere-outline">
+                          {/* Spherical Geodesic Circular Outer Shell */}
+                          <ellipse cx="400" cy="335" rx="280" ry="220" fill="none" stroke={themeColors.wallExterior} strokeWidth="12" />
+                          <ellipse cx="400" cy="335" rx="280" ry="220" fill="none" stroke="url(#concreteHatch)" strokeWidth="8" />
+                          <ellipse cx="400" cy="335" rx="274" ry="214" fill="none" stroke={themeColors.wallInterior} strokeWidth="2" />
+                          {/* Concentric Geodesic Latitude Rings */}
+                          <ellipse cx="400" cy="335" rx="200" ry="155" fill="none" stroke="#38BDF8" strokeWidth="1" strokeDasharray="6 3" />
+                          <ellipse cx="400" cy="335" rx="110" ry="85" fill="none" stroke="#38BDF8" strokeWidth="1" strokeDasharray="6 3" />
+                          <circle cx="400" cy="335" r="28" fill="#1E293B" stroke="#F59E0B" strokeWidth="1.5" />
+                          <text x="400" y="339" fill="#F59E0B" fontSize="8" fontWeight="bold" textAnchor="middle">
+                            CORE
+                          </text>
                         </g>
                       ) : (data.building3D?.massingForm === "L_SHAPED" || data.building3D?.isLShaped || data.prompt?.toLowerCase().includes("l shape") || data.prompt?.toLowerCase().includes("l-shape") || data.prompt?.toLowerCase().includes("l shaped") || data.prompt?.toLowerCase().includes("l-shaped")) ? (
                         <g id="cad-lshape-outline">
