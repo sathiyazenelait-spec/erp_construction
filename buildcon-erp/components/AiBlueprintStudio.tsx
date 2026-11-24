@@ -1631,24 +1631,24 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           const vt5 = project(-125 + twistX, 60, topZ);
           const vt6 = project(-155 + twistX, 35, topZ);
 
-          // T-Shaped Structural Vertices
-          const tb1 = project(-145 + twistX, -25, baseZ);
-          const tb2 = project(-45 + twistX, -25, baseZ);
-          const tb3 = project(-45 + twistX, -130, baseZ);
-          const tb4 = project(45 + twistX, -130, baseZ);
-          const tb5 = project(45 + twistX, -25, baseZ);
-          const tb6 = project(145 + twistX, -25, baseZ);
-          const tb7 = project(145 + twistX, 35, baseZ);
-          const tb8 = project(-145 + twistX, 35, baseZ);
+          // T-Shaped Symmetric Structural Frame Vertices (Matches ResearchGate Structural Model)
+          const tb1 = project(-140 + twistX, 20, baseZ);   // Left wing back corner
+          const tb2 = project(-45 + twistX, 20, baseZ);    // Left notch inner corner
+          const tb3 = project(-45 + twistX, -100, baseZ);  // Stem rear left corner
+          const tb4 = project(45 + twistX, -100, baseZ);   // Stem rear right corner
+          const tb5 = project(45 + twistX, 20, baseZ);     // Right notch inner corner
+          const tb6 = project(140 + twistX, 20, baseZ);    // Right wing back corner
+          const tb7 = project(140 + twistX, 80, baseZ);    // Front right corner
+          const tb8 = project(-140 + twistX, 80, baseZ);   // Front left corner
 
-          const tt1 = project(-145 + twistX, -25, topZ);
-          const tt2 = project(-45 + twistX, -25, topZ);
-          const tt3 = project(-45 + twistX, -130, topZ);
-          const tt4 = project(45 + twistX, -130, topZ);
-          const tt5 = project(45 + twistX, -25, topZ);
-          const tt6 = project(145 + twistX, -25, topZ);
-          const tt7 = project(145 + twistX, 35, topZ);
-          const tt8 = project(-145 + twistX, 35, topZ);
+          const tt1 = project(-140 + twistX, 20, topZ);
+          const tt2 = project(-45 + twistX, 20, topZ);
+          const tt3 = project(-45 + twistX, -100, topZ);
+          const tt4 = project(45 + twistX, -100, topZ);
+          const tt5 = project(45 + twistX, 20, topZ);
+          const tt6 = project(140 + twistX, 20, topZ);
+          const tt7 = project(140 + twistX, 80, topZ);
+          const tt8 = project(-140 + twistX, 80, topZ);
 
           // H-Shaped Symmetric Structural Frame Vertices (Matches ResearchGate 3D Model)
           const hb1 = project(-140 + twistX, -85, baseZ); // Left wing, rear left
@@ -2026,9 +2026,9 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                   ))}
                 </g>
               ) : massingForm === "V_SHAPED" && !isXRay ? (
-                /* V-SHAPED DUAL WING ARCHITECTURAL FACADE */
+                /* V-SHAPED SYMMETRIC DUAL WING STRUCTURAL FACADE (Matches ResearchGate Structural Model) */
                 <g id={`vshape-facade-floor-${floorNum}`}>
-                  {/* Left Wing Front Face */}
+                  {/* Left Wing Front Tip Face */}
                   <polygon
                     points={`${vb6.x},${vb6.y} ${vb5.x},${vb5.y} ${vt5.x},${vt5.y} ${vt6.x},${vt6.y}`}
                     fill={glassDistribution === "RIGHT_FRONT_GLASS" ? "#1E293B" : facadeFill}
@@ -2036,34 +2036,53 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     strokeWidth="1.2"
                     strokeOpacity="0.88"
                   />
-                  {/* Right Wing Front Face */}
+                  {/* Left Wing Inner Plaza Wall */}
+                  <polygon
+                    points={`${vb5.x},${vb5.y} ${vb4.x},${vb4.y} ${vt4.x},${vt4.y} ${vt5.x},${vt5.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.75"
+                  />
+                  {/* Right Wing Inner Plaza Wall */}
                   <polygon
                     points={`${vb4.x},${vb4.y} ${vb3.x},${vb3.y} ${vt3.x},${vt3.y} ${vt4.x},${vt4.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.75"
+                  />
+                  {/* Right Wing Front Tip Face */}
+                  <polygon
+                    points={`${vb3.x},${vb3.y} ${vb2.x},${vb2.y} ${vt2.x},${vt2.y} ${vt3.x},${vt3.y}`}
                     fill={glassDistribution === "LEFT_FRONT_GLASS" ? "#1E293B" : facadeFill}
                     stroke={facadeStroke}
                     strokeWidth="1.2"
                     strokeOpacity="0.88"
                   />
-                  {/* Central Apex Rotunda Glazed Foyer */}
-                  <polygon
-                    points={`${vb5.x},${vb5.y} ${vb4.x},${vb4.y} ${vt4.x},${vt4.y} ${vt5.x},${vt5.y}`}
-                    fill={facadeFill}
-                    stroke={isNight ? "#FEF08A" : "#38BDF8"}
-                    strokeWidth="1.5"
-                    strokeOpacity="0.95"
-                  />
                   {/* Right Wing Outer Flank */}
                   <polygon
-                    points={`${vb3.x},${vb3.y} ${vb2.x},${vb2.y} ${vt2.x},${vt2.y} ${vt3.x},${vt3.y}`}
+                    points={`${vb2.x},${vb2.y} ${vb1.x},${vb1.y} ${vt1.x},${vt1.y} ${vt2.x},${vt2.y}`}
                     fill={glassDistribution === "LEFT_FRONT_GLASS" || glassDistribution === "ONE_SIDE_GLASS" ? "#1E293B" : facadeFill}
                     stroke={facadeStroke}
                     strokeWidth="1"
                     strokeOpacity="0.65"
                   />
-                  {/* Vertical Mullions on V Wings */}
+                  {/* Left Wing Outer Flank */}
+                  <polygon
+                    points={`${vb1.x},${vb1.y} ${vb6.x},${vb6.y} ${vt6.x},${vt6.y} ${vt1.x},${vt1.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.65"
+                  />
+
+                  {/* Structural Columns & Window Mullions on V Wings */}
                   {[
+                    { p1: vb5, p2: vb4, t1: vt5, t2: vt4 },
+                    { p1: vb4, p2: vb3, t1: vt4, t2: vt3 },
                     { p1: vb6, p2: vb5, t1: vt6, t2: vt5 },
-                    { p1: vb4, p2: vb3, t1: vt4, t2: vt3 }
+                    { p1: vb3, p2: vb2, t1: vt3, t2: vt2 }
                   ].map((face, fIdx) => (
                     [0.25, 0.5, 0.75].map((ratio, mIdx) => {
                       const mx1 = face.p1.x + (face.p2.x - face.p1.x) * ratio;
@@ -2077,13 +2096,23 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                           y1={my1}
                           x2={mx2}
                           y2={my2}
-                          stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#E0F2FE"))}
-                          strokeWidth="1"
-                          strokeOpacity="0.6"
+                          stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#38BDF8"))}
+                          strokeWidth="1.2"
+                          strokeOpacity="0.65"
                         />
                       );
                     })
                   ))}
+
+                  {/* Central V-Apex Rotunda Highlight on Mid Floor */}
+                  {floorNum === Math.ceil(totalFlrs / 2) && (
+                    <g transform={`translate(${vb4.x - 40}, ${vb4.y - 12})`}>
+                      <rect x="0" y="-7" width="80" height="14" rx="3" fill="rgba(15, 23, 42, 0.95)" stroke="#38BDF8" strokeWidth="0.8" />
+                      <text x="40" y="3" fill="#38BDF8" fontSize="7" fontWeight="bold" textAnchor="middle">
+                        🏛️ CENTRAL FOYER
+                      </text>
+                    </g>
+                  )}
                 </g>
               ) : massingForm === "U_SHAPED" && !isXRay ? (
                 /* U-SHAPED TRIPLE-WING ARCHITECTURAL FACADE */
@@ -2146,9 +2175,9 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                   />
                 </g>
               ) : massingForm === "T_SHAPED" && !isXRay ? (
-                /* T-SHAPED FACADE */
+                /* T-SHAPED SYMMETRIC STRUCTURAL FRAME FACADE (Matches ResearchGate Structural Model) */
                 <g id={`tshape-facade-floor-${floorNum}`}>
-                  {/* Front Long Bar Face */}
+                  {/* Front Long Flange Face */}
                   <polygon
                     points={`${tb8.x},${tb8.y} ${tb7.x},${tb7.y} ${tt7.x},${tt7.y} ${tt8.x},${tt8.y}`}
                     fill={facadeFill}
@@ -2156,7 +2185,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     strokeWidth="1.2"
                     strokeOpacity="0.88"
                   />
-                  {/* Right End Face */}
+                  {/* Right Flange End Face */}
                   <polygon
                     points={`${tb6.x},${tb6.y} ${tb7.x},${tb7.y} ${tt7.x},${tt7.y} ${tt6.x},${tt6.y}`}
                     fill={facadeFill}
@@ -2164,33 +2193,73 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     strokeWidth="1"
                     strokeOpacity="0.70"
                   />
+                  {/* Right Notch Return Wall (Inner Courtyard Wall) */}
+                  <polygon
+                    points={`${tb5.x},${tb5.y} ${tb6.x},${tb6.y} ${tt6.x},${tt6.y} ${tt5.x},${tt5.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.75"
+                  />
                   {/* Stem Right Wall */}
                   <polygon
                     points={`${tb4.x},${tb4.y} ${tb5.x},${tb5.y} ${tt5.x},${tt5.y} ${tt4.x},${tt4.y}`}
                     fill={facadeFill}
                     stroke={facadeStroke}
                     strokeWidth="1"
-                    strokeOpacity="0.60"
+                    strokeOpacity="0.65"
                   />
-                  {/* Front Transom Mullions */}
-                  {[0.2, 0.4, 0.6, 0.8].map((ratio, mIdx) => {
-                    const mx1 = tb8.x + (tb7.x - tb8.x) * ratio;
-                    const my1 = tb8.y + (tb7.y - tb8.y) * ratio;
-                    const mx2 = tt8.x + (tt7.x - tt8.x) * ratio;
-                    const my2 = tt7.y + (tt7.y - tt8.y) * ratio;
-                    return (
-                      <line
-                        key={`mullion-t-${floorNum}-${mIdx}`}
-                        x1={mx1}
-                        y1={my1}
-                        x2={mx2}
-                        y2={my2}
-                        stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#E0F2FE"))}
-                        strokeWidth="1"
-                        strokeOpacity="0.6"
-                      />
-                    );
-                  })}
+                  {/* Left Flange End Face */}
+                  <polygon
+                    points={`${tb1.x},${tb1.y} ${tb8.x},${tb8.y} ${tt8.x},${tt8.y} ${tt1.x},${tt1.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.70"
+                  />
+                  {/* Left Notch Return Wall (Inner Courtyard Wall) */}
+                  <polygon
+                    points={`${tb1.x},${tb1.y} ${tb2.x},${tb2.y} ${tt2.x},${tt2.y} ${tt1.x},${tt1.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.75"
+                  />
+                  {/* Stem Left Wall */}
+                  <polygon
+                    points={`${tb3.x},${tb3.y} ${tb2.x},${tb2.y} ${tt2.x},${tt2.y} ${tt3.x},${tt3.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.65"
+                  />
+
+                  {/* Structural Columns & Window Mullions on T-Faces */}
+                  {[
+                    { p1: tb8, p2: tb7, t1: tt8, t2: tt7, divs: [0.16, 0.33, 0.5, 0.66, 0.83] },
+                    { p1: tb5, p2: tb6, t1: tt5, t2: tt6, divs: [0.33, 0.66] },
+                    { p1: tb4, p2: tb5, t1: tt4, t2: tt5, divs: [0.33, 0.66] },
+                    { p1: tb1, p2: tb2, t1: tt1, t2: tt2, divs: [0.33, 0.66] }
+                  ].map((face, fIdx) => (
+                    face.divs.map((ratio, mIdx) => {
+                      const mx1 = face.p1.x + (face.p2.x - face.p1.x) * ratio;
+                      const my1 = face.p1.y + (face.p2.y - face.p1.y) * ratio;
+                      const mx2 = face.t1.x + (face.t2.x - face.t1.x) * ratio;
+                      const my2 = face.t1.y + (face.t2.y - face.t1.y) * ratio;
+                      return (
+                        <line
+                          key={`mullion-t-${floorNum}-${fIdx}-${mIdx}`}
+                          x1={mx1}
+                          y1={my1}
+                          x2={mx2}
+                          y2={my2}
+                          stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#38BDF8"))}
+                          strokeWidth="1.2"
+                          strokeOpacity="0.65"
+                        />
+                      );
+                    })
+                  ))}
                 </g>
               ) : massingForm === "H_SHAPED" && !isXRay ? (
                 /* H-SHAPED SYMMETRIC STRUCTURAL FRAME FACADE (Matches ResearchGate 3D Model) */
@@ -2742,6 +2811,72 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     const pA = project(-50 + twistX, 0, topZ);
                     const pB = project(50 + twistX, 0, topZ);
                     return <line x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })()}
+                </g>
+              )}
+
+              {/* Structural FEM Grid Lines on T-Shape Roof Slab (matches ResearchGate structural model) */}
+              {massingForm === "T_SHAPED" && floorNum === totalFlrs && (
+                <g id="t-roof-fem-grid" opacity="0.85">
+                  {/* Front Flange Crossbar Grids */}
+                  {[-95, -50, 0, 50, 95].map((gx, gIdx) => {
+                    const pA = project(gx + twistX, 20, topZ);
+                    const pB = project(gx + twistX, 80, topZ);
+                    return <line key={`t-fem-f-x-${gIdx}`} x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })}
+                  {(() => {
+                    const pA = project(-140 + twistX, 50, topZ);
+                    const pB = project(140 + twistX, 50, topZ);
+                    return <line x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })()}
+                  {/* Stem Web Grids */}
+                  {[-15, -45, -75].map((gy, gIdx) => {
+                    const pA = project(-45 + twistX, gy, topZ);
+                    const pB = project(45 + twistX, gy, topZ);
+                    return <line key={`t-fem-s-y-${gIdx}`} x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })}
+                  {(() => {
+                    const pA = project(0 + twistX, -100, topZ);
+                    const pB = project(0 + twistX, 20, topZ);
+                    return <line x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })()}
+                </g>
+              )}
+
+              {/* Structural FEM Grid Lines on V-Shape Roof Slab (matches ResearchGate structural model) */}
+              {massingForm === "V_SHAPED" && floorNum === totalFlrs && (
+                <g id="v-roof-fem-grid" opacity="0.85">
+                  {/* Left Wing Lateral Bay Ribs */}
+                  {[0.25, 0.5, 0.75].map((ratio, rIdx) => {
+                    const xOut = 0 + (-155 - 0) * ratio;
+                    const yOut = -115 + (35 - (-115)) * ratio;
+                    const xIn = 0 + (-125 - 0) * ratio;
+                    const yIn = -50 + (60 - (-50)) * ratio;
+                    const pA = project(xOut + twistX, yOut, topZ);
+                    const pB = project(xIn + twistX, yIn, topZ);
+                    return <line key={`v-fem-l-${rIdx}`} x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })}
+                  {/* Right Wing Lateral Bay Ribs */}
+                  {[0.25, 0.5, 0.75].map((ratio, rIdx) => {
+                    const xOut = 0 + (155 - 0) * ratio;
+                    const yOut = -115 + (35 - (-115)) * ratio;
+                    const xIn = 0 + (125 - 0) * ratio;
+                    const yIn = -50 + (60 - (-50)) * ratio;
+                    const pA = project(xOut + twistX, yOut, topZ);
+                    const pB = project(xIn + twistX, yIn, topZ);
+                    return <line key={`v-fem-r-${rIdx}`} x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })}
+                  {/* Wing Longitudinal Spine Lines */}
+                  {(() => {
+                    const pApex = project(0 + twistX, -82, topZ);
+                    const pLeftTip = project(-140 + twistX, 47, topZ);
+                    const pRightTip = project(140 + twistX, 47, topZ);
+                    return (
+                      <>
+                        <line x1={pApex.x} y1={pApex.y} x2={pLeftTip.x} y2={pLeftTip.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />
+                        <line x1={pApex.x} y1={pApex.y} x2={pRightTip.x} y2={pRightTip.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />
+                      </>
+                    );
                   })()}
                 </g>
               )}
