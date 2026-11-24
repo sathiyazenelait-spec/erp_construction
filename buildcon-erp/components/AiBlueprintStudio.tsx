@@ -1650,32 +1650,32 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           const tt7 = project(145 + twistX, 35, topZ);
           const tt8 = project(-145 + twistX, 35, topZ);
 
-          // H-Shaped Twin-Tower & Skybridge Vertices
-          const hb1 = project(-145 + twistX, -120, baseZ);
-          const hb2 = project(-55 + twistX, -120, baseZ);
-          const hb3 = project(-55 + twistX, -35, baseZ);
-          const hb4 = project(55 + twistX, -35, baseZ);
-          const hb5 = project(55 + twistX, -120, baseZ);
-          const hb6 = project(145 + twistX, -120, baseZ);
-          const hb7 = project(145 + twistX, 55, baseZ);
-          const hb8 = project(55 + twistX, 55, baseZ);
-          const hb9 = project(55 + twistX, 15, baseZ);
-          const hb10 = project(-55 + twistX, 15, baseZ);
-          const hb11 = project(-55 + twistX, 55, baseZ);
-          const hb12 = project(-145 + twistX, 55, baseZ);
+          // H-Shaped Symmetric Structural Frame Vertices (Matches ResearchGate 3D Model)
+          const hb1 = project(-140 + twistX, -85, baseZ); // Left wing, rear left
+          const hb2 = project(-50 + twistX, -85, baseZ);  // Left wing, rear right
+          const hb3 = project(-50 + twistX, -28, baseZ);  // Left wing, inner rear notch corner
+          const hb4 = project(50 + twistX, -28, baseZ);   // Right wing, inner rear notch corner
+          const hb5 = project(50 + twistX, -85, baseZ);   // Right wing, rear left
+          const hb6 = project(140 + twistX, -85, baseZ);  // Right wing, rear right
+          const hb7 = project(140 + twistX, 85, baseZ);   // Right wing, front right
+          const hb8 = project(50 + twistX, 85, baseZ);    // Right wing, front left
+          const hb9 = project(50 + twistX, 28, baseZ);    // Right wing, inner front notch corner
+          const hb10 = project(-50 + twistX, 28, baseZ);  // Left wing, inner front notch corner
+          const hb11 = project(-50 + twistX, 85, baseZ);  // Left wing, front right
+          const hb12 = project(-140 + twistX, 85, baseZ); // Left wing, front left
 
-          const ht1 = project(-145 + twistX, -120, topZ);
-          const ht2 = project(-55 + twistX, -120, topZ);
-          const ht3 = project(-55 + twistX, -35, topZ);
-          const ht4 = project(55 + twistX, -35, topZ);
-          const ht5 = project(55 + twistX, -120, topZ);
-          const ht6 = project(145 + twistX, -120, topZ);
-          const ht7 = project(145 + twistX, 55, topZ);
-          const ht8 = project(55 + twistX, 55, topZ);
-          const ht9 = project(55 + twistX, 15, topZ);
-          const ht10 = project(-55 + twistX, 15, topZ);
-          const ht11 = project(-55 + twistX, 55, topZ);
-          const ht12 = project(-145 + twistX, 55, topZ);
+          const ht1 = project(-140 + twistX, -85, topZ);
+          const ht2 = project(-50 + twistX, -85, topZ);
+          const ht3 = project(-50 + twistX, -28, topZ);
+          const ht4 = project(50 + twistX, -28, topZ);
+          const ht5 = project(50 + twistX, -85, topZ);
+          const ht6 = project(140 + twistX, -85, topZ);
+          const ht7 = project(140 + twistX, 85, topZ);
+          const ht8 = project(50 + twistX, 85, topZ);
+          const ht9 = project(50 + twistX, 28, topZ);
+          const ht10 = project(-50 + twistX, 28, topZ);
+          const ht11 = project(-50 + twistX, 85, topZ);
+          const ht12 = project(-140 + twistX, 85, topZ);
 
           // Spherical Geodesic Globe Floor Coordinates
           const sphereDelta = (floorNum - 0.5 - totalFlrs / 2) / (totalFlrs / 2 + 0.5);
@@ -2193,9 +2193,9 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                   })}
                 </g>
               ) : massingForm === "H_SHAPED" && !isXRay ? (
-                /* H-SHAPED TWIN TOWERS & SKYBRIDGE FACADE */
+                /* H-SHAPED SYMMETRIC STRUCTURAL FRAME FACADE (Matches ResearchGate 3D Model) */
                 <g id={`hshape-facade-floor-${floorNum}`}>
-                  {/* Left Tower Front */}
+                  {/* Left Wing Front Face */}
                   <polygon
                     points={`${hb12.x},${hb12.y} ${hb11.x},${hb11.y} ${ht11.x},${ht11.y} ${ht12.x},${ht12.y}`}
                     fill={glassDistribution === "RIGHT_FRONT_GLASS" ? "#1E293B" : facadeFill}
@@ -2203,7 +2203,31 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     strokeWidth="1.2"
                     strokeOpacity="0.88"
                   />
-                  {/* Right Tower Front */}
+                  {/* Left Wing Inner Notch Face (Courtyard Side Wall) */}
+                  <polygon
+                    points={`${hb11.x},${hb11.y} ${hb10.x},${hb10.y} ${ht10.x},${ht10.y} ${ht11.x},${ht11.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.75"
+                  />
+                  {/* Central Connecting Corridor / Crossbar Front */}
+                  <polygon
+                    points={`${hb10.x},${hb10.y} ${hb9.x},${hb9.y} ${ht9.x},${ht9.y} ${ht10.x},${ht10.y}`}
+                    fill={facadeFill}
+                    stroke={isNight ? "#FEF08A" : "#38BDF8"}
+                    strokeWidth="1.2"
+                    strokeOpacity="0.95"
+                  />
+                  {/* Right Wing Inner Notch Face (Courtyard Side Wall) */}
+                  <polygon
+                    points={`${hb9.x},${hb9.y} ${hb8.x},${hb8.y} ${ht8.x},${ht8.y} ${ht9.x},${ht9.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.75"
+                  />
+                  {/* Right Wing Front Face */}
                   <polygon
                     points={`${hb8.x},${hb8.y} ${hb7.x},${hb7.y} ${ht7.x},${ht7.y} ${ht8.x},${ht8.y}`}
                     fill={glassDistribution === "LEFT_FRONT_GLASS" ? "#1E293B" : facadeFill}
@@ -2211,23 +2235,52 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     strokeWidth="1.2"
                     strokeOpacity="0.88"
                   />
-                  {/* Central Connecting Skybridge */}
+                  {/* Right Wing Outer Flank */}
                   <polygon
-                    points={`${hb10.x},${hb10.y} ${hb9.x},${hb9.y} ${ht9.x},${ht9.y} ${ht10.x},${ht10.y}`}
-                    fill="url(#glassFacadeDay)"
-                    stroke="#38BDF8"
-                    strokeWidth="1.5"
-                    strokeOpacity="0.95"
-                  />
-                  {/* Right Tower Side Flank */}
-                  <polygon
-                    points={`${hb6.x},${hb6.y} ${hb7.x},${hb7.y} ${ht7.x},${ht7.y} ${ht6.x},${ht6.y}`}
+                    points={`${hb7.x},${hb7.y} ${hb6.x},${hb6.y} ${ht6.x},${ht6.y} ${ht7.x},${ht7.y}`}
                     fill={facadeFill}
                     stroke={facadeStroke}
                     strokeWidth="1"
                     strokeOpacity="0.65"
                   />
-                  {/* Skybridge Label on Middle Floor */}
+                  {/* Left Wing Outer Flank */}
+                  <polygon
+                    points={`${hb1.x},${hb1.y} ${hb12.x},${hb12.y} ${ht12.x},${ht12.y} ${ht1.x},${ht1.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.65"
+                  />
+
+                  {/* Structural Columns & Window Mullions on H-Faces */}
+                  {[
+                    { p1: hb12, p2: hb11, t1: ht12, t2: ht11 },
+                    { p1: hb11, p2: hb10, t1: ht11, t2: ht10 },
+                    { p1: hb10, p2: hb9, t1: ht10, t2: ht9 },
+                    { p1: hb9, p2: hb8, t1: ht9, t2: ht8 },
+                    { p1: hb8, p2: hb7, t1: ht8, t2: ht7 }
+                  ].map((face, fIdx) => (
+                    [0.33, 0.66].map((ratio, mIdx) => {
+                      const mx1 = face.p1.x + (face.p2.x - face.p1.x) * ratio;
+                      const my1 = face.p1.y + (face.p2.y - face.p1.y) * ratio;
+                      const mx2 = face.t1.x + (face.t2.x - face.t1.x) * ratio;
+                      const my2 = face.t1.y + (face.t2.y - face.t1.y) * ratio;
+                      return (
+                        <line
+                          key={`mullion-h-${floorNum}-${fIdx}-${mIdx}`}
+                          x1={mx1}
+                          y1={my1}
+                          x2={mx2}
+                          y2={my2}
+                          stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#38BDF8"))}
+                          strokeWidth="1.2"
+                          strokeOpacity="0.65"
+                        />
+                      );
+                    })
+                  ))}
+
+                  {/* Central Spine Label on Mid Floor */}
                   {floorNum === Math.ceil(totalFlrs / 2) && (() => {
                     const sbMid = {
                       x: (hb10.x + hb9.x) / 2,
@@ -2237,7 +2290,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                       <g transform={`translate(${sbMid.x - 45}, ${sbMid.y - 6})`}>
                         <rect x="0" y="-7" width="90" height="14" rx="3" fill="rgba(15, 23, 42, 0.95)" stroke="#38BDF8" strokeWidth="0.8" />
                         <text x="45" y="3" fill="#38BDF8" fontSize="7" fontWeight="bold" textAnchor="middle">
-                          🌉 SKYBRIDGE
+                          🏢 CENTRAL CORE
                         </text>
                       </g>
                     );
@@ -2653,6 +2706,45 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                 stroke={isXRay ? "#10B981" : (isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#D97706" : "#94A3B8"))}
                 strokeWidth={isXRay ? 1 : 1.5}
               />
+
+              {/* Structural FEM Grid Lines on H-Shape Roof Slab (matches ResearchGate structural model) */}
+              {massingForm === "H_SHAPED" && floorNum === totalFlrs && (
+                <g id="h-roof-fem-grid" opacity="0.85">
+                  {/* Left Wing Grid Lines */}
+                  {[-110, -80].map((gx, gIdx) => {
+                    const pA = project(gx + twistX, -85, topZ);
+                    const pB = project(gx + twistX, 85, topZ);
+                    return <line key={`h-fem-l-x-${gIdx}`} x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })}
+                  {[-28, 28].map((gy, gIdx) => {
+                    const pA = project(-140 + twistX, gy, topZ);
+                    const pB = project(-50 + twistX, gy, topZ);
+                    return <line key={`h-fem-l-y-${gIdx}`} x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })}
+                  {/* Right Wing Grid Lines */}
+                  {[80, 110].map((gx, gIdx) => {
+                    const pA = project(gx + twistX, -85, topZ);
+                    const pB = project(gx + twistX, 85, topZ);
+                    return <line key={`h-fem-r-x-${gIdx}`} x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })}
+                  {[-28, 28].map((gy, gIdx) => {
+                    const pA = project(50 + twistX, gy, topZ);
+                    const pB = project(140 + twistX, gy, topZ);
+                    return <line key={`h-fem-r-y-${gIdx}`} x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })}
+                  {/* Center Bridge Crossbar Grid Lines */}
+                  {[-16, 16].map((gx, gIdx) => {
+                    const pA = project(gx + twistX, -28, topZ);
+                    const pB = project(gx + twistX, 28, topZ);
+                    return <line key={`h-fem-b-x-${gIdx}`} x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })}
+                  {(() => {
+                    const pA = project(-50 + twistX, 0, topZ);
+                    const pB = project(50 + twistX, 0, topZ);
+                    return <line x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })()}
+                </g>
+              )}
 
               {/* Floor Level Label Pill (Left floating) */}
               <g transform={`translate(${b1.x - 70}, ${b1.y})`}>
