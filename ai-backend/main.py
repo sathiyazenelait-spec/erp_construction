@@ -1082,15 +1082,22 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     has_diagrid = any(w in p_lower for w in ["diagrid", "diamond", "lattice", "exoskeleton", "cross brace", "x-brace"])
     has_sky_court = any(w in p_lower for w in ["sky court", "sky-court", "mid-level garden", "void", "cutout", "hollow", "sky bridge"])
     has_sun_louvers = any(w in p_lower for w in ["louver", "louvers", "shading", "brise-soleil", "fins", "slats"])
-    is_l_shaped = any(w in p_lower for w in ["l-shape", "l shape", "l-shaped", "l shaped", "l building", "l block", "l-type", "l layout"])
+    
+    # Accurate regex matching for L-shape to avoid false positives with words like 'hostel'
+    is_l_shaped = bool(re.search(r'\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b', p_lower))
+    is_curved_rounded = any(w in p_lower for w in ["rounded", "curved", "curve", "round", "circular", "cylinder", "cylindrical", "oval", "crescent", "arc", "fluid"])
+    is_hostel = any(w in p_lower for w in ["hostel", "dormitory", "student", "campus", "coliving", "co-living"])
+    has_basketball = any(w in p_lower for w in ["basketball", "b-ball", "hoop"])
+    has_volleyball = any(w in p_lower for w in ["volleyball", "v-ball"])
+    has_sports_court = has_basketball or has_volleyball or any(w in p_lower for w in ["sports court", "athletic", "court", "playground"])
 
     # Massing Form Classification
     if is_l_shaped:
         massing_form = "L_SHAPED"
+    elif is_curved_rounded:
+        massing_form = "CURVED_CYLINDRICAL"
     elif any(w in p_lower for w in ["stepped", "cascading", "terraced tower", "ziggurat", "setback", "tapering", "pyramid"]):
         massing_form = "STEPPED_CASCADING"
-    elif any(w in p_lower for w in ["curved", "cylinder", "cylindrical", "circular", "round tower", "oval", "fluid"]):
-        massing_form = "CURVED_CYLINDRICAL"
     elif any(w in p_lower for w in ["twist", "twisted", "spiral", "diagrid", "diamond lattice"]):
         massing_form = "TWISTED_DIAGRID"
     elif p_type == "INDUSTRIAL" or any(w in p_lower for w in ["warehouse", "shed", "factory", "hangar", "gantry"]):
@@ -1143,7 +1150,29 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     # Attempt real Gemini AI Architect call
     gemini_spec = call_gemini_blueprint_designer(prompt, p_type, sqft, floors_count, gemini_api_key)
     
-    if is_l_shaped:
+    if is_hostel:
+        title = f"{floors_count}-Floor Rounded Luxury Campus Hostel Residence"
+        dwg_no = "DWG-AI-HST-001"
+        rooms = [
+            {"id": "R1", "name": "Student Living Suites (Wing A)", "x": 100, "y": 100, "w": 300, "h": 220, "areaSqft": round(sqft * 0.32), "flooring": "Acoustic Vinyl Timber Plank", "type": "BEDROOM"},
+            {"id": "R2", "name": "Student Living Suites (Wing B)", "x": 420, "y": 100, "w": 280, "h": 220, "areaSqft": round(sqft * 0.28), "flooring": "Acoustic Vinyl Timber Plank", "type": "BEDROOM"},
+            {"id": "R3", "name": "Campus Dining Hall & Cafeteria", "x": 100, "y": 340, "w": 280, "h": 140, "areaSqft": round(sqft * 0.16), "flooring": "Hygienic Anti-Bacterial Terrazzo", "type": "KITCHEN"},
+            {"id": "R4", "name": "Central Study Library & Tech Hub", "x": 400, "y": 340, "w": 300, "h": 140, "areaSqft": round(sqft * 0.14), "flooring": "Soundproof Carpet Tile", "type": "OFFICE"},
+            {"id": "R5", "name": "Sports Courtyard (Basketball & Volleyball)", "x": 100, "y": 500, "w": 600, "h": 70, "areaSqft": round(sqft * 0.10), "flooring": "Acrylic Cushion Sports Hardcourt", "type": "COURTYARD"}
+        ]
+        columns = [
+            {"grid": "H-1", "x": 95, "y": 95, "size": "450x450mm", "rebar": "10-T20 Fe550D"},
+            {"grid": "H-2", "x": 415, "y": 95, "size": "450x450mm", "rebar": "10-T20 Fe550D"},
+            {"grid": "H-3", "x": 705, "y": 95, "size": "450x450mm", "rebar": "10-T20 Fe550D"},
+            {"grid": "H-4", "x": 95, "y": 335, "size": "450x450mm", "rebar": "10-T20 Fe550D"},
+            {"grid": "H-5", "x": 395, "y": 335, "size": "450x450mm", "rebar": "10-T20 Fe550D"},
+            {"grid": "H-6", "x": 705, "y": 335, "size": "450x450mm", "rebar": "10-T20 Fe550D"},
+            {"grid": "H-7", "x": 95, "y": 565, "size": "450x450mm", "rebar": "10-T20 Fe550D"},
+            {"grid": "H-8", "x": 705, "y": 565, "size": "450x450mm", "rebar": "10-T20 Fe550D"}
+        ]
+        hvac_path = "M 140 180 L 380 180 L 460 180 L 680 180 M 140 400 L 680 400"
+        sprinklers = [{"x": 160, "y": 160}, {"x": 300, "y": 160}, {"x": 500, "y": 160}, {"x": 640, "y": 160}, {"x": 240, "y": 380}, {"x": 560, "y": 380}]
+    elif is_l_shaped:
         title = f"{floors_count}-Story Modern L-Shaped Architectural Complex"
         dwg_no = "DWG-AI-LSHP-001"
         rooms = [
@@ -1314,7 +1343,13 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     gfa_sqft = round(sqft * floors_count)
 
     # Dynamic Architecture Title and Facade System based on prompt
-    if is_l_shaped:
+    if is_hostel:
+        fallback_title = f"{floors_count}-Floor Rounded Luxury Campus Hostel Residence"
+        fallback_facade = "Aerodynamic Curved Glass Envelope with Panoramic Balconies"
+    elif is_curved_rounded:
+        fallback_title = f"{floors_count}-Floor Curved Panoramic Architectural Complex"
+        fallback_facade = "Curved Aerodynamic Low-E Blue Double Glazing"
+    elif is_l_shaped:
         fallback_title = f"{floors_count}-Story Modern L-Shaped Dual-Wing Complex"
         fallback_facade = "L-Shaped Dual Wing Glazed Envelope with Courtyard"
     elif is_luxury_mansion:
@@ -1356,9 +1391,13 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     # Build highly responsive architectural highlights
     custom_highlights = [
         f"{floors_count}-Story {massing_form.replace('_', ' ').title()} RCC Frame Structure",
-        "L-Shaped dual wing geometry with open-air central courtyard plaza" if massing_form == "L_SHAPED" else (
-            "External diagonal structural steel diagrid exoskeleton" if has_diagrid else (
-                "Alternating double-height living room glazing with structural silicone mullions" if has_double_height else "High-performance acoustic Low-E double curtain wall glazing"
+        "Central athletic courtyard featuring regulation basketball & volleyball courts" if has_sports_court else (
+            "L-Shaped dual wing geometry with open-air central courtyard plaza" if massing_form == "L_SHAPED" else (
+                "Aerodynamic cylindrical curved architectural facade with continuous panoramic glazing" if massing_form == "CURVED_CYLINDRICAL" else (
+                    "External diagonal structural steel diagrid exoskeleton" if has_diagrid else (
+                        "Alternating double-height living room glazing with structural silicone mullions" if has_double_height else "High-performance acoustic Low-E double curtain wall glazing"
+                    )
+                )
             )
         ),
         "Curved wave sinusoidal organic balconies" if balcony_type == "CURVED_WAVE" else (
@@ -1404,6 +1443,11 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
             "architecturalHighlights": gemini_spec.get("architecturalHighlights", custom_highlights) if gemini_spec else custom_highlights,
             "massingForm": massing_form,
             "isLShaped": is_l_shaped,
+            "isCurvedRounded": is_curved_rounded,
+            "isHostel": is_hostel,
+            "hasBasketball": has_basketball,
+            "hasVolleyball": has_volleyball,
+            "hasSportsCourt": has_sports_court,
             "rooftopFeature": rooftop_feature,
             "balconyType": balcony_type,
             "facadePalette": facade_palette,

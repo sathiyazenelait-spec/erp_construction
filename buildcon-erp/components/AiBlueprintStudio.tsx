@@ -45,6 +45,11 @@ export interface Building3DSpec {
   architecturalHighlights: string[];
   massingForm?: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED";
   isLShaped?: boolean;
+  isCurvedRounded?: boolean;
+  isHostel?: boolean;
+  hasBasketball?: boolean;
+  hasVolleyball?: boolean;
+  hasSportsCourt?: boolean;
   rooftopFeature?: "HELIPAD" | "INFINITY_POOL" | "OBSERVATORY_DOME" | "PENTHOUSE_GARDEN" | "GABLE_ROOF" | "SOLAR_ARRAY";
   balconyType?: "CANTILEVERED_FLOATING" | "WRAPAROUND_RIBBON" | "CURVED_WAVE" | "TERRACED_CASCADE" | "MINIMAL_FLUSH";
   facadePalette?: "GOLD_LUXURY" | "CYBER_OBSIDIAN" | "EMERALD_BIOPHILIC" | "TERRACOTTA_NORDIC" | "WHITE_MARBLE" | "AZURE_GLASS";
@@ -229,6 +234,9 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
       if (res.ok) {
         const bpData: BlueprintData = await res.json();
         setData(bpData);
+        if (bpData.floors && bpData.floors !== targetFloors) {
+          setFloors(bpData.floors);
+        }
         if (bpData.rooms && bpData.rooms.length > 0) {
           setSelectedRoom(bpData.rooms[0]);
         }
@@ -282,12 +290,19 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const hasDiagrid = pLower.includes("diagrid") || pLower.includes("diamond") || pLower.includes("lattice") || pLower.includes("exoskeleton") || pLower.includes("cross brace") || pLower.includes("x-brace");
     const hasSkyCourt = pLower.includes("sky court") || pLower.includes("sky-court") || pLower.includes("mid-level garden") || pLower.includes("void") || pLower.includes("cutout") || pLower.includes("hollow") || pLower.includes("sky bridge");
     const hasSunLouvers = pLower.includes("louver") || pLower.includes("louvers") || pLower.includes("shading") || pLower.includes("brise-soleil") || pLower.includes("fins") || pLower.includes("slats");
-    const isLShaped = pLower.includes("l-shape") || pLower.includes("l shape") || pLower.includes("l-shaped") || pLower.includes("l shaped") || pLower.includes("l building") || pLower.includes("l block") || pLower.includes("l layout");
+    const isLShaped = /\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b/i.test(pLower);
+    const isCurvedRounded = pLower.includes("rounded") || pLower.includes("curved") || pLower.includes("round") || pLower.includes("circular") || pLower.includes("cylinder") || pLower.includes("cylindrical") || pLower.includes("oval") || pLower.includes("crescent") || pLower.includes("arc");
+    const isHostel = pLower.includes("hostel") || pLower.includes("dormitory") || pLower.includes("student") || pLower.includes("campus") || pLower.includes("coliving");
+    const hasBasketball = pLower.includes("basketball") || pLower.includes("b-ball") || pLower.includes("hoop");
+    const hasVolleyball = pLower.includes("volleyball") || pLower.includes("v-ball");
+    const hasSportsCourt = hasBasketball || hasVolleyball || pLower.includes("sports court") || pLower.includes("court");
 
     // Massing Form
     let massingForm: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED" = "RECTANGULAR";
     if (isLShaped) {
       massingForm = "L_SHAPED";
+    } else if (isCurvedRounded || isHostel) {
+      massingForm = "CURVED_CYLINDRICAL";
     } else if (pLower.includes("stepped") || pLower.includes("cascading") || pLower.includes("terraced tower") || pLower.includes("ziggurat") || pLower.includes("setback") || pLower.includes("pyramid")) {
       massingForm = "STEPPED_CASCADING";
     } else if (pLower.includes("curved") || pLower.includes("cylinder") || pLower.includes("cylindrical") || pLower.includes("circular") || pLower.includes("round tower") || pLower.includes("oval") || pLower.includes("fluid")) {
@@ -326,7 +341,15 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     let dwg = `DWG-AI-RES-00${effectiveFloors}`;
     let facadeStyle = "Terracotta Louvers & Glazed Balconies";
 
-    if (isLShaped) {
+    if (isHostel) {
+      title = `${effectiveFloors}-Floor Rounded Luxury Campus Hostel Residence`;
+      facadeStyle = "Aerodynamic Curved Glass Envelope with Panoramic Balconies";
+      dwg = `DWG-AI-HSTL-00${effectiveFloors}`;
+    } else if (isCurvedRounded) {
+      title = `${effectiveFloors}-Floor Curved Architectural Panoramic Tower`;
+      facadeStyle = "Aerodynamic Curved Glass Envelope with Panoramic Balconies";
+      dwg = `DWG-AI-CRV-00${effectiveFloors}`;
+    } else if (isLShaped) {
       title = `${effectiveFloors}-Story Modern L-Shaped Dual-Wing Complex`;
       facadeStyle = "L-Shaped Dual Wing Glazed Envelope with Courtyard";
       dwg = `DWG-AI-LSHP-00${effectiveFloors}`;
@@ -363,7 +386,25 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     let rooms: BlueprintRoom[] = [];
     let cols: BlueprintColumn[] = [];
 
-    if (isLShaped) {
+    if (isHostel) {
+      rooms = [
+        { id: "R1", name: "Student Living Suites (Wing A)", x: 100, y: 100, w: 290, h: 220, areaSqft: Math.round(sqft * 0.32), flooring: "Acoustic Luxury Vinyl Tile", type: "BEDROOM" },
+        { id: "R2", name: "Student Living Suites (Wing B)", x: 410, y: 100, w: 290, h: 220, areaSqft: Math.round(sqft * 0.32), flooring: "Acoustic Luxury Vinyl Tile", type: "BEDROOM" },
+        { id: "R3", name: "Campus Dining Hall & Cafeteria", x: 100, y: 340, w: 220, h: 140, areaSqft: Math.round(sqft * 0.16), flooring: "Vitrified Anti-Slip Tile", type: "KITCHEN" },
+        { id: "R4", name: "Central Study Library & Tech Hub", x: 340, y: 340, w: 180, h: 140, areaSqft: Math.round(sqft * 0.12), flooring: "Engineered Oak Wood", type: "OFFICE" },
+        { id: "R5", name: "Sports Courtyard (Basketball & Volleyball)", x: 100, y: 500, w: 600, h: 70, areaSqft: Math.round(sqft * 0.08), flooring: "Multi-Sport Polyurethane Hardcourt", type: "COURTYARD" }
+      ];
+      cols = [
+        { grid: "H-1", x: 95, y: 95, size: "450x450mm", rebar: "8-T20 Fe550D" },
+        { grid: "H-2", x: 395, y: 95, size: "450x450mm", rebar: "8-T20 Fe550D" },
+        { grid: "H-3", x: 695, y: 95, size: "450x450mm", rebar: "8-T20 Fe550D" },
+        { grid: "H-4", x: 95, y: 335, size: "450x450mm", rebar: "8-T20 Fe550D" },
+        { grid: "H-5", x: 395, y: 335, size: "450x450mm", rebar: "8-T20 Fe550D" },
+        { grid: "H-6", x: 695, y: 335, size: "450x450mm", rebar: "8-T20 Fe550D" },
+        { grid: "H-7", x: 95, y: 495, size: "450x450mm", rebar: "8-T20 Fe550D" },
+        { grid: "H-8", x: 695, y: 495, size: "450x450mm", rebar: "8-T20 Fe550D" }
+      ];
+    } else if (isLShaped) {
       rooms = [
         { id: "R1", name: "Living Suite (Left Wing)", x: 100, y: 340, w: 280, h: 220, areaSqft: Math.round(sqft * 0.28), flooring: "Imported Italian Marble", type: "LIVING" },
         { id: "R2", name: "Master Suite (Left Wing)", x: 100, y: 100, w: 280, h: 220, areaSqft: Math.round(sqft * 0.26), flooring: "Hardwood Oak Parquet", type: "BEDROOM" },
@@ -474,6 +515,11 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         architecturalHighlights: customHighlights,
         massingForm,
         isLShaped,
+        isCurvedRounded,
+        isHostel,
+        hasBasketball,
+        hasVolleyball,
+        hasSportsCourt,
         rooftopFeature,
         balconyType,
         facadePalette,
@@ -811,14 +857,20 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const hasSkyCourt = data?.building3D?.hasSkyCourt ?? (promptLower.includes("sky court") || promptLower.includes("sky-court") || promptLower.includes("mid-level garden") || promptLower.includes("void") || promptLower.includes("cutout") || promptLower.includes("hollow") || promptLower.includes("sky bridge"));
     const hasSunLouvers = data?.building3D?.hasSunLouvers ?? (promptLower.includes("louver") || promptLower.includes("louvers") || promptLower.includes("shading") || promptLower.includes("brise-soleil") || promptLower.includes("fins") || promptLower.includes("slats"));
 
+    const isCurvedRounded = data?.building3D?.isCurvedRounded ?? (promptLower.includes("round") || promptLower.includes("curved") || promptLower.includes("circular") || promptLower.includes("cylinder") || promptLower.includes("cylindrical") || promptLower.includes("oval") || promptLower.includes("crescent") || promptLower.includes("arc"));
+    const isHostel = data?.building3D?.isHostel ?? (promptLower.includes("hostel") || promptLower.includes("dormitory") || promptLower.includes("student") || promptLower.includes("campus") || promptLower.includes("coliving"));
+    const hasBasketball = data?.building3D?.hasBasketball ?? (promptLower.includes("basketball") || promptLower.includes("b-ball") || promptLower.includes("hoop"));
+    const hasVolleyball = data?.building3D?.hasVolleyball ?? (promptLower.includes("volleyball") || promptLower.includes("v-ball"));
+    const hasSportsCourt = data?.building3D?.hasSportsCourt ?? (hasBasketball || hasVolleyball || promptLower.includes("sports court") || promptLower.includes("court"));
+
     // Active Massing Form
     const massingForm = data?.building3D?.massingForm || (
-      promptLower.includes("l-shape") || promptLower.includes("l shape") || promptLower.includes("l-shaped") || promptLower.includes("l shaped") || promptLower.includes("l building") || promptLower.includes("l block")
+      isCurvedRounded || isHostel
+        ? "CURVED_CYLINDRICAL"
+        : (/\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b/i.test(promptLower))
         ? "L_SHAPED"
         : promptLower.includes("stepped") || promptLower.includes("cascading") || promptLower.includes("terraced tower") || promptLower.includes("ziggurat") || promptLower.includes("setback") || promptLower.includes("pyramid")
         ? "STEPPED_CASCADING"
-        : promptLower.includes("curved") || promptLower.includes("cylinder") || promptLower.includes("cylindrical") || promptLower.includes("circular") || promptLower.includes("round tower") || promptLower.includes("oval")
-        ? "CURVED_CYLINDRICAL"
         : promptLower.includes("twist") || promptLower.includes("twisted") || promptLower.includes("spiral") || promptLower.includes("diagrid")
         ? "TWISTED_DIAGRID"
         : selectedPreset === "INDUSTRIAL" || promptLower.includes("warehouse") || promptLower.includes("shed")
@@ -826,7 +878,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         : "RECTANGULAR"
     );
 
-    const isLShaped = massingForm === "L_SHAPED" || !!data?.building3D?.isLShaped || promptLower.includes("l-shape") || promptLower.includes("l shape") || promptLower.includes("l-shaped") || promptLower.includes("l shaped") || promptLower.includes("l building") || promptLower.includes("l block");
+    const isLShaped = !isCurvedRounded && (massingForm === "L_SHAPED" || !!data?.building3D?.isLShaped || (/\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b/i.test(promptLower)));
 
     // Active Rooftop Feature
     const rooftopFeature = data?.building3D?.rooftopFeature || (
@@ -993,8 +1045,179 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             );
           })()}
 
+          {/* Sports Courtyard with Regulation Basketball & Volleyball Courts */}
+          {(hasSportsCourt || hasBasketball || hasVolleyball || isHostel) && (() => {
+            // Basketball Court (West Side: X: [-150, -18], Y: [30, 145])
+            const bk1 = project(-150, 30, 2);
+            const bk2 = project(-18, 30, 2);
+            const bk3 = project(-18, 145, 2);
+            const bk4 = project(-150, 145, 2);
+            const bkCenter = project(-84, 87.5, 2);
+
+            // Basketball Hoops
+            const bkHoop1Base = project(-148, 87.5, 2);
+            const bkHoop1Top = project(-148, 87.5, 24);
+            const bkHoop1BL = project(-148, 77.5, 26);
+            const bkHoop1BR = project(-148, 97.5, 26);
+            const bkHoop1BBL = project(-148, 77.5, 18);
+            const bkHoop1BBR = project(-148, 97.5, 18);
+            const bkHoop1Rim = project(-138, 87.5, 19);
+
+            const bkHoop2Base = project(-20, 87.5, 2);
+            const bkHoop2Top = project(-20, 87.5, 24);
+            const bkHoop2BL = project(-20, 77.5, 26);
+            const bkHoop2BR = project(-20, 97.5, 26);
+            const bkHoop2BBL = project(-20, 77.5, 18);
+            const bkHoop2BBR = project(-20, 97.5, 18);
+            const bkHoop2Rim = project(-30, 87.5, 19);
+
+            // Volleyball Court (East Side: X: [18, 150], Y: [30, 145])
+            const vb1 = project(18, 30, 2);
+            const vb2 = project(150, 30, 2);
+            const vb3 = project(150, 145, 2);
+            const vb4 = project(18, 145, 2);
+            const vbCenter = project(84, 87.5, 2);
+
+            // Volleyball Net across Y = 87.5 from X = 18 to 150
+            const netPole1Base = project(18, 87.5, 2);
+            const netPole1Top = project(18, 87.5, 24);
+            const netPole2Base = project(150, 87.5, 2);
+            const netPole2Top = project(150, 87.5, 24);
+
+            const netTopL = project(18, 87.5, 22);
+            const netTopR = project(150, 87.5, 22);
+            const netBotL = project(18, 87.5, 11);
+            const netBotR = project(150, 87.5, 11);
+
+            return (
+              <g id="sports-courtyard-plaza">
+                {/* Court Perimeter Landscape Surround */}
+                {(() => {
+                  const sp1 = project(-165, 20, 1.5);
+                  const sp2 = project(165, 20, 1.5);
+                  const sp3 = project(165, 155, 1.5);
+                  const sp4 = project(-165, 155, 1.5);
+                  return (
+                    <polygon
+                      points={`${sp1.x},${sp1.y} ${sp2.x},${sp2.y} ${sp3.x},${sp3.y} ${sp4.x},${sp4.y}`}
+                      fill="#064E3B"
+                      stroke="#059669"
+                      strokeWidth="1.5"
+                      fillOpacity="0.85"
+                    />
+                  );
+                })()}
+
+                {/* BASKETBALL COURT (West Wing) */}
+                <polygon
+                  points={`${bk1.x},${bk1.y} ${bk2.x},${bk2.y} ${bk3.x},${bk3.y} ${bk4.x},${bk4.y}`}
+                  fill="#1E3A8A"
+                  stroke="#60A5FA"
+                  strokeWidth="1.5"
+                />
+                {/* Center Half-Court Line & Jump Circle */}
+                {(() => {
+                  const cl1 = project(-84, 30, 2.5);
+                  const cl2 = project(-84, 145, 2.5);
+                  const k1A = project(-150, 67.5, 2.5);
+                  const k1B = project(-120, 67.5, 2.5);
+                  const k1C = project(-120, 107.5, 2.5);
+                  const k1D = project(-150, 107.5, 2.5);
+
+                  const k2A = project(-18, 67.5, 2.5);
+                  const k2B = project(-48, 67.5, 2.5);
+                  const k2C = project(-48, 107.5, 2.5);
+                  const k2D = project(-18, 107.5, 2.5);
+
+                  return (
+                    <>
+                      <line x1={cl1.x} y1={cl1.y} x2={cl2.x} y2={cl2.y} stroke="#FFFFFF" strokeWidth="1.2" strokeDasharray="3 2" />
+                      <ellipse cx={bkCenter.x} cy={bkCenter.y} rx="15" ry="7.5" fill="none" stroke="#FFFFFF" strokeWidth="1.2" />
+                      {/* Terracotta Key Areas */}
+                      <polygon points={`${k1A.x},${k1A.y} ${k1B.x},${k1B.y} ${k1C.x},${k1C.y} ${k1D.x},${k1D.y}`} fill="#C2410C" fillOpacity="0.85" stroke="#FFFFFF" strokeWidth="1" />
+                      <polygon points={`${k2A.x},${k2A.y} ${k2B.x},${k2B.y} ${k2C.x},${k2C.y} ${k2D.x},${k2D.y}`} fill="#C2410C" fillOpacity="0.85" stroke="#FFFFFF" strokeWidth="1" />
+                    </>
+                  );
+                })()}
+
+                {/* 3D Basketball Hoops */}
+                <g id="basketball-hoops-3d">
+                  {/* Hoop 1 (West) */}
+                  <line x1={bkHoop1Base.x} y1={bkHoop1Base.y} x2={bkHoop1Top.x} y2={bkHoop1Top.y} stroke="#CBD5E1" strokeWidth="2.5" />
+                  <polygon points={`${bkHoop1BL.x},${bkHoop1BL.y} ${bkHoop1BR.x},${bkHoop1BR.y} ${bkHoop1BBR.x},${bkHoop1BBR.y} ${bkHoop1BBL.x},${bkHoop1BBL.y}`} fill="#F8FAFC" stroke="#DC2626" strokeWidth="1" fillOpacity="0.9" />
+                  <ellipse cx={bkHoop1Rim.x} cy={bkHoop1Rim.y} rx="5" ry="2.5" fill="none" stroke="#EA580C" strokeWidth="2" />
+
+                  {/* Hoop 2 (East) */}
+                  <line x1={bkHoop2Base.x} y1={bkHoop2Base.y} x2={bkHoop2Top.x} y2={bkHoop2Top.y} stroke="#CBD5E1" strokeWidth="2.5" />
+                  <polygon points={`${bkHoop2BL.x},${bkHoop2BL.y} ${bkHoop2BR.x},${bkHoop2BR.y} ${bkHoop2BBR.x},${bkHoop2BBR.y} ${bkHoop2BBL.x},${bkHoop2BBL.y}`} fill="#F8FAFC" stroke="#DC2626" strokeWidth="1" fillOpacity="0.9" />
+                  <ellipse cx={bkHoop2Rim.x} cy={bkHoop2Rim.y} rx="5" ry="2.5" fill="none" stroke="#EA580C" strokeWidth="2" />
+                </g>
+
+                {/* Basketball Badge */}
+                <g transform={`translate(${bkCenter.x - 62}, ${bkCenter.y + 24})`}>
+                  <rect x="0" y="-8" width="124" height="16" rx="4" fill="rgba(15, 23, 42, 0.92)" stroke="#3B82F6" strokeWidth="0.8" />
+                  <text x="62" y="4" fill="#93C5FD" fontSize="8" fontWeight="bold" textAnchor="middle">
+                    🏀 BASKETBALL COURT
+                  </text>
+                </g>
+
+                {/* VOLLEYBALL COURT (East Wing) */}
+                <polygon
+                  points={`${vb1.x},${vb1.y} ${vb2.x},${vb2.y} ${vb3.x},${vb3.y} ${vb4.x},${vb4.y}`}
+                  fill="#0284C7"
+                  stroke="#38BDF8"
+                  strokeWidth="1.5"
+                />
+                {/* Center Line & 3m Attack Lines */}
+                {(() => {
+                  const vl1 = project(18, 87.5, 2.5);
+                  const vl2 = project(150, 87.5, 2.5);
+                  const at1A = project(18, 65, 2.5);
+                  const at1B = project(150, 65, 2.5);
+                  const at2A = project(18, 110, 2.5);
+                  const at2B = project(150, 110, 2.5);
+                  return (
+                    <>
+                      <line x1={vl1.x} y1={vl1.y} x2={vl2.x} y2={vl2.y} stroke="#FFFFFF" strokeWidth="1.5" />
+                      <line x1={at1A.x} y1={at1A.y} x2={at1B.x} y2={at1B.y} stroke="#FFFFFF" strokeWidth="1" strokeDasharray="4 2" />
+                      <line x1={at2A.x} y1={at2A.y} x2={at2B.x} y2={at2B.y} stroke="#FFFFFF" strokeWidth="1" strokeDasharray="4 2" />
+                    </>
+                  );
+                })()}
+
+                {/* 3D Volleyball Net */}
+                <g id="volleyball-net-3d">
+                  <line x1={netPole1Base.x} y1={netPole1Base.y} x2={netPole1Top.x} y2={netPole1Top.y} stroke="#E2E8F0" strokeWidth="3" />
+                  <line x1={netPole2Base.x} y1={netPole2Base.y} x2={netPole2Top.x} y2={netPole2Top.y} stroke="#E2E8F0" strokeWidth="3" />
+                  <polygon
+                    points={`${netTopL.x},${netTopL.y} ${netTopR.x},${netTopR.y} ${netBotR.x},${netBotR.y} ${netBotL.x},${netBotL.y}`}
+                    fill="rgba(255, 255, 255, 0.45)"
+                    stroke="#FFFFFF"
+                    strokeWidth="1.2"
+                  />
+                  <line x1={netTopL.x} y1={netTopL.y} x2={netTopR.x} y2={netTopR.y} stroke="#FFFFFF" strokeWidth="2.5" />
+                  {/* Volleyball hovering over net */}
+                  {(() => {
+                    const vbBall = project(84, 87.5, 30);
+                    return (
+                      <circle cx={vbBall.x} cy={vbBall.y} r="3.5" fill="#FACC15" stroke="#EAB308" strokeWidth="1" />
+                    );
+                  })()}
+                </g>
+
+                {/* Volleyball Badge */}
+                <g transform={`translate(${vbCenter.x - 62}, ${vbCenter.y + 24})`}>
+                  <rect x="0" y="-8" width="124" height="16" rx="4" fill="rgba(15, 23, 42, 0.92)" stroke="#38BDF8" strokeWidth="0.8" />
+                  <text x="62" y="4" fill="#7DD3FC" fontSize="8" fontWeight="bold" textAnchor="middle">
+                    🏐 VOLLEYBALL COURT
+                  </text>
+                </g>
+              </g>
+            );
+          })()}
+
           {/* L-Shaped Central Courtyard Plaza with Lawn & Fountain */}
-          {isLShaped && (() => {
+          {isLShaped && !hasSportsCourt && !isHostel && (() => {
             const halfW = buildingWidth / 2;
             const halfD = buildingDepth / 2;
             const xCorner = 10;
@@ -1092,6 +1315,46 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           const lt5 = project(xCorner + twistX, halfD, topZ);
           const lt6 = project(-halfW + twistX, halfD, topZ);
 
+          // 8-segment curved crescent geometry for rounded architectural massing
+          const arcSegs = 8;
+          const radMin = (18 * Math.PI) / 180;
+          const radMax = (162 * Math.PI) / 180;
+          const rxOut = 142 * widthScale;
+          const ryOut = 92 * depthScale;
+          const rxIn = 72 * widthScale;
+          const ryIn = 46 * depthScale;
+          const yOffset = -25;
+
+          const cbOut: { x: number; y: number }[] = [];
+          const cbIn: { x: number; y: number }[] = [];
+          const ctOut: { x: number; y: number }[] = [];
+          const ctIn: { x: number; y: number }[] = [];
+
+          for (let i = 0; i <= arcSegs; i++) {
+            const ang = radMin + (i / arcSegs) * (radMax - radMin);
+            const xo = -Math.cos(ang) * rxOut + twistX;
+            const yo = -Math.sin(ang) * ryOut + yOffset;
+            const xi = -Math.cos(ang) * rxIn + twistX;
+            const yi = -Math.sin(ang) * ryIn + yOffset;
+            cbOut.push(project(xo, yo, baseZ));
+            cbIn.push(project(xi, yi, baseZ));
+            ctOut.push(project(xo, yo, topZ));
+            ctIn.push(project(xi, yi, topZ));
+          }
+
+          // Balcony along inner concave curve facing courtyard
+          const rxBalc = rxIn - 18 * widthScale;
+          const ryBalc = ryIn - 13 * depthScale;
+          const cbBalc: { x: number; y: number }[] = [];
+          const crBalc: { x: number; y: number }[] = [];
+          for (let i = 0; i <= arcSegs; i++) {
+            const ang = radMin + (i / arcSegs) * (radMax - radMin);
+            const xb = -Math.cos(ang) * rxBalc + twistX;
+            const yb = -Math.sin(ang) * ryBalc + yOffset;
+            cbBalc.push(project(xb, yb, baseZ));
+            crBalc.push(project(xb, yb, baseZ + 12));
+          }
+
           // Determine Facade Fill and Stroke
           let facadeFill = isNight ? "url(#glassFacadeNight)" : "url(#glassFacadeDay)";
           let facadeStroke = isNight ? "#F59E0B" : "#38BDF8";
@@ -1117,7 +1380,9 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             <g key={`floor-${floorNum}`} className="transition-all duration-300">
               {/* Floor Slab Foundation Base */}
               <polygon
-                points={isLShaped
+                points={isCurvedRounded
+                  ? [...cbOut, ...[...cbIn].reverse()].map(p => `${p.x},${p.y}`).join(" ")
+                  : isLShaped
                   ? `${lb1.x},${lb1.y} ${lb2.x},${lb2.y} ${lb3.x},${lb3.y} ${lb4.x},${lb4.y} ${lb5.x},${lb5.y} ${lb6.x},${lb6.y}`
                   : `${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y} ${b4.x},${b4.y}`
                 }
@@ -1127,38 +1392,45 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               />
 
               {/* Structural RCC Columns (if X-Ray or Shaded) */}
-              {(isLShaped ? [
-                { x: -halfW + 8, y: -halfD + 8 },
-                { x: halfW - 8, y: -halfD + 8 },
-                { x: halfW - 8, y: yCorner - 8 },
-                { x: xCorner + 6, y: yCorner - 6 },
-                { x: xCorner - 8, y: halfD - 8 },
-                { x: -halfW + 8, y: halfD - 8 },
-                { x: -halfW / 2, y: -halfD + 8 },
-                { x: -halfW + 8, y: 0 }
+              {(isCurvedRounded ? [
+                { bottom: cbOut[0], top: ctOut[0] },
+                { bottom: cbIn[0], top: ctIn[0] },
+                { bottom: cbOut[2], top: ctOut[2] },
+                { bottom: cbIn[2], top: ctIn[2] },
+                { bottom: cbOut[4], top: ctOut[4] },
+                { bottom: cbIn[4], top: ctIn[4] },
+                { bottom: cbOut[6], top: ctOut[6] },
+                { bottom: cbIn[6], top: ctIn[6] },
+                { bottom: cbOut[8], top: ctOut[8] },
+                { bottom: cbIn[8], top: ctIn[8] }
+              ] : isLShaped ? [
+                { bottom: project(-halfW + 8 + twistX, -halfD + 8, baseZ), top: project(-halfW + 8 + twistX, -halfD + 8, topZ) },
+                { bottom: project(halfW - 8 + twistX, -halfD + 8, baseZ), top: project(halfW - 8 + twistX, -halfD + 8, topZ) },
+                { bottom: project(halfW - 8 + twistX, yCorner - 8, baseZ), top: project(halfW - 8 + twistX, yCorner - 8, topZ) },
+                { bottom: project(xCorner + 6 + twistX, yCorner - 6, baseZ), top: project(xCorner + 6 + twistX, yCorner - 6, topZ) },
+                { bottom: project(xCorner - 8 + twistX, halfD - 8, baseZ), top: project(xCorner - 8 + twistX, halfD - 8, topZ) },
+                { bottom: project(-halfW + 8 + twistX, halfD - 8, baseZ), top: project(-halfW + 8 + twistX, halfD - 8, topZ) },
+                { bottom: project(-halfW / 2 + twistX, -halfD + 8, baseZ), top: project(-halfW / 2 + twistX, -halfD + 8, topZ) },
+                { bottom: project(-halfW + 8 + twistX, 0, baseZ), top: project(-halfW + 8 + twistX, 0, topZ) }
               ] : [
-                { x: -halfW + 8, y: -halfD + 8 },
-                { x: halfW - 8, y: -halfD + 8 },
-                { x: halfW - 8, y: halfD - 8 },
-                { x: -halfW + 8, y: halfD - 8 },
-                { x: 0, y: -halfD + 8 },
-                { x: 0, y: halfD - 8 }
-              ]).map((col, idx) => {
-                const cBottom = project(col.x + twistX, col.y, baseZ);
-                const cTop = project(col.x + twistX, col.y, topZ);
-                return (
-                  <line
-                    key={`col-${floorNum}-${idx}`}
-                    x1={cBottom.x}
-                    y1={cBottom.y}
-                    x2={cTop.x}
-                    y2={cTop.y}
-                    stroke={isXRay ? "#34D399" : (isCyberObsidian ? "#06B6D4" : "#F59E0B")}
-                    strokeWidth={isXRay ? 3 : 4}
-                    strokeLinecap="square"
-                  />
-                );
-              })}
+                { bottom: project(-halfW + 8 + twistX, -halfD + 8, baseZ), top: project(-halfW + 8 + twistX, -halfD + 8, topZ) },
+                { bottom: project(halfW - 8 + twistX, -halfD + 8, baseZ), top: project(halfW - 8 + twistX, -halfD + 8, topZ) },
+                { bottom: project(halfW - 8 + twistX, halfD - 8, baseZ), top: project(halfW - 8 + twistX, halfD - 8, topZ) },
+                { bottom: project(-halfW + 8 + twistX, halfD - 8, baseZ), top: project(-halfW + 8 + twistX, halfD - 8, topZ) },
+                { bottom: project(0 + twistX, -halfD + 8, baseZ), top: project(0 + twistX, -halfD + 8, topZ) },
+                { bottom: project(0 + twistX, halfD - 8, baseZ), top: project(0 + twistX, halfD - 8, topZ) }
+              ]).map((col, idx) => (
+                <line
+                  key={`col-${floorNum}-${idx}`}
+                  x1={col.bottom.x}
+                  y1={col.bottom.y}
+                  x2={col.top.x}
+                  y2={col.top.y}
+                  stroke={isXRay ? "#34D399" : (isCyberObsidian ? "#06B6D4" : "#F59E0B")}
+                  strokeWidth={isXRay ? 3 : 4}
+                  strokeLinecap="square"
+                />
+              ))}
 
               {/* Mid-Level Sky Court Garden Cutout (if hasSkyCourt and mid floor) */}
               {hasSkyCourt && floorNum === Math.ceil(totalFlrs / 2) && !isXRay ? (
@@ -1181,6 +1453,70 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     </g>
                   );
                 })()
+              ) : isCurvedRounded && !isXRay ? (
+                /* CURVED ROUNDED ARCHITECTURAL FACADE */
+                <g id={`curved-facade-floor-${floorNum}`}>
+                  {/* Outer Convex Rear / Flanks Facade Segments */}
+                  {Array.from({ length: arcSegs }).map((_, i) => (
+                    <polygon
+                      key={`curved-out-${floorNum}-${i}`}
+                      points={`${cbOut[i].x},${cbOut[i].y} ${cbOut[i+1].x},${cbOut[i+1].y} ${ctOut[i+1].x},${ctOut[i+1].y} ${ctOut[i].x},${ctOut[i].y}`}
+                      fill={facadeFill}
+                      stroke={facadeStroke}
+                      strokeWidth="1"
+                      strokeOpacity="0.55"
+                    />
+                  ))}
+
+                  {/* Left Wing End-Cap */}
+                  <polygon
+                    points={`${cbOut[0].x},${cbOut[0].y} ${cbIn[0].x},${cbIn[0].y} ${ctIn[0].x},${ctIn[0].y} ${ctOut[0].x},${ctOut[0].y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.85"
+                  />
+                  {/* Right Wing End-Cap */}
+                  <polygon
+                    points={`${cbIn[arcSegs].x},${cbIn[arcSegs].y} ${cbOut[arcSegs].x},${cbOut[arcSegs].y} ${ctOut[arcSegs].x},${ctOut[arcSegs].y} ${ctIn[arcSegs].x},${ctIn[arcSegs].y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.85"
+                  />
+
+                  {/* Inner Concave Front Panoramic Facade (Faces Courtyard) */}
+                  {Array.from({ length: arcSegs }).map((_, i) => (
+                    <polygon
+                      key={`curved-in-${floorNum}-${i}`}
+                      points={`${cbIn[i].x},${cbIn[i].y} ${cbIn[i+1].x},${cbIn[i+1].y} ${ctIn[i+1].x},${ctIn[i+1].y} ${ctIn[i].x},${ctIn[i].y}`}
+                      fill={facadeFill}
+                      stroke={facadeStroke}
+                      strokeWidth="1"
+                      strokeOpacity="0.88"
+                    />
+                  ))}
+
+                  {/* Vertical Window Mullions along Inner Curved Facade */}
+                  {Array.from({ length: arcSegs }).map((_, i) => {
+                    const mx1 = (cbIn[i].x + cbIn[i+1].x) / 2;
+                    const my1 = (cbIn[i].y + cbIn[i+1].y) / 2;
+                    const mx2 = (ctIn[i].x + ctIn[i+1].x) / 2;
+                    const my2 = (ctIn[i].y + ctIn[i+1].y) / 2;
+                    return (
+                      <line
+                        key={`mullion-crv-${floorNum}-${i}`}
+                        x1={mx1}
+                        y1={my1}
+                        x2={mx2}
+                        y2={my2}
+                        stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#E0F2FE"))}
+                        strokeWidth="1.2"
+                        strokeOpacity="0.75"
+                      />
+                    );
+                  })}
+                </g>
               ) : isLShaped && !isXRay ? (
                 /* L-SHAPED 4-FACE CURTAIN WALL FACADE */
                 <g id={`lshape-facade-floor-${floorNum}`}>
@@ -1359,7 +1695,43 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               {/* DYNAMIC BALCONY VARIATIONS */}
               {!isXRay && (
                 (() => {
-                  if (isLShaped) {
+                  if (isCurvedRounded) {
+                    // Continuous curved wrap-around cantilevered ribbon balcony facing the sports courtyard
+                    return (
+                      <g key={`curved-balcony-${floorNum}`}>
+                        {/* Balcony Floor Slab */}
+                        <polygon
+                          points={[...cbIn, ...[...cbBalc].reverse()].map(p => `${p.x},${p.y}`).join(" ")}
+                          fill="#1E293B"
+                          stroke="#38BDF8"
+                          strokeWidth="1"
+                        />
+                        {/* Frameless Curved Laminated Glass Balustrade Segments */}
+                        {Array.from({ length: arcSegs }).map((_, i) => (
+                          <polygon
+                            key={`balc-glass-${floorNum}-${i}`}
+                            points={`${cbBalc[i].x},${cbBalc[i].y} ${cbBalc[i+1].x},${cbBalc[i+1].y} ${crBalc[i+1].x},${crBalc[i+1].y} ${crBalc[i].x},${crBalc[i].y}`}
+                            fill="rgba(56, 189, 248, 0.45)"
+                            stroke="#38BDF8"
+                            strokeWidth="1"
+                          />
+                        ))}
+                        {/* Polished Chrome Handrail along the Entire Arc */}
+                        {Array.from({ length: arcSegs }).map((_, i) => (
+                          <line
+                            key={`handrail-${floorNum}-${i}`}
+                            x1={crBalc[i].x}
+                            y1={crBalc[i].y}
+                            x2={crBalc[i+1].x}
+                            y2={crBalc[i+1].y}
+                            stroke="#FFFFFF"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                        ))}
+                      </g>
+                    );
+                  } else if (isLShaped) {
                     // Cantilevered glass balconies along Left Wing Front (Face 1) and Rear Wing Right (Face 4)
                     const bLeftFront = project(-halfW + twistX, halfD + 18, baseZ);
                     const bRightFront = project(xCorner + twistX, halfD + 18, baseZ);
@@ -1481,7 +1853,9 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
               {/* Top Slab Chamfer Edge */}
               <polygon
-                points={isLShaped
+                points={isCurvedRounded
+                  ? [...ctOut, ...[...ctIn].reverse()].map(p => `${p.x},${p.y}`).join(" ")
+                  : isLShaped
                   ? `${lt1.x},${lt1.y} ${lt2.x},${lt2.y} ${lt3.x},${lt3.y} ${lt4.x},${lt4.y} ${lt5.x},${lt5.y} ${lt6.x},${lt6.y}`
                   : `${t1.x},${t1.y} ${t2.x},${t2.y} ${t3.x},${t3.y} ${t4.x},${t4.y}`
                 }
@@ -1536,6 +1910,29 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           const lp5 = project(xCorner + topTwistX, halfD, topZ + 8);
           const lp6 = project(-halfW + topTwistX, halfD, topZ + 8);
 
+          // Parapet wall coping (curved crescent)
+          const cpTopOut: { x: number; y: number }[] = [];
+          const cpTopIn: { x: number; y: number }[] = [];
+          if (isCurvedRounded) {
+            const arcSegs = 8;
+            const radMin = (18 * Math.PI) / 180;
+            const radMax = (162 * Math.PI) / 180;
+            const rxOut = 142 * topWidthScale;
+            const ryOut = 92 * topDepthScale;
+            const rxIn = 72 * topWidthScale;
+            const ryIn = 46 * topDepthScale;
+            const yOffset = -25;
+            for (let i = 0; i <= arcSegs; i++) {
+              const ang = radMin + (i / arcSegs) * (radMax - radMin);
+              const xo = -Math.cos(ang) * rxOut + topTwistX;
+              const yo = -Math.sin(ang) * ryOut + yOffset;
+              const xi = -Math.cos(ang) * rxIn + topTwistX;
+              const yi = -Math.sin(ang) * ryIn + yOffset;
+              cpTopOut.push(project(xo, yo, topZ + 8));
+              cpTopIn.push(project(xi, yi, topZ + 8));
+            }
+          }
+
           // Central Core Lift Machine Room
           const coreX = isLShaped ? -halfW * 0.45 : 0;
           const coreY = isLShaped ? -halfD * 0.45 : 0;
@@ -1553,7 +1950,9 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             <g id="rooftop-feature-group">
               {/* Parapet Outline */}
               <polygon
-                points={isLShaped
+                points={isCurvedRounded
+                  ? [...cpTopOut, ...[...cpTopIn].reverse()].map(p => `${p.x},${p.y}`).join(" ")
+                  : isLShaped
                   ? `${lp1.x},${lp1.y} ${lp2.x},${lp2.y} ${lp3.x},${lp3.y} ${lp4.x},${lp4.y} ${lp5.x},${lp5.y} ${lp6.x},${lp6.y}`
                   : `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`
                 }
@@ -2194,7 +2593,72 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     )}
 
                     {layers.architectural && (
-                      (data.building3D?.massingForm === "L_SHAPED" || data.building3D?.isLShaped || data.prompt?.toLowerCase().includes("l shape") || data.prompt?.toLowerCase().includes("l-shape") || data.prompt?.toLowerCase().includes("l shaped") || data.prompt?.toLowerCase().includes("l-shaped")) ? (
+                      (data.building3D?.isCurvedRounded || data.building3D?.isHostel || data.prompt?.toLowerCase().includes("rounded") || data.prompt?.toLowerCase().includes("curved") || data.prompt?.toLowerCase().includes("hostel")) ? (
+                        <g id="cad-curved-hostel-sports-outline">
+                          {/* Exterior Building Arc Outline */}
+                          <path
+                            d="M 94 320 C 94 140 230 94 400 94 C 570 94 706 140 706 320 L 610 320 C 610 180 500 150 400 150 C 300 150 190 180 190 320 Z"
+                            fill="none"
+                            stroke={themeColors.wallExterior}
+                            strokeWidth="12"
+                          />
+                          <path
+                            d="M 94 320 C 94 140 230 94 400 94 C 570 94 706 140 706 320 L 610 320 C 610 180 500 150 400 150 C 300 150 190 180 190 320 Z"
+                            fill="none"
+                            stroke="url(#concreteHatch)"
+                            strokeWidth="8"
+                          />
+                          <path
+                            d="M 100 316 C 100 146 234 100 400 100 C 566 100 700 146 700 316 L 616 316 C 616 186 504 156 400 156 C 296 156 184 186 184 316 Z"
+                            fill="none"
+                            stroke={themeColors.wallInterior}
+                            strokeWidth="2"
+                          />
+
+                          {/* Central Sports Courtyard Plaza Boundary */}
+                          <rect x="94" y="340" width="612" height="236" rx="8" fill="#064E3B" fillOpacity="0.25" stroke="#10B981" strokeWidth="1.5" strokeDasharray="6 3" />
+                          <text x="400" y="356" fill="#34D399" fontSize="10" fontWeight="bold" textAnchor="middle" letterSpacing="2">
+                            CENTRAL SPORTS COURTYARD PLAZA
+                          </text>
+
+                          {/* Basketball Court 2D CAD Layout */}
+                          <g id="cad-basketball-court">
+                            <rect x="115" y="370" width="265" height="190" rx="4" fill="#1E3A8A" fillOpacity="0.8" stroke="#60A5FA" strokeWidth="1.5" />
+                            {/* Half Court Line */}
+                            <line x1="247" y1="370" x2="247" y2="560" stroke="#FFFFFF" strokeWidth="1.2" />
+                            {/* Center Jump Circle */}
+                            <circle cx="247" cy="465" r="24" fill="none" stroke="#FFFFFF" strokeWidth="1.2" />
+                            {/* Left Key Area */}
+                            <rect x="115" y="425" width="45" height="80" fill="#C2410C" fillOpacity="0.6" stroke="#FFFFFF" strokeWidth="1" />
+                            <circle cx="160" cy="465" r="18" fill="none" stroke="#FFFFFF" strokeWidth="1" strokeDasharray="3 2" />
+                            <circle cx="122" cy="465" r="4" fill="none" stroke="#EA580C" strokeWidth="1.5" />
+                            {/* Right Key Area */}
+                            <rect x="335" y="425" width="45" height="80" fill="#C2410C" fillOpacity="0.6" stroke="#FFFFFF" strokeWidth="1" />
+                            <circle cx="335" cy="465" r="18" fill="none" stroke="#FFFFFF" strokeWidth="1" strokeDasharray="3 2" />
+                            <circle cx="373" cy="465" r="4" fill="none" stroke="#EA580C" strokeWidth="1.5" />
+                            <text x="247" y="550" fill="#93C5FD" fontSize="8" fontWeight="bold" textAnchor="middle">
+                              BASKETBALL COURT (REGULATION)
+                            </text>
+                          </g>
+
+                          {/* Volleyball Court 2D CAD Layout */}
+                          <g id="cad-volleyball-court">
+                            <rect x="420" y="370" width="265" height="190" rx="4" fill="#0284C7" fillOpacity="0.8" stroke="#38BDF8" strokeWidth="1.5" />
+                            {/* Center Net Line */}
+                            <line x1="552" y1="370" x2="552" y2="560" stroke="#FFFFFF" strokeWidth="2.5" />
+                            {/* Left 3m Attack Line */}
+                            <line x1="510" y1="370" x2="510" y2="560" stroke="#FFFFFF" strokeWidth="1" strokeDasharray="4 2" />
+                            {/* Right 3m Attack Line */}
+                            <line x1="594" y1="370" x2="594" y2="560" stroke="#FFFFFF" strokeWidth="1" strokeDasharray="4 2" />
+                            {/* Net Posts */}
+                            <circle cx="552" cy="366" r="3" fill="#E2E8F0" />
+                            <circle cx="552" cy="564" r="3" fill="#E2E8F0" />
+                            <text x="552" y="550" fill="#7DD3FC" fontSize="8" fontWeight="bold" textAnchor="middle">
+                              VOLLEYBALL COURT (REGULATION)
+                            </text>
+                          </g>
+                        </g>
+                      ) : (data.building3D?.massingForm === "L_SHAPED" || data.building3D?.isLShaped || data.prompt?.toLowerCase().includes("l shape") || data.prompt?.toLowerCase().includes("l-shape") || data.prompt?.toLowerCase().includes("l shaped") || data.prompt?.toLowerCase().includes("l-shaped")) ? (
                         <g id="cad-lshape-outline">
                           {/* L-shaped Exterior Thick Walls */}
                           <polygon
