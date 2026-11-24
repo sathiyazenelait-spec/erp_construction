@@ -43,8 +43,9 @@ export interface Building3DSpec {
   foundationType: string;
   coreLiftCount: number;
   architecturalHighlights: string[];
-  massingForm?: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED" | "V_SHAPED" | "T_SHAPED" | "H_SHAPED" | "SPHERICAL_BALL" | "OPEN_SQUARE_DONUT" | "WIDE_LINEAR_RANGE";
+  massingForm?: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED" | "U_SHAPED" | "V_SHAPED" | "T_SHAPED" | "H_SHAPED" | "SPHERICAL_BALL" | "OPEN_SQUARE_DONUT" | "WIDE_LINEAR_RANGE";
   isLShaped?: boolean;
+  isUShaped?: boolean;
   isVShaped?: boolean;
   isTShaped?: boolean;
   isHShaped?: boolean;
@@ -319,6 +320,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const hasSkyCourt = pLower.includes("sky court") || pLower.includes("sky-court") || pLower.includes("mid-level garden") || pLower.includes("void") || pLower.includes("cutout") || pLower.includes("hollow") || pLower.includes("sky bridge");
     const hasSunLouvers = pLower.includes("louver") || pLower.includes("louvers") || pLower.includes("shading") || pLower.includes("brise-soleil") || pLower.includes("fins") || pLower.includes("slats");
     const isLShaped = /\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b/i.test(pLower);
+    const isUShaped = /\bu[-_\s]?(shape|shaped|block|layout)\b|\bu\s+building\b|horseshoe/i.test(pLower);
     const isVShaped = /\bv[-_\s]?(shape|shaped|block|layout)\b|\bv\s+building\b/i.test(pLower);
     const isTShaped = /\bt[-_\s]?(shape|shaped|block|layout)\b|\bt\s+building\b/i.test(pLower);
     const isHShaped = /\bh[-_\s]?(shape|shaped|block|layout)\b|\bh\s+building\b/i.test(pLower);
@@ -342,9 +344,11 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const isOneSideGlass = pLower.includes("one side glass") || pLower.includes("single side glass") || pLower.includes("one side glazed") || pLower.includes("front glass only") || pLower.includes("one side glassed");
 
     // Massing Form
-    let massingForm: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED" | "V_SHAPED" | "T_SHAPED" | "H_SHAPED" | "SPHERICAL_BALL" | "OPEN_SQUARE_DONUT" | "WIDE_LINEAR_RANGE" = "RECTANGULAR";
+    let massingForm: "RECTANGULAR" | "STEPPED_CASCADING" | "CURVED_CYLINDRICAL" | "TWISTED_DIAGRID" | "INDUSTRIAL_SHED" | "L_SHAPED" | "U_SHAPED" | "V_SHAPED" | "T_SHAPED" | "H_SHAPED" | "SPHERICAL_BALL" | "OPEN_SQUARE_DONUT" | "WIDE_LINEAR_RANGE" = "RECTANGULAR";
     if (isVShaped) {
       massingForm = "V_SHAPED";
+    } else if (isUShaped) {
+      massingForm = "U_SHAPED";
     } else if (isTShaped) {
       massingForm = "T_SHAPED";
     } else if (isHShaped) {
@@ -410,6 +414,10 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
       title = `${effectiveFloors}-Story Modern V-Shaped Iconic Tower`;
       facadeStyle = "V-Shaped Dual Wing Glazed Facade with Central Entrance Plaza";
       dwg = `DWG-AI-VSHP-00${effectiveFloors}`;
+    } else if (isUShaped) {
+      title = `${effectiveFloors}-Story Modern U-Shaped Courtyard Complex`;
+      facadeStyle = "U-Shaped Triple Wing Glazed Envelope with Central Courtyard";
+      dwg = `DWG-AI-USHP-00${effectiveFloors}`;
     } else if (isTShaped) {
       title = `${effectiveFloors}-Floor T-Shaped Commercial Complex`;
       facadeStyle = "T-Shaped Extruded Structural Frame with Front Glass Curtain";
@@ -670,6 +678,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         architecturalHighlights: customHighlights,
         massingForm,
         isVShaped,
+        isUShaped,
         isTShaped,
         isHShaped,
         isSphericalBall,
@@ -1029,6 +1038,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const hasSportsCourt = data?.building3D?.hasSportsCourt ?? (hasBasketball || hasVolleyball || promptLower.includes("sports court") || promptLower.includes("court"));
 
     const isVShaped = data?.building3D?.isVShaped ?? (/\bv[-_\s]?(shape|shaped|block|layout)\b|\bv\s+building\b/i.test(promptLower));
+    const isUShaped = data?.building3D?.isUShaped ?? (/\bu[-_\s]?(shape|shaped|block|layout)\b|\bu\s+building\b|horseshoe/i.test(promptLower));
     const isTShaped = data?.building3D?.isTShaped ?? (/\bt[-_\s]?(shape|shaped|block|layout)\b|\bt\s+building\b/i.test(promptLower));
     const isHShaped = data?.building3D?.isHShaped ?? (/\bh[-_\s]?(shape|shaped|block|layout)\b|\bh\s+building\b/i.test(promptLower));
     const isSphericalBall = data?.building3D?.isSphericalBall ?? (promptLower.includes("ball shape") || promptLower.includes("spherical") || promptLower.includes("sphere") || promptLower.includes("globe") || promptLower.includes("orb"));
@@ -1049,6 +1059,8 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const massingForm = data?.building3D?.massingForm || (
       isVShaped
         ? "V_SHAPED"
+        : isUShaped
+        ? "U_SHAPED"
         : isTShaped
         ? "T_SHAPED"
         : isHShaped
@@ -1072,7 +1084,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         : "RECTANGULAR"
     );
 
-    const isLShaped = !isCurvedRounded && !isVShaped && !isTShaped && !isHShaped && !isSphericalBall && !isOpenSquare && (massingForm === "L_SHAPED" || !!data?.building3D?.isLShaped || (/\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b/i.test(promptLower)));
+    const isLShaped = !isCurvedRounded && !isVShaped && !isUShaped && !isTShaped && !isHShaped && !isSphericalBall && !isOpenSquare && (massingForm === "L_SHAPED" || !!data?.building3D?.isLShaped || (/\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b/i.test(promptLower)));
 
     // Active Rooftop Feature
     const rooftopFeature = data?.building3D?.rooftopFeature || (
@@ -1712,6 +1724,27 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           const wt3 = project(wideSpan + twistX, 55, topZ);
           const wt4 = project(-wideSpan + twistX, 55, topZ);
 
+          // U-Shaped Courtyard Complex (3 Wings: Left Wing, Rear Connecting Bar, Right Wing)
+          const uWingW = halfW * 0.40;
+          const uRearD = halfD * 0.44;
+          const ub1 = project(-halfW + twistX, -halfD, baseZ); // back left
+          const ub2 = project(halfW + twistX, -halfD, baseZ);  // back right
+          const ub3 = project(halfW + twistX, halfD, baseZ);   // front right tip
+          const ub4 = project(halfW - uWingW + twistX, halfD, baseZ); // inner front right
+          const ub5 = project(halfW - uWingW + twistX, -halfD + uRearD, baseZ); // inner courtyard back right
+          const ub6 = project(-halfW + uWingW + twistX, -halfD + uRearD, baseZ); // inner courtyard back left
+          const ub7 = project(-halfW + uWingW + twistX, halfD, baseZ); // inner front left
+          const ub8 = project(-halfW + twistX, halfD, baseZ);  // front left tip
+
+          const ut1 = project(-halfW + twistX, -halfD, topZ);
+          const ut2 = project(halfW + twistX, -halfD, topZ);
+          const ut3 = project(halfW + twistX, halfD, topZ);
+          const ut4 = project(halfW - uWingW + twistX, halfD, topZ);
+          const ut5 = project(halfW - uWingW + twistX, -halfD + uRearD, topZ);
+          const ut6 = project(-halfW + uWingW + twistX, -halfD + uRearD, topZ);
+          const ut7 = project(-halfW + uWingW + twistX, halfD, topZ);
+          const ut8 = project(-halfW + twistX, halfD, topZ);
+
           // 8-segment curved crescent geometry for rounded architectural massing
           const arcSegs = 8;
           const radMin = (18 * Math.PI) / 180;
@@ -1780,6 +1813,8 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                 points={
                   massingForm === "V_SHAPED"
                     ? `${vb1.x},${vb1.y} ${vb2.x},${vb2.y} ${vb3.x},${vb3.y} ${vb4.x},${vb4.y} ${vb5.x},${vb5.y} ${vb6.x},${vb6.y}`
+                    : massingForm === "U_SHAPED"
+                    ? `${ub1.x},${ub1.y} ${ub2.x},${ub2.y} ${ub3.x},${ub3.y} ${ub4.x},${ub4.y} ${ub5.x},${ub5.y} ${ub6.x},${ub6.y} ${ub7.x},${ub7.y} ${ub8.x},${ub8.y}`
                     : massingForm === "T_SHAPED"
                     ? `${tb1.x},${tb1.y} ${tb2.x},${tb2.y} ${tb3.x},${tb3.y} ${tb4.x},${tb4.y} ${tb5.x},${tb5.y} ${tb6.x},${tb6.y} ${tb7.x},${tb7.y} ${tb8.x},${tb8.y}`
                     : massingForm === "H_SHAPED"
@@ -2049,6 +2084,66 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                       );
                     })
                   ))}
+                </g>
+              ) : massingForm === "U_SHAPED" && !isXRay ? (
+                /* U-SHAPED TRIPLE-WING ARCHITECTURAL FACADE */
+                <g id={`ushape-facade-floor-${floorNum}`}>
+                  {/* Left Wing Front Face */}
+                  <polygon
+                    points={`${ub8.x},${ub8.y} ${ub7.x},${ub7.y} ${ut7.x},${ut7.y} ${ut8.x},${ut8.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1.2"
+                    strokeOpacity="0.88"
+                  />
+                  {/* Left Wing Inner Courtyard Wall */}
+                  <polygon
+                    points={`${ub7.x},${ub7.y} ${ub6.x},${ub6.y} ${ut6.x},${ut6.y} ${ut7.x},${ut7.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.75"
+                  />
+                  {/* Rear Courtyard Connecting Wall */}
+                  <polygon
+                    points={`${ub6.x},${ub6.y} ${ub5.x},${ub5.y} ${ut5.x},${ut5.y} ${ut6.x},${ut6.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.80"
+                  />
+                  {/* Right Wing Inner Courtyard Wall */}
+                  <polygon
+                    points={`${ub5.x},${ub5.y} ${ub4.x},${ub4.y} ${ut4.x},${ut4.y} ${ut5.x},${ut5.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.75"
+                  />
+                  {/* Right Wing Front Face */}
+                  <polygon
+                    points={`${ub4.x},${ub4.y} ${ub3.x},${ub3.y} ${ut3.x},${ut3.y} ${ut4.x},${ut4.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1.2"
+                    strokeOpacity="0.88"
+                  />
+                  {/* Right Wing Outer Face */}
+                  <polygon
+                    points={`${ub3.x},${ub3.y} ${ub2.x},${ub2.y} ${ut2.x},${ut2.y} ${ut3.x},${ut3.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.70"
+                  />
+                  {/* Left Wing Outer Face */}
+                  <polygon
+                    points={`${ub1.x},${ub1.y} ${ub8.x},${ub8.y} ${ut8.x},${ut8.y} ${ut1.x},${ut1.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.70"
+                  />
                 </g>
               ) : massingForm === "T_SHAPED" && !isXRay ? (
                 /* T-SHAPED FACADE */
@@ -2536,6 +2631,8 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                 points={
                   massingForm === "V_SHAPED"
                     ? `${vt1.x},${vt1.y} ${vt2.x},${vt2.y} ${vt3.x},${vt3.y} ${vt4.x},${vt4.y} ${vt5.x},${vt5.y} ${vt6.x},${vt6.y}`
+                    : massingForm === "U_SHAPED"
+                    ? `${ut1.x},${ut1.y} ${ut2.x},${ut2.y} ${ut3.x},${ut3.y} ${ut4.x},${ut4.y} ${ut5.x},${ut5.y} ${ut6.x},${ut6.y} ${ut7.x},${ut7.y} ${ut8.x},${ut8.y}`
                     : massingForm === "T_SHAPED"
                     ? `${tt1.x},${tt1.y} ${tt2.x},${tt2.y} ${tt3.x},${tt3.y} ${tt4.x},${tt4.y} ${tt5.x},${tt5.y} ${tt6.x},${tt6.y} ${tt7.x},${tt7.y} ${tt8.x},${tt8.y}`
                     : massingForm === "H_SHAPED"
@@ -3162,6 +3259,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
         <div className="mt-2 flex flex-wrap items-center gap-1.5 relative z-10">
           {[
+            { label: "🧲 U-Shape Courtyard", prompt: "6-Floor U-Shaped Modern Commercial Complex with triple glazed wings, cantilevered balconies, and central landscaped courtyard plaza with sports court", floors: 6 },
             { label: "📐 V-Shape Tower", prompt: "6-Floor V-Shaped Modern Iconic Commercial Tower with central entrance rotunda, panoramic glazed wings, and open recreational playground", floors: 6 },
             { label: "🏗️ T-Shape Complex", prompt: "5-Floor T-Shape Architectural Office Building with front curtain glazing and structural RCC frame", floors: 5 },
             { label: "🏢 H-Shape Skybridge", prompt: "7-Floor H-Shaped Twin-Tower Residential Complex with central connecting glass skybridge lounge", floors: 7 },

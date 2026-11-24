@@ -1085,6 +1085,7 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     
     # Accurate regex matching for L-shape to avoid false positives with words like 'hostel'
     is_l_shaped = bool(re.search(r'\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b', p_lower))
+    is_u_shaped = bool(re.search(r'\bu[-_\s]?(shape|shaped|block|layout)\b|\bu\s+building\b|horseshoe', p_lower))
     is_v_shaped = bool(re.search(r'\bv[-_\s]?(shape|shaped|block|layout)\b|\bv\s+building\b', p_lower))
     is_t_shaped = bool(re.search(r'\bt[-_\s]?(shape|shaped|block|layout)\b|\bt\s+building\b', p_lower))
     is_h_shaped = bool(re.search(r'\bh[-_\s]?(shape|shaped|block|layout)\b|\bh\s+building\b', p_lower))
@@ -1110,6 +1111,8 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     # Massing Form Classification
     if is_v_shaped:
         massing_form = "V_SHAPED"
+    elif is_u_shaped:
+        massing_form = "U_SHAPED"
     elif is_t_shaped:
         massing_form = "T_SHAPED"
     elif is_h_shaped:
@@ -1213,6 +1216,27 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
         ]
         hvac_path = "M 120 160 L 400 120 L 680 160"
         sprinklers = [{"x": 150, "y": 180}, {"x": 400, "y": 140}, {"x": 650, "y": 180}, {"x": 220, "y": 320}, {"x": 580, "y": 320}]
+    elif is_u_shaped:
+        title = f"{floors_count}-Story U-Shaped Courtyard Complex"
+        dwg_no = "DWG-AI-USHP-001"
+        rooms = [
+            {"id": "R1", "name": "West Wing Suites (Left Flank)", "x": 100, "y": 100, "w": 180, "h": 460, "areaSqft": round(sqft * 0.32), "flooring": "Engineered Hardwood", "type": "OFFICE"},
+            {"id": "R2", "name": "East Wing Suites (Right Flank)", "x": 520, "y": 100, "w": 180, "h": 460, "areaSqft": round(sqft * 0.32), "flooring": "Engineered Hardwood", "type": "OFFICE"},
+            {"id": "R3", "name": "North Rear Connecting Gallery & Foyer", "x": 280, "y": 100, "w": 240, "h": 140, "areaSqft": round(sqft * 0.16), "flooring": "Italian Porcelain Tile", "type": "FOYER"},
+            {"id": "R4", "name": "Central Open Courtyard Garden & Court", "x": 280, "y": 240, "w": 240, "h": 320, "areaSqft": round(sqft * 0.20), "flooring": "Natural Grass & Pavers", "type": "COURTYARD"}
+        ]
+        columns = [
+            {"grid": "U-1", "x": 95, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "U-2", "x": 275, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "U-3", "x": 515, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "U-4", "x": 695, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "U-5", "x": 95, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "U-6", "x": 275, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "U-7", "x": 515, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "U-8", "x": 695, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"}
+        ]
+        hvac_path = "M 180 540 L 180 160 L 620 160 L 620 540"
+        sprinklers = [{"x": 180, "y": 200}, {"x": 180, "y": 450}, {"x": 400, "y": 160}, {"x": 620, "y": 200}, {"x": 620, "y": 450}]
     elif is_t_shaped:
         title = f"{floors_count}-Story T-Shaped Axial Corporate Complex"
         dwg_no = "DWG-AI-TSHP-001"
@@ -1526,6 +1550,27 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
         ]
         hvac_path = "M 120 160 L 400 120 L 680 160"
         sprinklers = [{"x": 150, "y": 180}, {"x": 400, "y": 140}, {"x": 650, "y": 180}, {"x": 220, "y": 320}, {"x": 580, "y": 320}]
+    elif is_u_shaped:
+        title = f"{floors_count}-Story U-Shaped Courtyard Complex"
+        dwg_no = "DWG-AI-USHP-001"
+        rooms = [
+            {"id": "R1", "name": "West Wing Suites (Left Flank)", "x": 100, "y": 100, "w": 180, "h": 460, "areaSqft": round(sqft * 0.32), "flooring": "Engineered Hardwood", "type": "OFFICE"},
+            {"id": "R2", "name": "East Wing Suites (Right Flank)", "x": 520, "y": 100, "w": 180, "h": 460, "areaSqft": round(sqft * 0.32), "flooring": "Engineered Hardwood", "type": "OFFICE"},
+            {"id": "R3", "name": "North Rear Connecting Gallery & Foyer", "x": 280, "y": 100, "w": 240, "h": 140, "areaSqft": round(sqft * 0.16), "flooring": "Italian Porcelain Tile", "type": "FOYER"},
+            {"id": "R4", "name": "Central Open Courtyard Garden & Court", "x": 280, "y": 240, "w": 240, "h": 320, "areaSqft": round(sqft * 0.20), "flooring": "Natural Grass & Pavers", "type": "COURTYARD"}
+        ]
+        columns = [
+            {"grid": "U-1", "x": 95, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "U-2", "x": 275, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "U-3", "x": 515, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "U-4", "x": 695, "y": 95, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "U-5", "x": 95, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "U-6", "x": 275, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "U-7", "x": 515, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"},
+            {"grid": "U-8", "x": 695, "y": 555, "size": "500x500mm", "rebar": "12-T25 Fe550D"}
+        ]
+        hvac_path = "M 180 540 L 180 160 L 620 160 L 620 540"
+        sprinklers = [{"x": 180, "y": 200}, {"x": 180, "y": 450}, {"x": 400, "y": 160}, {"x": 620, "y": 200}, {"x": 620, "y": 450}]
     elif is_t_shaped:
         title = f"{floors_count}-Story T-Shaped Axial Corporate Complex"
         dwg_no = "DWG-AI-TSHP-001"
@@ -1631,6 +1676,9 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     if is_v_shaped:
         fallback_title = f"{floors_count}-Story V-Shaped Iconic Dual-Wing Headquarters"
         fallback_facade = "Converging V-Angle Glazed Wings with Central Plaza Foyer"
+    elif is_u_shaped:
+        fallback_title = f"{floors_count}-Story Modern U-Shaped Courtyard Complex"
+        fallback_facade = "U-Shaped Triple-Wing Glazed Envelope with Central Courtyard Plaza"
     elif is_t_shaped:
         fallback_title = f"{floors_count}-Story T-Shaped Axial Corporate Complex"
         fallback_facade = "T-Configuration Curtain Wall with Perpendicular Spine"
@@ -1692,49 +1740,66 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     )
 
     # Build highly responsive architectural highlights
+    if rooftop_feature == "AIRPLANE_WING_ROOF":
+        roof_hl = "Aerodynamic supersonic swept-back airplane wing canopy roof with navigation lighting beacons"
+    elif rooftop_feature == "SOLAR_ARRAY" or has_solar_panels:
+        roof_hl = "Rooftop high-efficiency monocrystalline solar PV panel array (450 kWp grid-tied)"
+    elif rooftop_feature == "HELIPAD":
+        roof_hl = "Rooftop helipad with perimeter flight safety beacons & sky-mansion terrace"
+    elif rooftop_feature == "INFINITY_POOL":
+        roof_hl = "Elevated infinity sky pool with glass overflow edge and wooden sundeck"
+    elif rooftop_feature == "OBSERVATORY_DOME":
+        roof_hl = "Geodesic glass dome astronomical observatory & panoramic sky lounge"
+    elif rooftop_feature == "GABLE_ROOF":
+        roof_hl = "Architectural pitched timber gable roof with weather-sealed standing seams"
+    elif rooftop_feature == "PENTHOUSE_GARDEN":
+        roof_hl = "Landscaped sky-park botanical terrace garden with observation deck"
+    else:
+        roof_hl = "Rooftop terrace with solar PV array & pressurized lift core"
+
+    if glass_distribution == "FULL_GLASS":
+        facade_hl = "360-Degree full curtain wall double glazing with acoustic Low-E laminated panes"
+    elif glass_distribution == "RIGHT_FRONT_GLASS":
+        facade_hl = "Asymmetric architectural envelope: right front wing fully glazed curtain wall, left wing precast concrete"
+    elif glass_distribution == "LEFT_FRONT_GLASS":
+        facade_hl = "Asymmetric architectural envelope: left front wing fully glazed curtain wall, right wing precast concrete"
+    elif glass_distribution == "ONE_SIDE_GLASS":
+        facade_hl = "Unidirectional solar optimization: single front facade fully glazed, thermal mass flanks"
+    elif massing_form == "V_SHAPED":
+        facade_hl = "Converging V-Angle dual wings framing an open central entrance plaza"
+    elif massing_form == "U_SHAPED":
+        facade_hl = "Three-wing U-shaped courtyard geometry framing an expansive central landscaped plaza"
+    elif massing_form == "T_SHAPED":
+        facade_hl = "T-Configuration axial spine with balanced transverse wing blocks"
+    elif massing_form == "H_SHAPED":
+        facade_hl = "Twin parallel towers linked by a central skybridge atrium corridor"
+    elif massing_form == "SPHERICAL_BALL":
+        facade_hl = "Geodesic spherical glass orb envelope with latitudinal tension rings"
+    elif massing_form == "OPEN_SQUARE_DONUT":
+        facade_hl = "Hollow square quadrangle perimeter enclosing an open-to-sky central courtyard"
+    elif massing_form == "WIDE_LINEAR_RANGE":
+        facade_hl = "Extended wide-span linear campus with high-bay pavilion portico"
+    elif massing_form == "CURVED_CYLINDRICAL":
+        facade_hl = "Aerodynamic cylindrical curved architectural facade with continuous panoramic glazing"
+    elif massing_form == "L_SHAPED":
+        facade_hl = "L-Shaped dual wing geometry with open-air central courtyard plaza"
+    else:
+        facade_hl = "High-performance acoustic Low-E double curtain wall glazing"
+
+    if has_playground or has_sports_court:
+        amenity_hl = "Landscaped central courtyard featuring open playground, recreation lawn, and athletic hardcourts"
+    elif balcony_type == "WRAPAROUND_RIBBON":
+        amenity_hl = "Continuous 360-degree wrap-around panoramic ribbon balconies"
+    elif balcony_type == "CANTILEVERED_FLOATING":
+        amenity_hl = "Cantilevered floating balconies with frameless laminated glass balustrades"
+    else:
+        amenity_hl = "Integrated MEP service core with dual wet risers & HVAC shafts"
+
     custom_highlights = [
         f"{floors_count}-Story {massing_form.replace('_', ' ').title()} RCC Frame Structure",
-        "Aerodynamic supersonic swept-back airplane wing canopy roof with navigation lighting beacons" if rooftop_feature == "AIRPLANE_WING_ROOF" else (
-            "Rooftop high-efficiency monocrystalline solar PV panel array (450 kWp grid-tied)" if rooftop_feature == "SOLAR_ARRAY" or has_solar_panels else (
-                "Rooftop helipad with perimeter flight safety beacons & sky-mansion terrace" if rooftop_feature == "HELIPAD" else (
-                    "Elevated infinity sky pool with glass overflow edge and wooden sundeck" if rooftop_feature == "INFINITY_POOL" else (
-                        "Geodesic glass dome astronomical observatory & panoramic sky lounge" if rooftop_feature == "OBSERVATORY_DOME" else (
-                            "Architectural pitched timber gable roof with weather-sealed standing seams" if rooftop_feature == "GABLE_ROOF" else (
-                                "Landscaped sky-park botanical terrace garden with observation deck" if rooftop_feature == "PENTHOUSE_GARDEN" else "Rooftop terrace with solar PV array & pressurized lift core"
-                            )
-                        )
-                    )
-                )
-            )
-        ),
-        "360-Degree full curtain wall double glazing with acoustic Low-E laminated panes" if glass_distribution == "FULL_GLASS" else (
-            "Asymmetric architectural envelope: right front wing fully glazed curtain wall, left wing precast concrete" if glass_distribution == "RIGHT_FRONT_GLASS" else (
-                "Asymmetric architectural envelope: left front wing fully glazed curtain wall, right wing precast concrete" if glass_distribution == "LEFT_FRONT_GLASS" else (
-                    "Unidirectional solar optimization: single front facade fully glazed, thermal mass flanks" if glass_distribution == "ONE_SIDE_GLASS" else (
-                        "Converging V-Angle dual wings framing an open central entrance plaza" if massing_form == "V_SHAPED" else (
-                            "T-Configuration axial spine with balanced transverse wing blocks" if massing_form == "T_SHAPED" else (
-                                "Twin parallel towers linked by a central skybridge atrium corridor" if massing_form == "H_SHAPED" else (
-                                    "Geodesic spherical glass orb envelope with latitudinal tension rings" if massing_form == "SPHERICAL_BALL" else (
-                                        "Hollow square quadrangle perimeter enclosing an open-to-sky central courtyard" if massing_form == "OPEN_SQUARE_DONUT" else (
-                                            "Extended wide-span linear campus with high-bay pavilion portico" if massing_form == "WIDE_LINEAR_RANGE" else (
-                                                "Aerodynamic cylindrical curved architectural facade with continuous panoramic glazing" if massing_form == "CURVED_CYLINDRICAL" else (
-                                                    "L-Shaped dual wing geometry with open-air central courtyard plaza" if massing_form == "L_SHAPED" else "High-performance acoustic Low-E double curtain wall glazing"
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        ),
-        "Landscaped central courtyard featuring open playground, recreation lawn, and athletic hardcourts" if (has_playground or has_sports_court) else (
-            "Continuous 360-degree wrap-around panoramic ribbon balconies" if balcony_type == "WRAPAROUND_RIBBON" else (
-                "Cantilevered floating balconies with frameless laminated glass balustrades" if balcony_type == "CANTILEVERED_FLOATING" else "Integrated MEP service core with dual wet risers & HVAC shafts"
-            )
-        )
+        roof_hl,
+        facade_hl,
+        amenity_hl
     ]
 
     return {
@@ -1762,6 +1827,7 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
             "architecturalHighlights": gemini_spec.get("architecturalHighlights", custom_highlights) if gemini_spec else custom_highlights,
             "massingForm": massing_form,
             "isLShaped": is_l_shaped,
+            "isUShaped": is_u_shaped,
             "isVShaped": is_v_shaped,
             "isTShaped": is_t_shaped,
             "isHShaped": is_h_shaped,
