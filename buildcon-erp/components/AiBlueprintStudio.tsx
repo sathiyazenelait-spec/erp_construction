@@ -6,7 +6,7 @@ import {
   Printer, Save, RefreshCw, Sliders, ChevronRight,
   HardHat, Activity, Cpu, ShieldCheck, Thermometer,
   Grid, Move, Info, Check, ArrowRight, Sun, Moon, Rotate3d,
-  Key, Building, Building2, EyeOff, Send, X
+  Key, Building, Building2, EyeOff, Send, X, BookOpen, Search, Copy
 } from "lucide-react";
 
 export interface BlueprintRoom {
@@ -167,6 +167,24 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
   // Gemini API Key Modal
   const [showGeminiKeyModal, setShowGeminiKeyModal] = useState(false);
   const [geminiApiKey, setGeminiApiKey] = useState("");
+
+  // 1,500 Prompt Architectural Library Modal State
+  const [showPromptLibrary, setShowPromptLibrary] = useState(false);
+  const [promptLibraryData, setPromptLibraryData] = useState<any[]>([]);
+  const [selectedPromptCategory, setSelectedPromptCategory] = useState<number | "ALL">("ALL");
+  const [promptSearchQuery, setPromptSearchQuery] = useState("");
+  const [copiedPromptId, setCopiedPromptId] = useState<number | null>(null);
+  const [promptDisplayLimit, setPromptDisplayLimit] = useState(36);
+
+  // Load 1,500 Prompt Library Dataset
+  useEffect(() => {
+    fetch("/data/prompt_library_1500.json")
+      .then(res => res.json())
+      .then(d => {
+        if (Array.isArray(d)) setPromptLibraryData(d);
+      })
+      .catch(err => console.error("Could not load prompt library:", err));
+  }, []);
 
   // Canvas View Controls
   const [zoomLevel, setZoomLevel] = useState(100);
@@ -3119,12 +3137,30 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           </div>
         </div>
 
-        {/* 1-Click AI Design Archetype Chips */}
-        <div className="mt-3.5 pt-3 border-t border-slate-700/60 flex flex-wrap items-center gap-1.5 relative z-10">
-          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mr-1 flex items-center gap-1">
+        {/* 1,500 Prompt Library & 1-Click AI Design Archetype Chips */}
+        <div className="mt-3.5 pt-3 border-t border-slate-700/60 flex flex-wrap items-center justify-between gap-2 relative z-10">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setShowPromptLibrary(true);
+                setPromptDisplayLimit(36);
+              }}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-600/30 via-indigo-600/30 to-purple-600/30 hover:from-cyan-500/40 hover:to-purple-500/40 text-cyan-200 border border-cyan-400/50 hover:border-cyan-300 transition-all flex items-center gap-2 shadow-lg shadow-cyan-950/30 active:scale-95 group"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
+              <span>📚 1,500 Prompt Library</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 text-[10px] font-mono font-extrabold border border-cyan-400/30">
+                15 Categories (100 each)
+              </span>
+            </button>
+          </div>
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
             <Sparkles className="w-3 h-3 text-cyan-400" />
-            Quick Models:
-          </span>
+            <span>Quick Models:</span>
+          </div>
+        </div>
+
+        <div className="mt-2 flex flex-wrap items-center gap-1.5 relative z-10">
           {[
             { label: "📐 V-Shape Tower", prompt: "6-Floor V-Shaped Modern Iconic Commercial Tower with central entrance rotunda, panoramic glazed wings, and open recreational playground", floors: 6 },
             { label: "🏗️ T-Shape Complex", prompt: "5-Floor T-Shape Architectural Office Building with front curtain glazing and structural RCC frame", floors: 5 },
@@ -3842,6 +3878,275 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               >
                 Save & Apply
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 1,500 Prompt Architectural Library Modal */}
+      {showPromptLibrary && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
+          <div className="bg-[#0B111E] border border-slate-700/80 rounded-2xl max-w-6xl w-full h-[90vh] flex flex-col shadow-2xl overflow-hidden relative">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-800 bg-slate-900/60 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 text-cyan-400 rounded-xl border border-cyan-500/30">
+                  <BookOpen className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <h3 className="text-lg font-bold text-white tracking-wide">
+                      Architectural 3D Blueprint Prompt Library
+                    </h3>
+                    <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-mono font-bold border border-cyan-500/30">
+                      1,500 Prompts • 15 Categories
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Structured with complete 14-parameter architectural engineering formula. Click &quot;Load &amp; Generate&quot; for instant 3D model generation.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowPromptLibrary(false)}
+                className="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition"
+                title="Close Library"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Filter & Search Bar */}
+            <div className="p-4 border-b border-slate-800/80 bg-slate-950/40 shrink-0 space-y-3">
+              {/* Search Input */}
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={promptSearchQuery}
+                  onChange={(e) => {
+                    setPromptSearchQuery(e.target.value);
+                    setPromptDisplayLimit(36);
+                  }}
+                  placeholder="Search by keywords (e.g., helipad, cantilever, rounded, solar, sports court, glass, hospital, villa, hostel, spiral)..."
+                  className="w-full pl-10 pr-10 py-2.5 bg-slate-900 border border-slate-700/70 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition"
+                />
+                {promptSearchQuery && (
+                  <button
+                    onClick={() => setPromptSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-white"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              {/* Category Pills (15 Core Categories + All) */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-slate-700">
+                {[
+                  { id: "ALL", name: "All", icon: "🌐", count: promptLibraryData.length || 1500 },
+                  { id: 1, name: "Residential", icon: "🏢", count: 100 },
+                  { id: 2, name: "Hotels & Resorts", icon: "🏨", count: 100 },
+                  { id: 3, name: "Schools & Colleges", icon: "🏫", count: 100 },
+                  { id: 4, name: "Hospitals & Clinics", icon: "🏥", count: 100 },
+                  { id: 5, name: "Office & Corporate", icon: "🏢", count: 100 },
+                  { id: 6, name: "Villas & Luxury Homes", icon: "🏠", count: 100 },
+                  { id: 7, name: "Apartments & Housing", icon: "🏘️", count: 100 },
+                  { id: 8, name: "Hostels & Student Housing", icon: "🛏️", count: 100 },
+                  { id: 9, name: "Shopping Malls", icon: "🛍️", count: 100 },
+                  { id: 10, name: "Industrial & Factory", icon: "🏭", count: 100 },
+                  { id: 11, name: "Sports & Recreation", icon: "🏟️", count: 100 },
+                  { id: 12, name: "Public & Government", icon: "🏛️", count: 100 },
+                  { id: 13, name: "Religious & Cultural", icon: "🕌", count: 100 },
+                  { id: 14, name: "Eco-Friendly & Sustainable", icon: "🌳", count: 100 },
+                  { id: 15, name: "Futuristic Concepts", icon: "🏗️", count: 100 },
+                ].map((cat) => {
+                  const isActive = selectedPromptCategory === cat.id;
+                  return (
+                    <button
+                      key={`cat-pill-${cat.id}`}
+                      onClick={() => {
+                        setSelectedPromptCategory(cat.id as any);
+                        setPromptDisplayLimit(36);
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition flex items-center gap-1.5 shrink-0 ${
+                        isActive
+                          ? "bg-cyan-500 text-black font-bold shadow-md shadow-cyan-500/20"
+                          : "bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/60"
+                      }`}
+                    >
+                      <span>{cat.icon}</span>
+                      <span>{cat.name}</span>
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                        isActive ? "bg-black/20 text-black font-extrabold" : "bg-slate-900 text-slate-400"
+                      }`}>
+                        {cat.count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Prompt Cards Grid (Scrollable) */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+              {(() => {
+                const filteredPrompts = promptLibraryData.filter((item) => {
+                  const matchesCat = selectedPromptCategory === "ALL" || item.categoryId === selectedPromptCategory;
+                  if (!matchesCat) return false;
+                  if (!promptSearchQuery.trim()) return true;
+                  const q = promptSearchQuery.toLowerCase();
+                  return (
+                    item.title?.toLowerCase().includes(q) ||
+                    item.prompt?.toLowerCase().includes(q) ||
+                    item.buildingType?.toLowerCase().includes(q) ||
+                    item.style?.toLowerCase().includes(q) ||
+                    item.categoryName?.toLowerCase().includes(q) ||
+                    (Array.isArray(item.tags) && item.tags.some((t: string) => t.toLowerCase().includes(q)))
+                  );
+                });
+
+                if (filteredPrompts.length === 0) {
+                  return (
+                    <div className="h-64 flex flex-col items-center justify-center text-center p-6 bg-slate-950/40 rounded-2xl border border-dashed border-slate-800">
+                      <Search className="w-10 h-10 text-slate-600 mb-2" />
+                      <div className="text-sm font-semibold text-slate-300">No prompts matched your search</div>
+                      <div className="text-xs text-slate-500 mt-1">Try another keyword or select a different category</div>
+                    </div>
+                  );
+                }
+
+                const visiblePrompts = filteredPrompts.slice(0, promptDisplayLimit);
+
+                return (
+                  <>
+                    <div className="flex items-center justify-between text-xs text-slate-400 pb-1">
+                      <span>
+                        Showing <strong className="text-white">{visiblePrompts.length}</strong> of{" "}
+                        <strong className="text-cyan-400">{filteredPrompts.length}</strong> prompts
+                      </span>
+                      <span className="text-[11px] text-slate-500 font-mono">
+                        Formula: Type + Floors + Style + Facade + Windows + Balconies + Roof + Entrance + Landscape + Parking + Sports + Materials + Lighting
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {visiblePrompts.map((item) => (
+                        <div
+                          key={`prompt-card-${item.id}`}
+                          className="bg-slate-900/90 border border-slate-800 hover:border-cyan-500/40 rounded-2xl p-4 flex flex-col justify-between transition-all duration-200 hover:shadow-xl hover:shadow-cyan-950/20 group"
+                        >
+                          {/* Card Top Details */}
+                          <div>
+                            <div className="flex items-center justify-between gap-2 mb-2">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-sm">{item.categoryIcon}</span>
+                                <span className="text-[11px] font-bold text-slate-300">{item.categoryName}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 text-[10px] font-mono font-bold border border-cyan-500/20">
+                                  {item.floors} Floors
+                                </span>
+                                <span className="px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-400 text-[10px] font-mono">
+                                  #{item.id}
+                                </span>
+                              </div>
+                            </div>
+
+                            <h4 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors line-clamp-1 mb-2">
+                              {item.title}
+                            </h4>
+
+                            {/* Full Prompt Display Box */}
+                            <div className="p-3 rounded-xl bg-black/40 border border-slate-800/80 text-[11px] text-slate-300/90 leading-relaxed font-mono select-text mb-3">
+                              {item.prompt}
+                            </div>
+
+                            {/* Tags Chips */}
+                            {Array.isArray(item.tags) && item.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mb-3">
+                                {item.tags.map((tag: string, tIdx: number) => (
+                                  <span
+                                    key={`tag-${item.id}-${tIdx}`}
+                                    className="px-2 py-0.5 rounded bg-slate-800/60 text-slate-400 text-[9px] font-medium"
+                                  >
+                                    #{tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex items-center gap-2 pt-3 border-t border-slate-800/80">
+                            <button
+                              onClick={() => {
+                                setPromptText(item.prompt);
+                                setFloors(item.floors);
+                                setShowPromptLibrary(false);
+                                generateBlueprint(selectedPreset, item.prompt, builtupSqft, item.floors);
+                              }}
+                              className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-cyan-900/30 transition active:scale-95"
+                            >
+                              <Sparkles className="w-3.5 h-3.5" />
+                              <span>Load &amp; Generate 3D Model</span>
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setPromptText(item.prompt);
+                                setFloors(item.floors);
+                                setShowPromptLibrary(false);
+                              }}
+                              className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
+                              title="Set as Prompt without Auto-Generating"
+                            >
+                              Use in Prompt Box
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                if (navigator.clipboard) {
+                                  navigator.clipboard.writeText(item.prompt);
+                                  setCopiedPromptId(item.id);
+                                  setTimeout(() => setCopiedPromptId(null), 2000);
+                                }
+                              }}
+                              className={`p-2 rounded-xl border text-xs font-semibold transition flex items-center gap-1 ${
+                                copiedPromptId === item.id
+                                  ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                                  : "bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-white border-slate-700/60"
+                              }`}
+                              title="Copy Prompt to Clipboard"
+                            >
+                              {copiedPromptId === item.id ? (
+                                <Check className="w-4 h-4 text-emerald-400" />
+                              ) : (
+                                <Copy className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Pagination / Load More */}
+                    {filteredPrompts.length > promptDisplayLimit && (
+                      <div className="pt-4 flex justify-center">
+                        <button
+                          onClick={() => setPromptDisplayLimit((prev) => prev + 36)}
+                          className="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 text-xs font-bold transition flex items-center gap-2 shadow-lg"
+                        >
+                          <span>Load More Prompts (+36)</span>
+                          <span className="text-[10px] text-slate-400 font-mono">
+                            ({filteredPrompts.length - promptDisplayLimit} remaining)
+                          </span>
+                        </button>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>
