@@ -1011,7 +1011,7 @@ def call_gemini_blueprint_designer(prompt: str, project_type: str, builtup_sqft:
             f"- 'totalBuildingHeightMeters': float (e.g. {floors * 3.2:.1f})\n"
             f"- 'concreteGrade': e.g. 'M30 / M35'\n"
             f"- 'steelGrade': e.g. 'Fe550D High Ductility'\n"
-            f"- 'massingForm': One of ['L_SHAPED', 'STEPPED_CASCADING', 'CURVED_CYLINDRICAL', 'TWISTED_DIAGRID', 'INDUSTRIAL_SHED', 'RECTANGULAR']. If prompt mentions 'l-shape', 'l shape', or 'l shaped', you MUST return 'L_SHAPED'.\n"
+            f"- 'massingForm': One of ['T_SHAPED', 'H_SHAPED', 'V_SHAPED', 'U_SHAPED', 'L_SHAPED', 'CIRCULAR_DONUT', 'STEPPED_CASCADING', 'CURVED_CYLINDRICAL', 'TWISTED_DIAGRID', 'INDUSTRIAL_SHED', 'RECTANGULAR']. If prompt mentions 't-shape', 't shape', or 't shaped', you MUST return 'T_SHAPED'. If prompt mentions 'l-shape', 'l shape', or 'l shaped', you MUST return 'L_SHAPED'.\n"
             f"- 'architecturalHighlights': array of 4 string engineering highlights\n"
             f"- 'aiDesignSummary': 2-3 sentence executive summary by the architect"
         )
@@ -1084,7 +1084,11 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     has_sun_louvers = any(w in p_lower for w in ["louver", "louvers", "shading", "brise-soleil", "fins", "slats"])
     
     # Accurate regex matching for all architectural geometric shapes
-    is_t_shaped = bool(re.search(r'\b(t[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b', p_lower)) or bool(re.search(r'\bt\b.*\b(shape|shaped)\b', p_lower))
+    is_t_shaped = (
+        bool(re.search(r'\b(t|tee)[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building|type|typed)\b', p_lower)) or
+        (bool(re.search(r'\b(t|tee)\b', p_lower)) and bool(re.search(r'\b(shape|shaped)\b', p_lower))) or
+        any(w in p_lower for w in ["t shape", "t-shape", "t shaped", "t-shaped", "t frame", "t-frame", "tee shape", "tee-shape"])
+    )
     is_h_shaped = bool(re.search(r'\b(h[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b', p_lower)) or bool(re.search(r'\bh\b.*\b(shape|shaped)\b', p_lower))
     is_v_shaped = bool(re.search(r'\b(v[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b', p_lower)) or bool(re.search(r'\bv\b.*\b(shape|shaped)\b', p_lower))
     is_u_shaped = bool(re.search(r'\b(u[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b', p_lower)) or bool(re.search(r'\bu\b.*\b(shape|shaped)\b', p_lower)) or "horseshoe" in p_lower

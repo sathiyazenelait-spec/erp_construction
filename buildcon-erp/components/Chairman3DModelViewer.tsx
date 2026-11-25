@@ -86,7 +86,12 @@ export default function Chairman3DModelViewer({
   // Determine architectural shape from text/props
   const allText = `${title} ${details || ""} ${shape || ""}`.toLowerCase();
   const isHShaped = shape === "H_SHAPED" || (/\bh[-_\s]?(shape|shaped|block|frame|layout)\b/i.test(allText)) || (/\bh\b/i.test(allText) && /\bshape\b/i.test(allText));
-  const isTShaped = !isHShaped && (shape === "T_SHAPED" || (/\bt[-_\s]?(shape|shaped|block|frame|layout)\b/i.test(allText)) || (/\bt\b/i.test(allText) && /\bshape\b/i.test(allText)));
+  const isTShaped = !isHShaped && (
+    shape === "T_SHAPED" ||
+    (/\b(t|tee)[-_\s]?(shape|shaped|block|frame|layout|plan|building|tower|structure|type|model)\b/i.test(allText)) ||
+    (/\b(t|tee)\b/i.test(allText) && /\b(shape|shaped)\b/i.test(allText)) ||
+    allText.includes("t-shape") || allText.includes("t shape") || allText.includes("t shaped") || allText.includes("t-shaped") || allText.includes("t frame") || allText.includes("t-frame") || allText.includes("tee shape")
+  );
   const isVShaped = !isHShaped && !isTShaped && (shape === "V_SHAPED" || (/\bv[-_\s]?(shape|shaped|block|frame|layout)\b/i.test(allText)) || (/\bv\b/i.test(allText) && /\bshape\b/i.test(allText)));
   const isUShaped = !isHShaped && !isTShaped && !isVShaped && (shape === "U_SHAPED" || (/\bu[-_\s]?(shape|shaped|block|frame|courtyard)\b/i.test(allText)) || (/\bu\b/i.test(allText) && /\bshape\b/i.test(allText)));
   const isCircular = !isHShaped && !isTShaped && !isVShaped && !isUShaped && (shape === "CIRCULAR_DONUT" || allText.includes("circle") || allText.includes("circular") || allText.includes("cylind"));
@@ -181,19 +186,29 @@ export default function Chairman3DModelViewer({
       elements.push(renderBox("h-mr-left", -110, -35, -75, 35, topZ, topZ + 26, totalFlrs, false, "#334155"));
       elements.push(renderBox("h-mr-right", 75, -35, 110, 35, topZ, topZ + 26, totalFlrs, false, "#334155"));
     } else if (isTShaped) {
-      // T-SHAPE: Front Wing Bar and Rear Central Stem Wing
+      // T-SHAPE: Front Transverse Wing Bar and Rear Central Perpendicular Stem (Matches ResearchGate Structural Model)
       for (let f = 0; f < totalFlrs; f++) {
         if (activeFloorTab !== "ALL" && activeFloorTab !== f + 1) continue;
         const z0 = f * floorHeight;
         const z1 = z0 + floorHeight - 3;
 
-        // Front horizontal bar (-130 to 130, -110 to -35)
-        elements.push(renderBox(`t-bar-${f}`, -130, -110, 130, -35, z0, z1, f));
-        // Central perpendicular stem (-45 to 45, -35 to 110)
-        elements.push(renderBox(`t-stem-${f}`, -45, -35, 45, 110, z0, z1, f, true));
+        // Front horizontal bar (-140 to 140, 20 to 80, center y = 50)
+        const barBox = { key: `t-bar-${f}`, x1: -140, y1: 20, x2: 140, y2: 80, z0, z1, f, isCore: false, midX: 0, midY: 50 };
+        // Central perpendicular stem (-45 to 45, -100 to 20, center y = -40)
+        const stemBox = { key: `t-stem-${f}`, x1: -45, y1: -100, x2: 45, y2: 20, z0, z1, f, isCore: true, midX: 0, midY: -40 };
+
+        // 3D Depth Sorting: Draw further box first so front box never clips improperly
+        const boxes = [barBox, stemBox].map(b => ({
+          ...b,
+          depth: b.midX * sinO + b.midY * cosO
+        })).sort((a, b) => a.depth - b.depth);
+
+        boxes.forEach(b => {
+          elements.push(renderBox(b.key, b.x1, b.y1, b.x2, b.y2, b.z0, b.z1, b.f, b.isCore));
+        });
       }
       const topZ = totalFlrs * floorHeight;
-      elements.push(renderBox("t-mr", -30, -50, 30, 10, topZ, topZ + 25, totalFlrs, false, "#334155"));
+      elements.push(renderBox("t-mr", -25, -20, 25, 20, topZ, topZ + 25, totalFlrs, false, "#334155"));
     } else if (isVShaped) {
       // V-SHAPE: Left angled wing, Right angled wing, Central apex rotunda
       for (let f = 0; f < totalFlrs; f++) {

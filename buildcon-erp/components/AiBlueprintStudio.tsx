@@ -398,7 +398,9 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const hasDiagrid = pLower.includes("diagrid") || pLower.includes("diamond") || pLower.includes("lattice") || pLower.includes("exoskeleton") || pLower.includes("cross brace") || pLower.includes("x-brace");
     const hasSkyCourt = pLower.includes("sky court") || pLower.includes("sky-court") || pLower.includes("mid-level garden") || pLower.includes("void") || pLower.includes("cutout") || pLower.includes("hollow") || pLower.includes("sky bridge");
     const hasSunLouvers = pLower.includes("louver") || pLower.includes("louvers") || pLower.includes("shading") || pLower.includes("brise-soleil") || pLower.includes("fins") || pLower.includes("slats");
-    const isTShaped = (/\b(t[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(pLower)) || (/\bt\b/i.test(pLower) && /\b(shape|shaped)\b/i.test(pLower));
+    const isTShaped = (/\b(t|tee)[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building|type|typed)\b/i.test(pLower)) ||
+                      (/\b(t|tee)\b/i.test(pLower) && /\b(shape|shaped)\b/i.test(pLower)) ||
+                      pLower.includes("t shape") || pLower.includes("t-shape") || pLower.includes("t shaped") || pLower.includes("t-shaped") || pLower.includes("t frame") || pLower.includes("t-frame") || pLower.includes("tee shape") || pLower.includes("tee-shape");
     const isHShaped = (/\b(h[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(pLower)) || (/\bh\b/i.test(pLower) && /\b(shape|shaped)\b/i.test(pLower));
     const isVShaped = (/\b(v[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(pLower)) || (/\bv\b/i.test(pLower) && /\b(shape|shaped)\b/i.test(pLower));
     const isUShaped = (/\b(u[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(pLower)) || (/\bu\b/i.test(pLower) && /\b(shape|shaped)\b/i.test(pLower)) || pLower.includes("horseshoe");
@@ -599,6 +601,25 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         { grid: "V-5", x: 515, y: 95, size: "500x500mm", rebar: "12-T25 Fe550D" },
         { grid: "V-6", x: 95, y: 355, size: "500x500mm", rebar: "12-T25 Fe550D" },
         { grid: "V-7", x: 695, y: 355, size: "500x500mm", rebar: "12-T25 Fe550D" }
+      ];
+    } else if (isTShaped) {
+      rooms = [
+        { id: "R1", name: "Transverse Front Bar (West Wing)", x: 100, y: 100, w: 280, h: 154, areaSqft: Math.round(sqft * 0.28), flooring: "Engineered Hardwood", type: "OFFICE" },
+        { id: "R2", name: "Transverse Front Bar (East Wing)", x: 420, y: 100, w: 280, h: 154, areaSqft: Math.round(sqft * 0.28), flooring: "Engineered Hardwood", type: "OFFICE" },
+        { id: "R3", name: "Central Perpendicular Axial Spine", x: 326, y: 260, w: 148, h: 310, areaSqft: Math.round(sqft * 0.24), flooring: "Vitrified Porcelain", type: "CONFERENCE" },
+        { id: "R4", name: "West Landscaped Courtyard", x: 94, y: 260, w: 220, h: 310, areaSqft: Math.round(sqft * 0.10), flooring: "Natural Turf Lawn", type: "OUTDOOR" },
+        { id: "R5", name: "East Recreational Courtyard", x: 486, y: 260, w: 220, h: 310, areaSqft: Math.round(sqft * 0.10), flooring: "Natural Turf Lawn", type: "OUTDOOR" }
+      ];
+      cols = [
+        { grid: "T-1", x: 95, y: 95, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "T-2", x: 395, y: 95, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "T-3", x: 695, y: 95, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "T-4", x: 95, y: 255, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "T-5", x: 325, y: 255, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "T-6", x: 475, y: 255, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "T-7", x: 695, y: 255, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "T-8", x: 325, y: 565, size: "500x500mm", rebar: "12-T25 Fe550D" },
+        { grid: "T-9", x: 475, y: 565, size: "500x500mm", rebar: "12-T25 Fe550D" }
       ];
     } else if (isHShaped) {
       rooms = [
@@ -949,46 +970,61 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
       const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
       const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
+      if (token && token !== "null" && token !== "undefined") headers["Authorization"] = `Bearer ${token}`;
 
       // 1. Submit to Board Approvals
       try {
-        await fetch("http://localhost:8081/api/chairman/approvals", {
+        const appRes = await fetch("http://localhost:8081/api/chairman/approvals", {
           method: "POST",
           headers,
           body: JSON.stringify(approvalPayload)
         });
+        if (appRes.status === 401 && headers["Authorization"]) {
+          await fetch("http://localhost:8081/api/chairman/approvals", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(approvalPayload)
+          });
+        }
       } catch (err) {
         console.warn("Backend approval POST failed, fallback to local cache", err);
       }
 
       // 2. Also register drawing in Drawings Hub as UNDER_REVIEW
       try {
-        await fetch("http://localhost:8081/api/drawings/upload", {
+        const drawingPayload = {
+          drawingNumber: data.drawingNumber,
+          title: data.title,
+          category: "ARCHITECTURAL",
+          discipline: "ARCHITECTURAL",
+          revision: `v1.0-${floors}F-CHAIRMAN`,
+          revisionNotes: `Submitted for Chairman Executive Board Approval (${selectedOrg.name}): ${chairmanSubmitNote}`,
+          fileName: `${data.drawingNumber.toLowerCase()}.dwg`,
+          fileType: "DWG_CAD_VECTOR",
+          fileSizeBytes: 2458000,
+          status: "UNDER_REVIEW",
+          uploadedBy: requesterName,
+          projectName: `${selectedOrg.name} Landmark Tower`,
+          builtupAreaSqft: data.dimensions.builtupAreaSqft * floors,
+          carpetAreaSqft: data.dimensions.carpetAreaSqft * floors,
+          wallLengthMeters: data.dimensions.wallPerimeterMeters * floors,
+          openingCount: data.rooms.length * 3 * floors,
+          clashesCount: data.aiInsights.clashesDetected,
+          organizationId: targetOrgId,
+          aiAnalysisJson: JSON.stringify(data)
+        };
+        const drawRes = await fetch("http://localhost:8081/api/drawings/upload", {
           method: "POST",
           headers,
-          body: JSON.stringify({
-            drawingNumber: data.drawingNumber,
-            title: data.title,
-            category: "ARCHITECTURAL",
-            discipline: "ARCHITECTURAL",
-            revision: `v1.0-${floors}F-CHAIRMAN`,
-            revisionNotes: `Submitted for Chairman Executive Board Approval (${selectedOrg.name}): ${chairmanSubmitNote}`,
-            fileName: `${data.drawingNumber.toLowerCase()}.dwg`,
-            fileType: "DWG_CAD_VECTOR",
-            fileSizeBytes: 2458000,
-            status: "UNDER_REVIEW",
-            uploadedBy: requesterName,
-            projectName: `${selectedOrg.name} Landmark Tower`,
-            builtupAreaSqft: data.dimensions.builtupAreaSqft * floors,
-            carpetAreaSqft: data.dimensions.carpetAreaSqft * floors,
-            wallLengthMeters: data.dimensions.wallPerimeterMeters * floors,
-            openingCount: data.rooms.length * 3 * floors,
-            clashesCount: data.aiInsights.clashesDetected,
-            organizationId: targetOrgId,
-            aiAnalysisJson: JSON.stringify(data)
-          })
+          body: JSON.stringify(drawingPayload)
         });
+        if (drawRes.status === 401 && headers["Authorization"]) {
+          await fetch("http://localhost:8081/api/drawings/upload", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(drawingPayload)
+          });
+        }
       } catch (err) {
         console.warn("Backend drawing upload failed, fallback to local cache", err);
       }
@@ -1117,8 +1153,9 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     Boolean(data?.building3D?.isHShaped);
 
   const isTShaped = !isHShaped && (
-                    (/\b(t[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(allContextText)) ||
-                    (/\bt\b/i.test(allContextText) && /\b(shape|shaped)\b/i.test(allContextText)) ||
+                    (/\b(t|tee)[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building|type|typed)\b/i.test(allContextText)) ||
+                    (/\b(t|tee)\b/i.test(allContextText) && /\b(shape|shaped)\b/i.test(allContextText)) ||
+                    allContextText.includes("t shape") || allContextText.includes("t-shape") || allContextText.includes("t shaped") || allContextText.includes("t-shaped") || allContextText.includes("t frame") || allContextText.includes("t-frame") || allContextText.includes("tee shape") || allContextText.includes("tee-shape") ||
                     data?.building3D?.massingForm === "T_SHAPED" ||
                     Boolean(data?.building3D?.isTShaped));
 
@@ -1248,8 +1285,9 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                       Boolean(data?.building3D?.isHShaped);
 
     const isTShaped = !isHShaped && (
-                      (/\b(t[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(allContextText)) ||
-                      (/\bt\b/i.test(allContextText) && /\b(shape|shaped)\b/i.test(allContextText)) ||
+                      (/\b(t|tee)[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building|type|typed)\b/i.test(allContextText)) ||
+                      (/\b(t|tee)\b/i.test(allContextText) && /\b(shape|shaped)\b/i.test(allContextText)) ||
+                      allContextText.includes("t shape") || allContextText.includes("t-shape") || allContextText.includes("t shaped") || allContextText.includes("t-shaped") || allContextText.includes("t frame") || allContextText.includes("t-frame") || allContextText.includes("tee shape") || allContextText.includes("tee-shape") ||
                       data?.building3D?.massingForm === "T_SHAPED" ||
                       Boolean(data?.building3D?.isTShaped));
 
