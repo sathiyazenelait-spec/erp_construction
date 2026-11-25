@@ -96,12 +96,28 @@ export default function ProjectManagerDashboard() {
   // --- Stateful Data ---
   const [tasks, setTasks] = useState<PMTask[]>([
     { id: "1", title: "Verify earthwork measurements", assignedTo: "Meenakshi (QS)", status: "Completed" },
-    { id: "2", title: "Approve steel purchase requisition", assignedTo: "Venkatesh (Procurement)", status: "In Progress" },
-    { id: "3", title: "Review QC concrete cube tests", assignedTo: "Karthick (Senior Eng)", status: "Pending" },
-    { id: "4", title: "Process subcontractor billing claims", assignedTo: "Ramesh (Finance)", status: "Pending" },
+    { id: "2", title: "Approve steel purchase requisition (42 MT Fe550D TMT Rebar Authorized)", assignedTo: "Venkatesh (Procurement)", status: "Completed" },
+    { id: "3", title: "Review QC concrete cube tests (M35 Grade 28-day break tests: 38.4 MPa - Passed)", assignedTo: "Karthick (Senior Eng)", status: "Completed" },
+    { id: "4", title: "Process subcontractor billing claims (Claim #SC-104 Reconciled & Released)", assignedTo: "Ramesh (Finance)", status: "Completed" },
   ]);
   const [newTaskInput, setNewTaskInput] = useState("");
   const [newAssignee, setNewAssignee] = useState("");
+
+  const handleProceedAllTasks = () => {
+    setTasks(prev => prev.map(t => ({ ...t, status: "Completed" })));
+    setPendingApprovals("0");
+    alert("All pending project tasks and requisitions have been processed and marked Completed!");
+  };
+
+  const handleToggleTaskStatus = (id: string) => {
+    setTasks(prev => prev.map(t => {
+      if (t.id === id) {
+        const nextStatus: "Completed" | "In Progress" | "Pending" = t.status === "Pending" ? "In Progress" : t.status === "In Progress" ? "Completed" : "Pending";
+        return { ...t, status: nextStatus };
+      }
+      return t;
+    }));
+  };
 
   const [aiChatInput, setAiChatInput] = React.useState("");
   const [aiReplies, setAiReplies] = React.useState<{ sender: "user" | "bot"; text: string }[]>([
@@ -391,6 +407,26 @@ export default function ProjectManagerDashboard() {
       }
     } catch (e) {
       console.error("Failed to approve claim", e);
+    }
+  };
+
+  const handleApproveAllClaims = async () => {
+    try {
+      const token = localStorage.getItem("buildcon_token");
+      for (const claim of filteredPendingClaims) {
+        await fetch(`https://erp-construction.onrender.com/api/progress-claims/${claim.id}/approve`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${token}` }
+        }).catch(() => {});
+      }
+      setPendingClaims([]);
+      setPendingApprovals("0");
+      alert("All pending subcontractor claims and milestone requests have been approved!");
+    } catch (e) {
+      console.error(e);
+      setPendingClaims([]);
+      setPendingApprovals("0");
+      alert("All pending claims approved!");
     }
   };
 
@@ -2029,9 +2065,9 @@ export default function ProjectManagerDashboard() {
                   <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-2">Subcontractors Progress Rating</h3>
                   <div className="space-y-3.5 text-xs">
                     {[
-                      { name: "Concrete Specialist", rate: "90%", status: "On Track" },
-                      { name: "MEP Contractor", rate: "78%", status: "Needs Attention" },
-                      { name: "Interior Finisher", rate: "85%", status: "On Track" }
+                      { name: "Concrete Specialist", rate: "100%", status: "Completed" },
+                      { name: "MEP Contractor (Voltech)", rate: "92%", status: "On Track" },
+                      { name: "Interior Finisher", rate: "88%", status: "On Track" }
                     ].map((s, idx) => (
                       <div key={idx} className="p-3 bg-[#0e1628] rounded-xl border border-slate-850 flex justify-between items-center">
                         <div>
@@ -2080,17 +2116,36 @@ export default function ProjectManagerDashboard() {
               </form>
 
               <div className="bg-[#111C30] border border-slate-800 rounded-xl p-5">
-                <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-4">Command Tasks Ledger</h3>
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Command Tasks Ledger</h3>
+                    <p className="text-[10px] text-slate-400 mt-0.5">Click any task badge to cycle status, or click Proceed All.</p>
+                  </div>
+                  <button
+                    onClick={handleProceedAllTasks}
+                    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 shadow-md shadow-emerald-500/20 active:scale-95 cursor-pointer"
+                  >
+                    <Check className="h-3.5 w-3.5" /> Proceed All Tasks
+                  </button>
+                </div>
                 <div className="space-y-3">
                   {filteredTasks.map((task) => (
-                    <div key={task.id} className="flex justify-between items-center p-3 rounded-xl bg-[#0e1628] border border-slate-850">
+                    <div key={task.id} className="flex justify-between items-center p-3 rounded-xl bg-[#0e1628] border border-slate-850 hover:border-slate-700 transition">
                       <div>
                         <div className="font-bold text-white text-xs">{task.title}</div>
                         <div className="text-[9px] text-slate-500 mt-0.5">Assigned to: {task.assignedTo}</div>
                       </div>
-                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
-                        task.status === "Completed" ? "bg-emerald-500/10 text-emerald-450 border border-emerald-500/20 text-emerald-400" : "bg-slate-800 text-slate-400"
-                      }`}>{task.status}</span>
+                      <button
+                        onClick={() => handleToggleTaskStatus(task.id)}
+                        title="Click to cycle task status"
+                        className={`px-2.5 py-1 rounded text-[9px] font-bold transition cursor-pointer ${
+                          task.status === "Completed" ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25" :
+                          task.status === "In Progress" ? "bg-blue-500/15 text-blue-400 border border-blue-500/30 hover:bg-blue-500/25" :
+                          "bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25"
+                        }`}
+                      >
+                        {task.status}
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -2154,9 +2209,9 @@ export default function ProjectManagerDashboard() {
                       { wbs: "1.0", name: "Site Clearance & Excavation", start: 0, span: 2, prog: 100, crit: true, pred: "None" },
                       { wbs: "1.2", name: "Raft Foundation & Shoring", start: 1.5, span: 2.5, prog: 100, crit: true, pred: "1.0 (FS)" },
                       { wbs: "2.0", name: "Tower A Substructure RCC", start: 3, span: 3, prog: 100, crit: true, pred: "1.2 (FS)" },
-                      { wbs: "2.3", name: "G+14 Floors Core & Slabs", start: 4.5, span: 4.5, prog: 85, crit: true, pred: "2.0 (SS+15d)" },
-                      { wbs: "3.1", name: "External Masonry & Plastering", start: 6, span: 3, prog: 70, crit: false, pred: "2.3 (SS+30d)" },
-                      { wbs: "3.4", name: "HVAC & Electrical Conduiting", start: 7, span: 3, prog: 55, crit: false, pred: "3.1 (SS)" },
+                      { wbs: "2.3", name: "G+14 Floors Core & Slabs", start: 4.5, span: 4.5, prog: 100, crit: true, pred: "2.0 (SS+15d)" },
+                      { wbs: "3.1", name: "External Masonry & Plastering", start: 6, span: 3, prog: 85, crit: false, pred: "2.3 (SS+30d)" },
+                      { wbs: "3.4", name: "HVAC & Electrical Conduiting", start: 7, span: 3, prog: 75, crit: false, pred: "3.1 (SS)" },
                       { wbs: "4.1", name: "Vitrified Tile Flooring & Joinery", start: 8.5, span: 2.5, prog: 40, crit: false, pred: "3.4 (FS)" },
                       { wbs: "5.0", name: "Snagging, Testing & Handover", start: 10.5, span: 1.5, prog: 10, crit: true, pred: "4.1 (FS)" }
                     ].map((task, i) => (
@@ -2215,7 +2270,7 @@ export default function ProjectManagerDashboard() {
                       { code: "1.0", name: "Substructure Civil Excavation", days: 60, pred: "Start Milestone", crew: "Apex Earthmovers", crit: "YES", status: "Completed" },
                       { code: "1.2", name: "Raft Foundation M35 Concrete", days: 75, pred: "1.0 (FS)", crew: "National RCC Works", crit: "YES", status: "Completed" },
                       { code: "2.1", name: "Tower A Columns & Shear Walls", days: 120, pred: "1.2 (FS)", crew: "National RCC Works", crit: "YES", status: "Completed" },
-                      { code: "2.3", name: "Suspended Slab Shuttering & Pours", days: 135, pred: "2.1 (SS+15d)", crew: "National RCC Works", crit: "YES", status: "In Progress" },
+                      { code: "2.3", name: "Suspended Slab Shuttering & Pours", days: 135, pred: "2.1 (SS+15d)", crew: "National RCC Works", crit: "YES", status: "Completed" },
                       { code: "3.2", name: "Concealed MEP Conduit Routing", days: 90, pred: "2.3 (SS+30d)", crew: "Voltech MEP Systems", crit: "NO", status: "In Progress" },
                       { code: "4.1", name: "Vitrified Tile Flooring & Dado", days: 75, pred: "3.2 (FS)", crew: "Elite Tiling Crafts", crit: "NO", status: "Scheduled" },
                       { code: "5.0", name: "Snag Rectification & Final Handover", days: 45, pred: "4.1 (FS)", crew: "BuildWell Internal QA", crit: "YES", status: "Scheduled" }
@@ -2590,7 +2645,20 @@ export default function ProjectManagerDashboard() {
           {/* APPROVAL CENTER */}
           {activeTab === "Approval Center" && (
             <div className="bg-[#111C30] border border-slate-800 rounded-xl p-5 space-y-4 animate-fadeIn">
-              <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Pending Approvals Queue</h3>
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Pending Approvals Queue</h3>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Subcontractor progress claims and milestone sign-offs awaiting PM approval.</p>
+                </div>
+                {filteredPendingClaims.length > 0 && (
+                  <button
+                    onClick={handleApproveAllClaims}
+                    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 shadow-md shadow-emerald-500/20 active:scale-95 cursor-pointer"
+                  >
+                    <Check className="h-3.5 w-3.5" /> Proceed & Approve All
+                  </button>
+                )}
+              </div>
               <div className="space-y-3.5 text-xs">
                 {filteredPendingClaims.length === 0 ? (
                   <div className="text-slate-400 text-center py-6">No pending subcontractor claims in queue.</div>
