@@ -689,6 +689,8 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         isUShaped,
         isTShaped,
         isHShaped,
+        isCircularDonut,
+        isAldarCoin,
         isSphericalBall,
         isOpenSquare,
         isWideRange,
@@ -993,6 +995,87 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     isDraggingRef.current = false;
   };
 
+  // Extract dynamic architectural features from prompt and 3D spec for both 3D & 2D CAD
+  const promptLower = (promptText || data?.prompt || "").toLowerCase();
+  const allContextText = `${promptText} ${data?.prompt || ""} ${data?.title || ""} ${data?.building3D?.facadeStyle || ""}`.toLowerCase();
+
+  const isHShaped = (/\b(h[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(allContextText)) ||
+                    (/\bh\b/i.test(allContextText) && /\b(shape|shaped)\b/i.test(allContextText)) ||
+                    data?.building3D?.massingForm === "H_SHAPED" ||
+                    Boolean(data?.building3D?.isHShaped);
+
+  const isTShaped = !isHShaped && (
+                    (/\b(t[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(allContextText)) ||
+                    (/\bt\b/i.test(allContextText) && /\b(shape|shaped)\b/i.test(allContextText)) ||
+                    data?.building3D?.massingForm === "T_SHAPED" ||
+                    Boolean(data?.building3D?.isTShaped));
+
+  const isVShaped = !isHShaped && !isTShaped && (
+                    (/\b(v[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(allContextText)) ||
+                    (/\bv\b/i.test(allContextText) && /\b(shape|shaped)\b/i.test(allContextText)) ||
+                    data?.building3D?.massingForm === "V_SHAPED" ||
+                    Boolean(data?.building3D?.isVShaped));
+
+  const isUShaped = !isHShaped && !isTShaped && !isVShaped && (
+                    (/\b(u[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(allContextText)) ||
+                    (/\bu\b/i.test(allContextText) && /\b(shape|shaped)\b/i.test(allContextText)) ||
+                    allContextText.includes("horseshoe") ||
+                    data?.building3D?.massingForm === "U_SHAPED" ||
+                    Boolean(data?.building3D?.isUShaped));
+
+  const isAldarCoin = allContextText.includes("aldar") || allContextText.includes("coin shape") || allContextText.includes("standing disc") || allContextText.includes("coin building") || allContextText.includes("vertical circle") || data?.building3D?.massingForm === "ALDAR_COIN" || Boolean(data?.building3D?.isAldarCoin);
+
+  const isCircularDonut = !isAldarCoin && (allContextText.includes("cricle") || allContextText.includes("circle") || allContextText.includes("circular") || allContextText.includes("ring shape") || allContextText.includes("circular donut") || allContextText.includes("circular courtyard") || data?.building3D?.massingForm === "CIRCULAR_DONUT" || Boolean(data?.building3D?.isCircularDonut));
+
+  const isSphericalBall = allContextText.includes("ball shape") || allContextText.includes("spherical") || allContextText.includes("sphere") || allContextText.includes("globe") || allContextText.includes("orb") || allContextText.includes("geodesic ball") || allContextText.includes("ball building") || data?.building3D?.massingForm === "SPHERICAL_BALL" || Boolean(data?.building3D?.isSphericalBall);
+
+  const isOpenSquare = allContextText.includes("square open center") || allContextText.includes("open center") || allContextText.includes("hollow square") || allContextText.includes("courtyard ring") || allContextText.includes("atrium square") || (allContextText.includes("donut") && !allContextText.includes("circular")) || data?.building3D?.massingForm === "OPEN_SQUARE_DONUT" || Boolean(data?.building3D?.isOpenSquare);
+
+  const isWideRange = allContextText.includes("wide range") || allContextText.includes("wide building") || allContextText.includes("linear campus") || allContextText.includes("wide span") || data?.building3D?.massingForm === "WIDE_LINEAR_RANGE" || Boolean(data?.building3D?.isWideRange);
+
+  const isLShaped = !isHShaped && !isTShaped && !isVShaped && !isUShaped && !isSphericalBall && !isOpenSquare && !isCircularDonut && !isAldarCoin && (
+                    (/\b(l[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(allContextText)) ||
+                    (/\bl\b/i.test(allContextText) && /\b(shape|shaped)\b/i.test(allContextText)) ||
+                    data?.building3D?.massingForm === "L_SHAPED" ||
+                    Boolean(data?.building3D?.isLShaped));
+
+  const isCurvedRounded = data?.building3D?.isCurvedRounded ?? (promptLower.includes("round") || promptLower.includes("curved") || promptLower.includes("circular") || promptLower.includes("cylinder") || promptLower.includes("cylindrical") || promptLower.includes("oval") || promptLower.includes("crescent") || promptLower.includes("arc"));
+  const isHostel = data?.building3D?.isHostel ?? (promptLower.includes("hostel") || promptLower.includes("dormitory") || promptLower.includes("student") || promptLower.includes("campus") || promptLower.includes("coliving"));
+
+  const massingForm = (
+    isHShaped
+      ? "H_SHAPED"
+      : isTShaped
+      ? "T_SHAPED"
+      : isVShaped
+      ? "V_SHAPED"
+      : isUShaped
+      ? "U_SHAPED"
+      : isSphericalBall
+      ? "SPHERICAL_BALL"
+      : isOpenSquare
+      ? "OPEN_SQUARE_DONUT"
+      : isAldarCoin
+      ? "ALDAR_COIN"
+      : isCircularDonut
+      ? "CIRCULAR_DONUT"
+      : isWideRange
+      ? "WIDE_LINEAR_RANGE"
+      : isLShaped
+      ? "L_SHAPED"
+      : data?.building3D?.massingForm || (
+          isCurvedRounded || isHostel
+            ? "CURVED_CYLINDRICAL"
+            : promptLower.includes("stepped") || promptLower.includes("cascading") || promptLower.includes("terraced tower") || promptLower.includes("ziggurat") || promptLower.includes("setback") || promptLower.includes("pyramid")
+            ? "STEPPED_CASCADING"
+            : promptLower.includes("twist") || promptLower.includes("twisted") || promptLower.includes("spiral") || promptLower.includes("diagrid")
+            ? "TWISTED_DIAGRID"
+            : selectedPreset === "INDUSTRIAL" || promptLower.includes("warehouse") || promptLower.includes("shed")
+            ? "INDUSTRIAL_SHED"
+            : "RECTANGULAR"
+        )
+  );
+
   // Helper to project 3D isometric building coordinates
   const render3DBuilding = () => {
     const totalFlrs = floors || 7;
@@ -1045,29 +1128,48 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const hasVolleyball = data?.building3D?.hasVolleyball ?? (promptLower.includes("volleyball") || promptLower.includes("v-ball"));
     const hasSportsCourt = data?.building3D?.hasSportsCourt ?? (hasBasketball || hasVolleyball || promptLower.includes("sports court") || promptLower.includes("court"));
 
-    const isTShaped = (/\b(t[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(promptLower)) ||
-                      (/\bt\b/i.test(promptLower) && /\b(shape|shaped)\b/i.test(promptLower)) ||
-                      Boolean(data?.building3D?.isTShaped);
-    const isHShaped = (/\b(h[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(promptLower)) ||
-                      (/\bh\b/i.test(promptLower) && /\b(shape|shaped)\b/i.test(promptLower)) ||
+    const allContextText = `${promptText} ${data?.prompt || ""} ${data?.title || ""} ${data?.building3D?.facadeStyle || ""}`.toLowerCase();
+
+    const isHShaped = (/\b(h[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(allContextText)) ||
+                      (/\bh\b/i.test(allContextText) && /\b(shape|shaped)\b/i.test(allContextText)) ||
+                      data?.building3D?.massingForm === "H_SHAPED" ||
                       Boolean(data?.building3D?.isHShaped);
-    const isVShaped = (/\b(v[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(promptLower)) ||
-                      (/\bv\b/i.test(promptLower) && /\b(shape|shaped)\b/i.test(promptLower)) ||
-                      Boolean(data?.building3D?.isVShaped);
-    const isUShaped = (/\b(u[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(promptLower)) ||
-                      (/\bu\b/i.test(promptLower) && /\b(shape|shaped)\b/i.test(promptLower)) ||
-                      promptLower.includes("horseshoe") ||
-                      Boolean(data?.building3D?.isUShaped);
-    const isSphericalBall = promptLower.includes("ball shape") || promptLower.includes("spherical") || promptLower.includes("sphere") || promptLower.includes("globe") || promptLower.includes("orb") || Boolean(data?.building3D?.isSphericalBall);
-    const isOpenSquare = promptLower.includes("square open center") || promptLower.includes("open center") || promptLower.includes("hollow square") || promptLower.includes("atrium square") || (promptLower.includes("donut") && !promptLower.includes("circular")) || Boolean(data?.building3D?.isOpenSquare);
-    const isAldarCoin = promptLower.includes("aldar") || promptLower.includes("coin shape") || promptLower.includes("standing disc") || promptLower.includes("coin building") || promptLower.includes("vertical circle") || Boolean(data?.building3D?.isAldarCoin);
-    const isCircularDonut = promptLower.includes("cricle") || promptLower.includes("circle") || promptLower.includes("circular") || promptLower.includes("ring shape") || promptLower.includes("circular donut") || promptLower.includes("circular courtyard") || Boolean(data?.building3D?.isCircularDonut);
-    const isWideRange = promptLower.includes("wide range") || promptLower.includes("wide building") || promptLower.includes("linear campus") || promptLower.includes("wide span") || Boolean(data?.building3D?.isWideRange);
-    const isLShaped = !isVShaped && !isUShaped && !isTShaped && !isHShaped && !isSphericalBall && !isOpenSquare && !isCircularDonut && !isAldarCoin && (
-      (/\b(l[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(promptLower)) ||
-      (/\bl\b/i.test(promptLower) && /\b(shape|shaped)\b/i.test(promptLower)) ||
-      Boolean(data?.building3D?.isLShaped)
-    );
+
+    const isTShaped = !isHShaped && (
+                      (/\b(t[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(allContextText)) ||
+                      (/\bt\b/i.test(allContextText) && /\b(shape|shaped)\b/i.test(allContextText)) ||
+                      data?.building3D?.massingForm === "T_SHAPED" ||
+                      Boolean(data?.building3D?.isTShaped));
+
+    const isVShaped = !isHShaped && !isTShaped && (
+                      (/\b(v[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(allContextText)) ||
+                      (/\bv\b/i.test(allContextText) && /\b(shape|shaped)\b/i.test(allContextText)) ||
+                      data?.building3D?.massingForm === "V_SHAPED" ||
+                      Boolean(data?.building3D?.isVShaped));
+
+    const isUShaped = !isHShaped && !isTShaped && !isVShaped && (
+                      (/\b(u[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(allContextText)) ||
+                      (/\bu\b/i.test(allContextText) && /\b(shape|shaped)\b/i.test(allContextText)) ||
+                      allContextText.includes("horseshoe") ||
+                      data?.building3D?.massingForm === "U_SHAPED" ||
+                      Boolean(data?.building3D?.isUShaped));
+
+    const isAldarCoin = allContextText.includes("aldar") || allContextText.includes("coin shape") || allContextText.includes("standing disc") || allContextText.includes("coin building") || allContextText.includes("vertical circle") || data?.building3D?.massingForm === "ALDAR_COIN" || Boolean(data?.building3D?.isAldarCoin);
+
+    const isCircularDonut = !isAldarCoin && (allContextText.includes("cricle") || allContextText.includes("circle") || allContextText.includes("circular") || allContextText.includes("ring shape") || allContextText.includes("circular donut") || allContextText.includes("circular courtyard") || data?.building3D?.massingForm === "CIRCULAR_DONUT" || Boolean(data?.building3D?.isCircularDonut));
+
+    const isSphericalBall = allContextText.includes("ball shape") || allContextText.includes("spherical") || allContextText.includes("sphere") || allContextText.includes("globe") || allContextText.includes("orb") || allContextText.includes("geodesic ball") || allContextText.includes("ball building") || data?.building3D?.massingForm === "SPHERICAL_BALL" || Boolean(data?.building3D?.isSphericalBall);
+
+    const isOpenSquare = allContextText.includes("square open center") || allContextText.includes("open center") || allContextText.includes("hollow square") || allContextText.includes("courtyard ring") || allContextText.includes("atrium square") || (allContextText.includes("donut") && !allContextText.includes("circular")) || data?.building3D?.massingForm === "OPEN_SQUARE_DONUT" || Boolean(data?.building3D?.isOpenSquare);
+
+    const isWideRange = allContextText.includes("wide range") || allContextText.includes("wide building") || allContextText.includes("linear campus") || allContextText.includes("wide span") || data?.building3D?.massingForm === "WIDE_LINEAR_RANGE" || Boolean(data?.building3D?.isWideRange);
+
+    const isLShaped = !isHShaped && !isTShaped && !isVShaped && !isUShaped && !isSphericalBall && !isOpenSquare && !isCircularDonut && !isAldarCoin && (
+                      (/\b(l[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(allContextText)) ||
+                      (/\bl\b/i.test(allContextText) && /\b(shape|shaped)\b/i.test(allContextText)) ||
+                      data?.building3D?.massingForm === "L_SHAPED" ||
+                      Boolean(data?.building3D?.isLShaped));
+
     const hasPlayground = data?.building3D?.hasPlayground ?? (promptLower.includes("playgroud") || promptLower.includes("playground") || promptLower.includes("play ground") || promptLower.includes("play area") || promptLower.includes("park"));
     const hasAirplaneRoof = data?.building3D?.hasAirplaneRoof ?? (promptLower.includes("aeroplan") || promptLower.includes("airplane") || promptLower.includes("aeroplane") || promptLower.includes("wing design roof") || promptLower.includes("wing roof") || promptLower.includes("aviation roof"));
     const hasSolarPanels = data?.building3D?.hasSolarPanels ?? (promptLower.includes("solar pannel") || promptLower.includes("solar panel") || promptLower.includes("solar rooftop") || promptLower.includes("solar array") || promptLower.includes("solar farm"));
@@ -1081,10 +1183,10 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
     // Active Massing Form (Prompt explicit shapes take highest priority)
     const massingForm = (
-      isTShaped
-        ? "T_SHAPED"
-        : isHShaped
+      isHShaped
         ? "H_SHAPED"
+        : isTShaped
+        ? "T_SHAPED"
         : isVShaped
         ? "V_SHAPED"
         : isUShaped
@@ -1920,18 +2022,35 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                 { bottom: tb2, top: tt2 },
                 { bottom: tb1, top: tt1 }
               ] : massingForm === "H_SHAPED" ? [
-                // ResearchGate H-Shaped Structural Frame Columns at all 12 corners
+                // ResearchGate H-Shaped Structural Frame Columns at all 12 corners + bay nodes
                 { bottom: hb1, top: ht1 }, { bottom: hb2, top: ht2 }, { bottom: hb3, top: ht3 },
                 { bottom: hb4, top: ht4 }, { bottom: hb5, top: ht5 }, { bottom: hb6, top: ht6 },
                 { bottom: hb7, top: ht7 }, { bottom: hb8, top: ht8 }, { bottom: hb9, top: ht9 },
-                { bottom: hb10, top: ht10 }, { bottom: hb11, top: ht11 }, { bottom: hb12, top: ht12 }
+                { bottom: hb10, top: ht10 }, { bottom: hb11, top: ht11 }, { bottom: hb12, top: ht12 },
+                // Flank & notch intermediate columns
+                { bottom: project(-140 + twistX, 0, baseZ), top: project(-140 + twistX, 0, topZ) },
+                { bottom: project(140 + twistX, 0, baseZ), top: project(140 + twistX, 0, topZ) },
+                { bottom: project(-95 + twistX, 85, baseZ), top: project(-95 + twistX, 85, topZ) },
+                { bottom: project(95 + twistX, 85, baseZ), top: project(95 + twistX, 85, topZ) },
+                { bottom: project(-95 + twistX, -85, baseZ), top: project(-95 + twistX, -85, topZ) },
+                { bottom: project(95 + twistX, -85, baseZ), top: project(95 + twistX, -85, topZ) },
+                { bottom: project(0 + twistX, 28, baseZ), top: project(0 + twistX, 28, topZ) },
+                { bottom: project(0 + twistX, -28, baseZ), top: project(0 + twistX, -28, topZ) }
               ] : massingForm === "U_SHAPED" ? [
                 { bottom: ub1, top: ut1 }, { bottom: ub2, top: ut2 }, { bottom: ub3, top: ut3 },
                 { bottom: ub4, top: ut4 }, { bottom: ub5, top: ut5 }, { bottom: ub6, top: ut6 },
-                { bottom: ub7, top: ut7 }, { bottom: ub8, top: ut8 }
+                { bottom: ub7, top: ut7 }, { bottom: ub8, top: ut8 },
+                { bottom: project(-halfW + twistX, 0, baseZ), top: project(-halfW + twistX, 0, topZ) },
+                { bottom: project(halfW + twistX, 0, baseZ), top: project(halfW + twistX, 0, topZ) },
+                { bottom: project(0 + twistX, -halfD + uRearD, baseZ), top: project(0 + twistX, -halfD + uRearD, topZ) },
+                { bottom: project(0 + twistX, -halfD, baseZ), top: project(0 + twistX, -halfD, topZ) }
               ] : massingForm === "V_SHAPED" ? [
                 { bottom: vb1, top: vt1 }, { bottom: vb2, top: vt2 }, { bottom: vb3, top: vt3 },
-                { bottom: vb4, top: vt4 }, { bottom: vb5, top: vt5 }, { bottom: vb6, top: vt6 }
+                { bottom: vb4, top: vt4 }, { bottom: vb5, top: vt5 }, { bottom: vb6, top: vt6 },
+                { bottom: project(-77.5 + twistX, -40, baseZ), top: project(-77.5 + twistX, -40, topZ) },
+                { bottom: project(77.5 + twistX, -40, baseZ), top: project(77.5 + twistX, -40, topZ) },
+                { bottom: project(-62.5 + twistX, 5, baseZ), top: project(-62.5 + twistX, 5, topZ) },
+                { bottom: project(62.5 + twistX, 5, baseZ), top: project(62.5 + twistX, 5, topZ) }
               ] : isCurvedRounded ? [
                 { bottom: cbOut[0], top: ctOut[0] },
                 { bottom: cbIn[0], top: ctIn[0] },
@@ -1993,71 +2112,232 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     </g>
                   );
                 })()
-              ) : isCurvedRounded && !isXRay ? (
-                /* CURVED ROUNDED ARCHITECTURAL FACADE */
-                <g id={`curved-facade-floor-${floorNum}`}>
-                  {/* Outer Convex Rear / Flanks Facade Segments */}
-                  {Array.from({ length: arcSegs }).map((_, i) => (
-                    <polygon
-                      key={`curved-out-${floorNum}-${i}`}
-                      points={`${cbOut[i].x},${cbOut[i].y} ${cbOut[i+1].x},${cbOut[i+1].y} ${ctOut[i+1].x},${ctOut[i+1].y} ${ctOut[i].x},${ctOut[i].y}`}
-                      fill={facadeFill}
-                      stroke={facadeStroke}
-                      strokeWidth="1"
-                      strokeOpacity="0.55"
-                    />
-                  ))}
+              ) : massingForm === "H_SHAPED" && !isXRay ? (
+                /* H-SHAPED SYMMETRIC STRUCTURAL FRAME FACADE (Matches ResearchGate 3D Model with 3D Depth Sorting) */
+                <g id={`hshape-facade-floor-${floorNum}`}>
+                  {(() => {
+                    const hFaces = [
+                      { id: 'left_front', p1: hb12, p2: hb11, t1: ht12, t2: ht11, midX: -95, midY: 85, strokeW: "1.4", op: "0.92" },
+                      { id: 'left_inner_notch', p1: hb11, p2: hb10, t1: ht11, t2: ht10, midX: -50, midY: 56.5, strokeW: "1.1", op: "0.85" },
+                      { id: 'bridge_front', p1: hb10, p2: hb9, t1: ht10, t2: ht9, midX: 0, midY: 28, strokeW: "1.3", op: "0.95" },
+                      { id: 'right_inner_notch', p1: hb9, p2: hb8, t1: ht9, t2: ht8, midX: 50, midY: 56.5, strokeW: "1.1", op: "0.85" },
+                      { id: 'right_front', p1: hb8, p2: hb7, t1: ht8, t2: ht7, midX: 95, midY: 85, strokeW: "1.4", op: "0.92" },
+                      { id: 'right_flank', p1: hb7, p2: hb6, t1: ht7, t2: ht6, midX: 140, midY: 0, strokeW: "1.2", op: "0.75" },
+                      { id: 'right_rear', p1: hb6, p2: hb5, t1: ht6, t2: ht5, midX: 95, midY: -85, strokeW: "1.2", op: "0.80" },
+                      { id: 'right_rear_notch', p1: hb5, p2: hb4, t1: ht5, t2: ht4, midX: 50, midY: -56.5, strokeW: "1.1", op: "0.80" },
+                      { id: 'bridge_rear', p1: hb4, p2: hb3, t1: ht4, t2: ht3, midX: 0, midY: -28, strokeW: "1.2", op: "0.80" },
+                      { id: 'left_rear_notch', p1: hb3, p2: hb2, t1: ht3, t2: ht2, midX: -50, midY: -56.5, strokeW: "1.1", op: "0.80" },
+                      { id: 'left_rear', p1: hb2, p2: hb1, t1: ht2, t2: ht1, midX: -95, midY: -85, strokeW: "1.2", op: "0.80" },
+                      { id: 'left_flank', p1: hb1, p2: hb12, t1: ht1, t2: ht12, midX: -140, midY: 0, strokeW: "1.2", op: "0.75" }
+                    ].map(face => ({
+                      ...face,
+                      depth: face.midX * sinO + face.midY * cosO
+                    })).sort((a, b) => a.depth - b.depth);
 
-                  {/* Left Wing End-Cap */}
-                  <polygon
-                    points={`${cbOut[0].x},${cbOut[0].y} ${cbIn[0].x},${cbIn[0].y} ${ctIn[0].x},${ctIn[0].y} ${ctOut[0].x},${ctOut[0].y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.85"
-                  />
-                  {/* Right Wing End-Cap */}
-                  <polygon
-                    points={`${cbIn[arcSegs].x},${cbIn[arcSegs].y} ${cbOut[arcSegs].x},${cbOut[arcSegs].y} ${ctOut[arcSegs].x},${ctOut[arcSegs].y} ${ctIn[arcSegs].x},${ctIn[arcSegs].y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.85"
-                  />
+                    return hFaces.map(face => (
+                      <g key={`h-face-${floorNum}-${face.id}`}>
+                        <polygon
+                          points={`${face.p1.x},${face.p1.y} ${face.p2.x},${face.p2.y} ${face.t2.x},${face.t2.y} ${face.t1.x},${face.t1.y}`}
+                          fill={facadeFill}
+                          stroke={facadeStroke}
+                          strokeWidth={face.strokeW}
+                          strokeOpacity={face.op}
+                        />
+                        {[0.33, 0.66].map((ratio, mIdx) => {
+                          const mx1 = face.p1.x + (face.p2.x - face.p1.x) * ratio;
+                          const my1 = face.p1.y + (face.p2.y - face.p1.y) * ratio;
+                          const mx2 = face.t1.x + (face.t2.x - face.t1.x) * ratio;
+                          const my2 = face.t1.y + (face.t2.y - face.t1.y) * ratio;
+                          return (
+                            <line
+                              key={`h-mull-${floorNum}-${face.id}-${mIdx}`}
+                              x1={mx1}
+                              y1={my1}
+                              x2={mx2}
+                              y2={my2}
+                              stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#38BDF8"))}
+                              strokeWidth="1.2"
+                              strokeOpacity="0.65"
+                            />
+                          );
+                        })}
+                      </g>
+                    ));
+                  })()}
 
-                  {/* Inner Concave Front Panoramic Facade (Faces Courtyard) */}
-                  {Array.from({ length: arcSegs }).map((_, i) => (
-                    <polygon
-                      key={`curved-in-${floorNum}-${i}`}
-                      points={`${cbIn[i].x},${cbIn[i].y} ${cbIn[i+1].x},${cbIn[i+1].y} ${ctIn[i+1].x},${ctIn[i+1].y} ${ctIn[i].x},${ctIn[i].y}`}
-                      fill={facadeFill}
-                      stroke={facadeStroke}
-                      strokeWidth="1"
-                      strokeOpacity="0.88"
-                    />
-                  ))}
-
-                  {/* Vertical Window Mullions along Inner Curved Facade */}
-                  {Array.from({ length: arcSegs }).map((_, i) => {
-                    const mx1 = (cbIn[i].x + cbIn[i+1].x) / 2;
-                    const my1 = (cbIn[i].y + cbIn[i+1].y) / 2;
-                    const mx2 = (ctIn[i].x + ctIn[i+1].x) / 2;
-                    const my2 = (ctIn[i].y + ctIn[i+1].y) / 2;
+                  {/* Central Spine Label on Mid Floor */}
+                  {floorNum === Math.ceil(totalFlrs / 2) && (() => {
+                    const sbMid = {
+                      x: (hb10.x + hb9.x) / 2,
+                      y: (hb10.y + hb9.y + ht10.y + ht9.y) / 4
+                    };
                     return (
-                      <line
-                        key={`mullion-crv-${floorNum}-${i}`}
-                        x1={mx1}
-                        y1={my1}
-                        x2={mx2}
-                        y2={my2}
-                        stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#E0F2FE"))}
-                        strokeWidth="1.2"
-                        strokeOpacity="0.75"
-                      />
+                      <g transform={`translate(${sbMid.x - 45}, ${sbMid.y - 6})`}>
+                        <rect x="0" y="-7" width="90" height="14" rx="3" fill="rgba(15, 23, 42, 0.95)" stroke="#38BDF8" strokeWidth="0.8" />
+                        <text x="45" y="3" fill="#38BDF8" fontSize="7" fontWeight="bold" textAnchor="middle">
+                          🏢 CENTRAL CORE
+                        </text>
+                      </g>
                     );
-                  })}
+                  })()}
                 </g>
-              ) : isLShaped && !isXRay ? (
+              ) : massingForm === "T_SHAPED" && !isXRay ? (
+                /* T-SHAPED SYMMETRIC STRUCTURAL FRAME FACADE (Matches ResearchGate Structural Model with 3D Depth Sorting) */
+                <g id={`tshape-facade-floor-${floorNum}`}>
+                  {(() => {
+                    const tFaces = [
+                      { id: 'front', p1: tb8, p2: tb7, t1: tt8, t2: tt7, midX: 0, midY: 80, strokeW: "1.4", op: "0.92" },
+                      { id: 'right_end', p1: tb7, p2: tb6, t1: tt7, t2: tt6, midX: 140, midY: 50, strokeW: "1.2", op: "0.85" },
+                      { id: 'right_notch', p1: tb6, p2: tb5, t1: tt6, t2: tt5, midX: 92.5, midY: 20, strokeW: "1", op: "0.80" },
+                      { id: 'stem_right', p1: tb5, p2: tb4, t1: tt5, t2: tt4, midX: 45, midY: -40, strokeW: "1", op: "0.75" },
+                      { id: 'stem_rear', p1: tb4, p2: tb3, t1: tt4, t2: tt3, midX: 0, midY: -100, strokeW: "1.2", op: "0.80" },
+                      { id: 'stem_left', p1: tb3, p2: tb2, t1: tt3, t2: tt2, midX: -45, midY: -40, strokeW: "1", op: "0.75" },
+                      { id: 'left_notch', p1: tb2, p2: tb1, t1: tt2, t2: tt1, midX: -92.5, midY: 20, strokeW: "1", op: "0.80" },
+                      { id: 'left_end', p1: tb1, p2: tb8, t1: tt1, t2: tt8, midX: -140, midY: 50, strokeW: "1.2", op: "0.85" }
+                    ].map(face => ({
+                      ...face,
+                      depth: face.midX * sinO + face.midY * cosO
+                    })).sort((a, b) => a.depth - b.depth);
+
+                    return tFaces.map(face => (
+                      <g key={`t-face-${floorNum}-${face.id}`}>
+                        <polygon
+                          points={`${face.p1.x},${face.p1.y} ${face.p2.x},${face.p2.y} ${face.t2.x},${face.t2.y} ${face.t1.x},${face.t1.y}`}
+                          fill={facadeFill}
+                          stroke={facadeStroke}
+                          strokeWidth={face.strokeW}
+                          strokeOpacity={face.op}
+                        />
+                        {/* Structural Columns & Window Mullions on T-Faces */}
+                        {(face.id === 'front' ? [0.16, 0.33, 0.5, 0.66, 0.83] : [0.33, 0.66]).map((ratio, mIdx) => {
+                          const mx1 = face.p1.x + (face.p2.x - face.p1.x) * ratio;
+                          const my1 = face.p1.y + (face.p2.y - face.p1.y) * ratio;
+                          const mx2 = face.t1.x + (face.t2.x - face.t1.x) * ratio;
+                          const my2 = face.t1.y + (face.t2.y - face.t1.y) * ratio;
+                          return (
+                            <line
+                              key={`t-mull-${floorNum}-${face.id}-${mIdx}`}
+                              x1={mx1}
+                              y1={my1}
+                              x2={mx2}
+                              y2={my2}
+                              stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#38BDF8"))}
+                              strokeWidth="1.2"
+                              strokeOpacity="0.65"
+                            />
+                          );
+                        })}
+                      </g>
+                    ));
+                  })()}
+                </g>
+              ) : massingForm === "V_SHAPED" && !isXRay ? (
+                /* V-SHAPED SYMMETRIC DUAL WING STRUCTURAL FACADE (Matches ResearchGate Structural Model with 3D Depth Sorting) */
+                <g id={`vshape-facade-floor-${floorNum}`}>
+                  {(() => {
+                    const vFaces = [
+                      { id: 'left_outer', p1: vb1, p2: vb6, t1: vt1, t2: vt6, midX: -77.5, midY: -40, strokeW: "1.2", op: "0.75" },
+                      { id: 'left_tip', p1: vb6, p2: vb5, t1: vt6, t2: vt5, midX: -140, midY: 47.5, strokeW: "1.4", op: "0.90" },
+                      { id: 'left_inner', p1: vb5, p2: vb4, t1: vt5, t2: vt4, midX: -62.5, midY: 5, strokeW: "1.2", op: "0.85" },
+                      { id: 'right_inner', p1: vb4, p2: vb3, t1: vt4, t2: vt3, midX: 62.5, midY: 5, strokeW: "1.2", op: "0.85" },
+                      { id: 'right_tip', p1: vb3, p2: vb2, t1: vt3, t2: vt2, midX: 140, midY: 47.5, strokeW: "1.4", op: "0.90" },
+                      { id: 'right_outer', p1: vb2, p2: vb1, t1: vt2, t2: vt1, midX: 77.5, midY: -40, strokeW: "1.2", op: "0.75" }
+                    ].map(face => ({
+                      ...face,
+                      depth: face.midX * sinO + face.midY * cosO
+                    })).sort((a, b) => a.depth - b.depth);
+
+                    return vFaces.map(face => (
+                      <g key={`v-face-${floorNum}-${face.id}`}>
+                        <polygon
+                          points={`${face.p1.x},${face.p1.y} ${face.p2.x},${face.p2.y} ${face.t2.x},${face.t2.y} ${face.t1.x},${face.t1.y}`}
+                          fill={facadeFill}
+                          stroke={facadeStroke}
+                          strokeWidth={face.strokeW}
+                          strokeOpacity={face.op}
+                        />
+                        {[0.25, 0.5, 0.75].map((ratio, mIdx) => {
+                          const mx1 = face.p1.x + (face.p2.x - face.p1.x) * ratio;
+                          const my1 = face.p1.y + (face.p2.y - face.p1.y) * ratio;
+                          const mx2 = face.t1.x + (face.t2.x - face.t1.x) * ratio;
+                          const my2 = face.t1.y + (face.t2.y - face.t1.y) * ratio;
+                          return (
+                            <line
+                              key={`v-mull-${floorNum}-${face.id}-${mIdx}`}
+                              x1={mx1}
+                              y1={my1}
+                              x2={mx2}
+                              y2={my2}
+                              stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#38BDF8"))}
+                              strokeWidth="1.2"
+                              strokeOpacity="0.65"
+                            />
+                          );
+                        })}
+                      </g>
+                    ));
+                  })()}
+
+                  {/* Central V-Apex Rotunda Highlight on Mid Floor */}
+                  {floorNum === Math.ceil(totalFlrs / 2) && (
+                    <g transform={`translate(${vb4.x - 40}, ${vb4.y - 12})`}>
+                      <rect x="0" y="-7" width="80" height="14" rx="3" fill="rgba(15, 23, 42, 0.95)" stroke="#38BDF8" strokeWidth="0.8" />
+                      <text x="40" y="3" fill="#38BDF8" fontSize="7" fontWeight="bold" textAnchor="middle">
+                        🏛️ CENTRAL FOYER
+                      </text>
+                    </g>
+                  )}
+                </g>
+              ) : massingForm === "U_SHAPED" && !isXRay ? (
+                /* U-SHAPED TRIPLE-WING ARCHITECTURAL FACADE (Matches ResearchGate 3D Model with Depth Sorting) */
+                <g id={`ushape-facade-floor-${floorNum}`}>
+                  {(() => {
+                    const uFaces = [
+                      { id: 'left_tip', p1: ub8, p2: ub7, t1: ut8, t2: ut7, midX: -halfW + uWingW / 2, midY: halfD, strokeW: "1.4", op: "0.92" },
+                      { id: 'left_inner', p1: ub7, p2: ub6, t1: ut7, t2: ut6, midX: -halfW + uWingW, midY: (-halfD + uRearD + halfD) / 2, strokeW: "1.2", op: "0.85" },
+                      { id: 'rear_inner', p1: ub6, p2: ub5, t1: ut6, t2: ut5, midX: 0, midY: -halfD + uRearD, strokeW: "1.3", op: "0.90" },
+                      { id: 'right_inner', p1: ub5, p2: ub4, t1: ut5, t2: ut4, midX: halfW - uWingW, midY: (-halfD + uRearD + halfD) / 2, strokeW: "1.2", op: "0.85" },
+                      { id: 'right_tip', p1: ub4, p2: ub3, t1: ut4, t2: ut3, midX: halfW - uWingW / 2, midY: halfD, strokeW: "1.4", op: "0.92" },
+                      { id: 'right_flank', p1: ub3, p2: ub2, t1: ut3, t2: ut2, midX: halfW, midY: 0, strokeW: "1.2", op: "0.75" },
+                      { id: 'rear_outer', p1: ub2, p2: ub1, t1: ut2, t2: ut1, midX: 0, midY: -halfD, strokeW: "1.2", op: "0.75" },
+                      { id: 'left_flank', p1: ub1, p2: ub8, t1: ut1, t2: ut8, midX: -halfW, midY: 0, strokeW: "1.2", op: "0.75" }
+                    ].map(face => ({
+                      ...face,
+                      depth: face.midX * sinO + face.midY * cosO
+                    })).sort((a, b) => a.depth - b.depth);
+
+                    return uFaces.map(face => (
+                      <g key={`u-face-${floorNum}-${face.id}`}>
+                        <polygon
+                          points={`${face.p1.x},${face.p1.y} ${face.p2.x},${face.p2.y} ${face.t2.x},${face.t2.y} ${face.t1.x},${face.t1.y}`}
+                          fill={facadeFill}
+                          stroke={facadeStroke}
+                          strokeWidth={face.strokeW}
+                          strokeOpacity={face.op}
+                        />
+                        {[0.33, 0.66].map((ratio, mIdx) => {
+                          const mx1 = face.p1.x + (face.p2.x - face.p1.x) * ratio;
+                          const my1 = face.p1.y + (face.p2.y - face.p1.y) * ratio;
+                          const mx2 = face.t1.x + (face.t2.x - face.t1.x) * ratio;
+                          const my2 = face.t1.y + (face.t2.y - face.t1.y) * ratio;
+                          return (
+                            <line
+                              key={`u-mull-${floorNum}-${face.id}-${mIdx}`}
+                              x1={mx1}
+                              y1={my1}
+                              x2={mx2}
+                              y2={my2}
+                              stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#38BDF8"))}
+                              strokeWidth="1.2"
+                              strokeOpacity="0.65"
+                            />
+                          );
+                        })}
+                      </g>
+                    ));
+                  })()}
+                </g>
+              ) : massingForm === "L_SHAPED" && !isXRay ? (
                 /* L-SHAPED 4-FACE CURTAIN WALL FACADE */
                 <g id={`lshape-facade-floor-${floorNum}`}>
                   {/* Face 1: Left Wing Front Face */}
@@ -2120,308 +2400,69 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     })
                   ))}
                 </g>
-              ) : massingForm === "V_SHAPED" && !isXRay ? (
-                /* V-SHAPED SYMMETRIC DUAL WING STRUCTURAL FACADE (Matches ResearchGate Structural Model) */
-                <g id={`vshape-facade-floor-${floorNum}`}>
-                  {/* Left Wing Front Tip Face */}
-                  <polygon
-                    points={`${vb6.x},${vb6.y} ${vb5.x},${vb5.y} ${vt5.x},${vt5.y} ${vt6.x},${vt6.y}`}
-                    fill={glassDistribution === "RIGHT_FRONT_GLASS" ? "#1E293B" : facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1.2"
-                    strokeOpacity="0.88"
-                  />
-                  {/* Left Wing Inner Plaza Wall */}
-                  <polygon
-                    points={`${vb5.x},${vb5.y} ${vb4.x},${vb4.y} ${vt4.x},${vt4.y} ${vt5.x},${vt5.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.75"
-                  />
-                  {/* Right Wing Inner Plaza Wall */}
-                  <polygon
-                    points={`${vb4.x},${vb4.y} ${vb3.x},${vb3.y} ${vt3.x},${vt3.y} ${vt4.x},${vt4.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.75"
-                  />
-                  {/* Right Wing Front Tip Face */}
-                  <polygon
-                    points={`${vb3.x},${vb3.y} ${vb2.x},${vb2.y} ${vt2.x},${vt2.y} ${vt3.x},${vt3.y}`}
-                    fill={glassDistribution === "LEFT_FRONT_GLASS" ? "#1E293B" : facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1.2"
-                    strokeOpacity="0.88"
-                  />
-                  {/* Right Wing Outer Flank */}
-                  <polygon
-                    points={`${vb2.x},${vb2.y} ${vb1.x},${vb1.y} ${vt1.x},${vt1.y} ${vt2.x},${vt2.y}`}
-                    fill={glassDistribution === "LEFT_FRONT_GLASS" || glassDistribution === "ONE_SIDE_GLASS" ? "#1E293B" : facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.65"
-                  />
-                  {/* Left Wing Outer Flank */}
-                  <polygon
-                    points={`${vb1.x},${vb1.y} ${vb6.x},${vb6.y} ${vt6.x},${vt6.y} ${vt1.x},${vt1.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.65"
-                  />
-
-                  {/* Structural Columns & Window Mullions on V Wings */}
-                  {[
-                    { p1: vb5, p2: vb4, t1: vt5, t2: vt4 },
-                    { p1: vb4, p2: vb3, t1: vt4, t2: vt3 },
-                    { p1: vb6, p2: vb5, t1: vt6, t2: vt5 },
-                    { p1: vb3, p2: vb2, t1: vt3, t2: vt2 }
-                  ].map((face, fIdx) => (
-                    [0.25, 0.5, 0.75].map((ratio, mIdx) => {
-                      const mx1 = face.p1.x + (face.p2.x - face.p1.x) * ratio;
-                      const my1 = face.p1.y + (face.p2.y - face.p1.y) * ratio;
-                      const mx2 = face.t1.x + (face.t2.x - face.t1.x) * ratio;
-                      const my2 = face.t1.y + (face.t2.y - face.t1.y) * ratio;
-                      return (
-                        <line
-                          key={`mullion-v-${floorNum}-${fIdx}-${mIdx}`}
-                          x1={mx1}
-                          y1={my1}
-                          x2={mx2}
-                          y2={my2}
-                          stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#38BDF8"))}
-                          strokeWidth="1.2"
-                          strokeOpacity="0.65"
-                        />
-                      );
-                    })
+              ) : (massingForm === "CURVED_CYLINDRICAL" || isCurvedRounded) && !isXRay ? (
+                /* CURVED ROUNDED ARCHITECTURAL FACADE */
+                <g id={`curved-facade-floor-${floorNum}`}>
+                  {/* Outer Convex Rear / Flanks Facade Segments */}
+                  {Array.from({ length: arcSegs }).map((_, i) => (
+                    <polygon
+                      key={`curved-out-${floorNum}-${i}`}
+                      points={`${cbOut[i].x},${cbOut[i].y} ${cbOut[i+1].x},${cbOut[i+1].y} ${ctOut[i+1].x},${ctOut[i+1].y} ${ctOut[i].x},${ctOut[i].y}`}
+                      fill={facadeFill}
+                      stroke={facadeStroke}
+                      strokeWidth="1"
+                      strokeOpacity="0.55"
+                    />
                   ))}
 
-                  {/* Central V-Apex Rotunda Highlight on Mid Floor */}
-                  {floorNum === Math.ceil(totalFlrs / 2) && (
-                    <g transform={`translate(${vb4.x - 40}, ${vb4.y - 12})`}>
-                      <rect x="0" y="-7" width="80" height="14" rx="3" fill="rgba(15, 23, 42, 0.95)" stroke="#38BDF8" strokeWidth="0.8" />
-                      <text x="40" y="3" fill="#38BDF8" fontSize="7" fontWeight="bold" textAnchor="middle">
-                        🏛️ CENTRAL FOYER
-                      </text>
-                    </g>
-                  )}
-                </g>
-              ) : massingForm === "U_SHAPED" && !isXRay ? (
-                /* U-SHAPED TRIPLE-WING ARCHITECTURAL FACADE */
-                <g id={`ushape-facade-floor-${floorNum}`}>
-                  {/* Left Wing Front Face */}
+                  {/* Left Wing End-Cap */}
                   <polygon
-                    points={`${ub8.x},${ub8.y} ${ub7.x},${ub7.y} ${ut7.x},${ut7.y} ${ut8.x},${ut8.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1.2"
-                    strokeOpacity="0.88"
-                  />
-                  {/* Left Wing Inner Courtyard Wall */}
-                  <polygon
-                    points={`${ub7.x},${ub7.y} ${ub6.x},${ub6.y} ${ut6.x},${ut6.y} ${ut7.x},${ut7.y}`}
+                    points={`${cbOut[0].x},${cbOut[0].y} ${cbIn[0].x},${cbIn[0].y} ${ctIn[0].x},${ctIn[0].y} ${ctOut[0].x},${ctOut[0].y}`}
                     fill={facadeFill}
                     stroke={facadeStroke}
                     strokeWidth="1"
-                    strokeOpacity="0.75"
+                    strokeOpacity="0.85"
                   />
-                  {/* Rear Courtyard Connecting Wall */}
+                  {/* Right Wing End-Cap */}
                   <polygon
-                    points={`${ub6.x},${ub6.y} ${ub5.x},${ub5.y} ${ut5.x},${ut5.y} ${ut6.x},${ut6.y}`}
+                    points={`${cbIn[arcSegs].x},${cbIn[arcSegs].y} ${cbOut[arcSegs].x},${cbOut[arcSegs].y} ${ctOut[arcSegs].x},${ctOut[arcSegs].y} ${ctIn[arcSegs].x},${ctIn[arcSegs].y}`}
                     fill={facadeFill}
                     stroke={facadeStroke}
                     strokeWidth="1"
-                    strokeOpacity="0.80"
-                  />
-                  {/* Right Wing Inner Courtyard Wall */}
-                  <polygon
-                    points={`${ub5.x},${ub5.y} ${ub4.x},${ub4.y} ${ut4.x},${ut4.y} ${ut5.x},${ut5.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.75"
-                  />
-                  {/* Right Wing Front Face */}
-                  <polygon
-                    points={`${ub4.x},${ub4.y} ${ub3.x},${ub3.y} ${ut3.x},${ut3.y} ${ut4.x},${ut4.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1.2"
-                    strokeOpacity="0.88"
-                  />
-                  {/* Right Wing Outer Face */}
-                  <polygon
-                    points={`${ub3.x},${ub3.y} ${ub2.x},${ub2.y} ${ut2.x},${ut2.y} ${ut3.x},${ut3.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.70"
-                  />
-                  {/* Left Wing Outer Face */}
-                  <polygon
-                    points={`${ub1.x},${ub1.y} ${ub8.x},${ub8.y} ${ut8.x},${ut8.y} ${ut1.x},${ut1.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.70"
-                  />
-                </g>
-              ) : massingForm === "T_SHAPED" && !isXRay ? (
-                /* T-SHAPED SYMMETRIC STRUCTURAL FRAME FACADE (Matches ResearchGate Structural Model with 3D Depth Sorting) */
-                <g id={`tshape-facade-floor-${floorNum}`}>
-                  {(() => {
-                    const tFaces = [
-                      { id: 'front', p1: tb8, p2: tb7, t1: tt8, t2: tt7, midX: 0, midY: 80, strokeW: "1.4", op: "0.92" },
-                      { id: 'right_end', p1: tb7, p2: tb6, t1: tt7, t2: tt6, midX: 140, midY: 50, strokeW: "1.2", op: "0.85" },
-                      { id: 'right_notch', p1: tb6, p2: tb5, t1: tt6, t2: tt5, midX: 92.5, midY: 20, strokeW: "1", op: "0.80" },
-                      { id: 'stem_right', p1: tb5, p2: tb4, t1: tt5, t2: tt4, midX: 45, midY: -40, strokeW: "1", op: "0.75" },
-                      { id: 'stem_rear', p1: tb4, p2: tb3, t1: tt4, t2: tt3, midX: 0, midY: -100, strokeW: "1.2", op: "0.80" },
-                      { id: 'stem_left', p1: tb3, p2: tb2, t1: tt3, t2: tt2, midX: -45, midY: -40, strokeW: "1", op: "0.75" },
-                      { id: 'left_notch', p1: tb2, p2: tb1, t1: tt2, t2: tt1, midX: -92.5, midY: 20, strokeW: "1", op: "0.80" },
-                      { id: 'left_end', p1: tb1, p2: tb8, t1: tt1, t2: tt8, midX: -140, midY: 50, strokeW: "1.2", op: "0.85" }
-                    ].map(face => ({
-                      ...face,
-                      depth: face.midX * sinO + face.midY * cosO
-                    })).sort((a, b) => a.depth - b.depth);
-
-                    return tFaces.map(face => (
-                      <g key={`t-face-${floorNum}-${face.id}`}>
-                        <polygon
-                          points={`${face.p1.x},${face.p1.y} ${face.p2.x},${face.p2.y} ${face.t2.x},${face.t2.y} ${face.t1.x},${face.t1.y}`}
-                          fill={facadeFill}
-                          stroke={facadeStroke}
-                          strokeWidth={face.strokeW}
-                          strokeOpacity={face.op}
-                        />
-                        {/* Structural Columns & Window Mullions on T-Faces */}
-                        {(face.id === 'front' ? [0.16, 0.33, 0.5, 0.66, 0.83] : [0.33, 0.66]).map((ratio, mIdx) => {
-                          const mx1 = face.p1.x + (face.p2.x - face.p1.x) * ratio;
-                          const my1 = face.p1.y + (face.p2.y - face.p1.y) * ratio;
-                          const mx2 = face.t1.x + (face.t2.x - face.t1.x) * ratio;
-                          const my2 = face.t1.y + (face.t2.y - face.t1.y) * ratio;
-                          return (
-                            <line
-                              key={`t-mull-${floorNum}-${face.id}-${mIdx}`}
-                              x1={mx1}
-                              y1={my1}
-                              x2={mx2}
-                              y2={my2}
-                              stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#38BDF8"))}
-                              strokeWidth="1.2"
-                              strokeOpacity="0.65"
-                            />
-                          );
-                        })}
-                      </g>
-                    ));
-                  })()}
-                </g>
-              ) : massingForm === "H_SHAPED" && !isXRay ? (
-                /* H-SHAPED SYMMETRIC STRUCTURAL FRAME FACADE (Matches ResearchGate 3D Model) */
-                <g id={`hshape-facade-floor-${floorNum}`}>
-                  {/* Left Wing Front Face */}
-                  <polygon
-                    points={`${hb12.x},${hb12.y} ${hb11.x},${hb11.y} ${ht11.x},${ht11.y} ${ht12.x},${ht12.y}`}
-                    fill={glassDistribution === "RIGHT_FRONT_GLASS" ? "#1E293B" : facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1.2"
-                    strokeOpacity="0.88"
-                  />
-                  {/* Left Wing Inner Notch Face (Courtyard Side Wall) */}
-                  <polygon
-                    points={`${hb11.x},${hb11.y} ${hb10.x},${hb10.y} ${ht10.x},${ht10.y} ${ht11.x},${ht11.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.75"
-                  />
-                  {/* Central Connecting Corridor / Crossbar Front */}
-                  <polygon
-                    points={`${hb10.x},${hb10.y} ${hb9.x},${hb9.y} ${ht9.x},${ht9.y} ${ht10.x},${ht10.y}`}
-                    fill={facadeFill}
-                    stroke={isNight ? "#FEF08A" : "#38BDF8"}
-                    strokeWidth="1.2"
-                    strokeOpacity="0.95"
-                  />
-                  {/* Right Wing Inner Notch Face (Courtyard Side Wall) */}
-                  <polygon
-                    points={`${hb9.x},${hb9.y} ${hb8.x},${hb8.y} ${ht8.x},${ht8.y} ${ht9.x},${ht9.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.75"
-                  />
-                  {/* Right Wing Front Face */}
-                  <polygon
-                    points={`${hb8.x},${hb8.y} ${hb7.x},${hb7.y} ${ht7.x},${ht7.y} ${ht8.x},${ht8.y}`}
-                    fill={glassDistribution === "LEFT_FRONT_GLASS" ? "#1E293B" : facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1.2"
-                    strokeOpacity="0.88"
-                  />
-                  {/* Right Wing Outer Flank */}
-                  <polygon
-                    points={`${hb7.x},${hb7.y} ${hb6.x},${hb6.y} ${ht6.x},${ht6.y} ${ht7.x},${ht7.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.65"
-                  />
-                  {/* Left Wing Outer Flank */}
-                  <polygon
-                    points={`${hb1.x},${hb1.y} ${hb12.x},${hb12.y} ${ht12.x},${ht12.y} ${ht1.x},${ht1.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.65"
+                    strokeOpacity="0.85"
                   />
 
-                  {/* Structural Columns & Window Mullions on H-Faces */}
-                  {[
-                    { p1: hb12, p2: hb11, t1: ht12, t2: ht11 },
-                    { p1: hb11, p2: hb10, t1: ht11, t2: ht10 },
-                    { p1: hb10, p2: hb9, t1: ht10, t2: ht9 },
-                    { p1: hb9, p2: hb8, t1: ht9, t2: ht8 },
-                    { p1: hb8, p2: hb7, t1: ht8, t2: ht7 }
-                  ].map((face, fIdx) => (
-                    [0.33, 0.66].map((ratio, mIdx) => {
-                      const mx1 = face.p1.x + (face.p2.x - face.p1.x) * ratio;
-                      const my1 = face.p1.y + (face.p2.y - face.p1.y) * ratio;
-                      const mx2 = face.t1.x + (face.t2.x - face.t1.x) * ratio;
-                      const my2 = face.t1.y + (face.t2.y - face.t1.y) * ratio;
-                      return (
-                        <line
-                          key={`mullion-h-${floorNum}-${fIdx}-${mIdx}`}
-                          x1={mx1}
-                          y1={my1}
-                          x2={mx2}
-                          y2={my2}
-                          stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#38BDF8"))}
-                          strokeWidth="1.2"
-                          strokeOpacity="0.65"
-                        />
-                      );
-                    })
+                  {/* Inner Concave Front Panoramic Facade (Faces Courtyard) */}
+                  {Array.from({ length: arcSegs }).map((_, i) => (
+                    <polygon
+                      key={`curved-in-${floorNum}-${i}`}
+                      points={`${cbIn[i].x},${cbIn[i].y} ${cbIn[i+1].x},${cbIn[i+1].y} ${ctIn[i+1].x},${ctIn[i+1].y} ${ctIn[i].x},${ctIn[i].y}`}
+                      fill={facadeFill}
+                      stroke={facadeStroke}
+                      strokeWidth="1"
+                      strokeOpacity="0.88"
+                    />
                   ))}
 
-                  {/* Central Spine Label on Mid Floor */}
-                  {floorNum === Math.ceil(totalFlrs / 2) && (() => {
-                    const sbMid = {
-                      x: (hb10.x + hb9.x) / 2,
-                      y: (hb10.y + hb9.y + ht10.y + ht9.y) / 4
-                    };
+                  {/* Vertical Window Mullions along Inner Curved Facade */}
+                  {Array.from({ length: arcSegs }).map((_, i) => {
+                    const mx1 = (cbIn[i].x + cbIn[i+1].x) / 2;
+                    const my1 = (cbIn[i].y + cbIn[i+1].y) / 2;
+                    const mx2 = (ctIn[i].x + ctIn[i+1].x) / 2;
+                    const my2 = (ctIn[i].y + ctIn[i+1].y) / 2;
                     return (
-                      <g transform={`translate(${sbMid.x - 45}, ${sbMid.y - 6})`}>
-                        <rect x="0" y="-7" width="90" height="14" rx="3" fill="rgba(15, 23, 42, 0.95)" stroke="#38BDF8" strokeWidth="0.8" />
-                        <text x="45" y="3" fill="#38BDF8" fontSize="7" fontWeight="bold" textAnchor="middle">
-                          🏢 CENTRAL CORE
-                        </text>
-                      </g>
+                      <line
+                        key={`mullion-crv-${floorNum}-${i}`}
+                        x1={mx1}
+                        y1={my1}
+                        x2={mx2}
+                        y2={my2}
+                        stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#E0F2FE"))}
+                        strokeWidth="1.2"
+                        strokeOpacity="0.75"
+                      />
                     );
-                  })()}
+                  })}
                 </g>
               ) : massingForm === "SPHERICAL_BALL" && !isXRay ? (
                 /* SPHERICAL GEODESIC GLOBE FACADE */
@@ -3143,6 +3184,30 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                       </>
                     );
                   })()}
+                </g>
+              )}
+
+              {/* Structural FEM Grid Lines on U-Shape Roof Slab (matches ResearchGate structural model) */}
+              {massingForm === "U_SHAPED" && floorNum === totalFlrs && (
+                <g id="u-roof-fem-grid" opacity="0.85">
+                  {/* Left Wing Cross Bay Lines */}
+                  {[-halfD + uRearD * 0.5, 0, halfD * 0.5].map((gy, gIdx) => {
+                    const pA = project(-halfW + twistX, gy, topZ);
+                    const pB = project(-halfW + uWingW + twistX, gy, topZ);
+                    return <line key={`u-fem-l-${gIdx}`} x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })}
+                  {/* Right Wing Cross Bay Lines */}
+                  {[-halfD + uRearD * 0.5, 0, halfD * 0.5].map((gy, gIdx) => {
+                    const pA = project(halfW - uWingW + twistX, gy, topZ);
+                    const pB = project(halfW + twistX, gy, topZ);
+                    return <line key={`u-fem-r-${gIdx}`} x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })}
+                  {/* Rear Connecting Wing Cross Bay Lines */}
+                  {[-halfW * 0.35, 0, halfW * 0.35].map((gx, gIdx) => {
+                    const pA = project(gx + twistX, -halfD, topZ);
+                    const pB = project(gx + twistX, -halfD + uRearD, topZ);
+                    return <line key={`u-fem-b-${gIdx}`} x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })}
                 </g>
               )}
 
@@ -4031,10 +4096,12 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
         <div className="mt-2 flex flex-wrap items-center gap-1.5 relative z-10">
           {[
-            { label: "🧲 U-Shape Courtyard", prompt: "6-Floor U-Shaped Modern Commercial Complex with triple glazed wings, cantilevered balconies, and central landscaped courtyard plaza with sports court", floors: 6 },
-            { label: "📐 V-Shape Tower", prompt: "6-Floor V-Shaped Modern Iconic Commercial Tower with central entrance rotunda, panoramic glazed wings, and open recreational playground", floors: 6 },
-            { label: "🏗️ T-Shape Complex", prompt: "5-Floor T-Shape Architectural Office Building with front curtain glazing and structural RCC frame", floors: 5 },
-            { label: "🏢 H-Shape Skybridge", prompt: "7-Floor H-Shaped Twin-Tower Residential Complex with central connecting glass skybridge lounge", floors: 7 },
+            { label: "🏢 8-Floor H-Shaped Frame", prompt: "8 Floor High-Tech Modern H-Shaped Symmetric Structural Frame Building with dual parallel tower wings and central connecting structural core, multi-bay beam-column grid facade with continuous double-glazed Low-E curtain wall, structural perimeter columns at all bay intersections, flat roof slab with structural FEM bay grid lines and central elevator machine room, double-height covered entrance portico in front courtyard notch, landscaped front and rear sunken garden plazas with pedestrian walkways, two-level subterranean parking garage, indoor sports recreation center with squash courts and fitness gym, high-strength M40 concrete frame with Fe550D TMT structural rebar, warm 3000K linear LED perimeter column uplighting, detailed 3D model architectural visualization, realistic construction materials, professional blueprint-style presentation", floors: 8 },
+            { label: "🏗️ 8-Floor T-Shaped Frame", prompt: "8 Floor Modern T-Shaped Symmetric Structural Frame Building with perpendicular stem spine and broad front transverse wing, structural beam-column grid facade with continuous double-glazed curtain wall, structural perimeter columns at all bay intersections, flat roof slab with structural FEM bay grid lines, two landscaped outdoor courtyards flanking the stem, M40 concrete frame with Fe550D TMT rebar, detailed 3D model architectural visualization, realistic construction materials, professional blueprint-style presentation", floors: 8 },
+            { label: "🗼 6-Floor V-Shaped Tower", prompt: "6 Floor V-Shaped Modern Iconic Commercial Tower with converging panoramic glazed wings meeting at a central glass apex rotunda, double-glazed acoustic curtain wall windows with motorized solar louvers, cantilevered tapering wing balconies, aerodynamic rooftop crown with monocrystalline solar PV panels, grand two-story central entrance rotunda foyer with revolving glass doors, converging landscaped outdoor garden plaza with interactive water jets, subterranean multi-deck parking garage, open recreational sports playground with synthetic turf multi-sports pitch, M35 concrete core with composite steel framing, programmed cool-blue architectural LED night lighting, detailed 3D model architectural visualization, realistic construction materials, professional blueprint-style presentation", floors: 6 },
+            { label: "🏨 6-Floor U-Shaped Complex", prompt: "6 Floor Modern Luxury U-Shaped Courtyard Complex with three continuous glazed wings enclosing an expansive central open courtyard, floor-to-ceiling acoustic Low-E glass curtain walls, wrap-around cantilevered balconies overlooking the courtyard, rooftop solar PV farm array with certified lift machine rooms, grand central glass-roofed pedestrian arrival foyer, landscaped inner courtyard with volleyball court, basketball court, and central swimming pool, subterranean basement parking with dedicated EV charging stations, multi-sport athletic fitness gym and student recreation lounge, high-performance M35 RCC frame with Fe550D TMT rebar, 3000K architectural facade wall grazing illumination, detailed 3D model architectural visualization, realistic construction materials, professional blueprint-style presentation", floors: 6 },
+            { label: "⭕ 6-Floor Circular Donut", prompt: "6 Floor Iconic Circular Courtyard Donut Building with continuous 360-degree curved glass facade enclosing a lush circular inner garden courtyard atrium, aerodynamic ribbon balconies, rooftop observation terrace, central civic entrance rotunda, M35 concrete frame, detailed 3D model architectural visualization, professional blueprint-style presentation", floors: 6 },
+            { label: "🌿 7-Floor L-Shaped Hub", prompt: "7-Floor Modern L-Shaped Building Model with central landscaped courtyard, cantilevered glass balconies, and double-glazed curtain wall facade", floors: 7 },
             { label: "🔮 Spherical Orb Globe", prompt: "6-Floor Spherical Geodesic Ball Company Headquarters with carbon exoskeleton and glass globe facade", floors: 6 },
             { label: "🔲 Square Open-Center", prompt: "5-Floor Square Open Center Quadrangle Building with continuous glass envelope and central open-sky atrium", floors: 5 },
             { label: "✈️ Airplane Wing Roof", prompt: "6-Floor Contemporary Tower with aerodynamic swept airplane wing roof, navigation beacons, and curtain wall glazing", floors: 6 },
@@ -4044,7 +4111,6 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             { label: "🌗 Right Front Glassed", prompt: "6-Floor Contemporary Office Building with right front glass curtain wall and precast left wing", floors: 6 },
             { label: "⚽ Open Playground Hostel", prompt: "5-Floor Rounded Luxury Hostel Building with modern balconies and center open playground with sports court", floors: 5 },
             { label: "🏛️ Wide Linear Campus", prompt: "4-Floor Wide-Range Linear Innovation Campus Building with multi-bay structural frame and ribbon windows", floors: 4 },
-            { label: "🌿 L-Shaped Courtyard", prompt: "7-Floor Modern L-Shaped Building Model with central landscaped courtyard and cantilevered balconies", floors: 7 },
             { label: "🚁 Helipad Sky-Mansion", prompt: "7-Floor Ultra-Luxury Sky-Mansion Tower with champagne gold glazing, cantilevered floating balconies, and rooftop helipad terrace", floors: 7 },
             { label: "🏊 Infinity Sky Pool", prompt: "6-Floor Contemporary Waterfront Tower with elevated glass infinity sky pool, wooden sundeck, and azure glass facade", floors: 6 },
             { label: "🌀 Twisted Spiral Diagrid", prompt: "8-Floor Futuristic Spiral Twisted Tower with diamond diagrid exoskeleton and obsidian glass curtain wall", floors: 8 },
@@ -4288,7 +4354,191 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                     )}
 
                     {layers.architectural && (
-                      (data.building3D?.isCurvedRounded || data.building3D?.isHostel || data.prompt?.toLowerCase().includes("rounded") || data.prompt?.toLowerCase().includes("curved") || data.prompt?.toLowerCase().includes("hostel")) ? (
+                      (massingForm === "H_SHAPED" || isHShaped) ? (
+                        <g id="cad-hshape-outline">
+                          {/* H-Shaped Twin-Towers with Central Skybridge */}
+                          <polygon
+                            points="94,94 280,94 280,240 520,240 520,94 706,94 706,576 520,576 520,380 280,380 280,576 94,576"
+                            fill="none"
+                            stroke={themeColors.wallExterior}
+                            strokeWidth="12"
+                          />
+                          <polygon
+                            points="94,94 280,94 280,240 520,240 520,94 706,94 706,576 520,576 520,380 280,380 280,576 94,576"
+                            fill="none"
+                            stroke="url(#concreteHatch)"
+                            strokeWidth="8"
+                          />
+                          <polygon
+                            points="100,100 274,100 274,246 526,246 526,100 700,100 700,570 526,570 526,374 274,374 274,570 100,570"
+                            fill="none"
+                            stroke={themeColors.wallInterior}
+                            strokeWidth="2"
+                          />
+                          {/* Skybridge Linking Corridor */}
+                          <rect x="280" y="246" width="240" height="128" fill="none" stroke="#38BDF8" strokeWidth="1.5" strokeDasharray="4 2" />
+                          <text x="400" y="315" fill="#38BDF8" fontSize="10" fontWeight="bold" textAnchor="middle">
+                            🌉 GLAZED SKYBRIDGE
+                          </text>
+                        </g>
+                      ) : (massingForm === "T_SHAPED" || isTShaped) ? (
+                        <g id="cad-tshape-outline">
+                          {/* T-Shaped Structural Walls */}
+                          <polygon
+                            points="94,94 706,94 706,260 480,260 480,576 320,576 320,260 94,260"
+                            fill="none"
+                            stroke={themeColors.wallExterior}
+                            strokeWidth="12"
+                          />
+                          <polygon
+                            points="94,94 706,94 706,260 480,260 480,576 320,576 320,260 94,260"
+                            fill="none"
+                            stroke="url(#concreteHatch)"
+                            strokeWidth="8"
+                          />
+                          <polygon
+                            points="100,100 700,100 700,254 474,254 474,570 326,570 326,254 100,254"
+                            fill="none"
+                            stroke={themeColors.wallInterior}
+                            strokeWidth="2"
+                          />
+                          {/* West & East Side Courtyards */}
+                          <rect x="94" y="260" width="220" height="310" fill="#064E3B" fillOpacity="0.2" stroke="#10B981" strokeWidth="1" strokeDasharray="4 2" />
+                          <rect x="486" y="260" width="220" height="310" fill="#064E3B" fillOpacity="0.2" stroke="#10B981" strokeWidth="1" strokeDasharray="4 2" />
+                          <text x="204" y="415" fill="#34D399" fontSize="9" fontWeight="bold" textAnchor="middle">WEST COURTYARD</text>
+                          <text x="596" y="415" fill="#34D399" fontSize="9" fontWeight="bold" textAnchor="middle">EAST COURTYARD</text>
+                        </g>
+                      ) : (massingForm === "V_SHAPED" || isVShaped) ? (
+                        <g id="cad-vshape-outline">
+                          {/* V-Shaped Exterior Dual Wing Walls */}
+                          <polygon
+                            points="400,100 680,140 640,320 440,240 400,280 360,240 160,320 120,140"
+                            fill="none"
+                            stroke={themeColors.wallExterior}
+                            strokeWidth="12"
+                          />
+                          <polygon
+                            points="400,100 680,140 640,320 440,240 400,280 360,240 160,320 120,140"
+                            fill="none"
+                            stroke="url(#concreteHatch)"
+                            strokeWidth="8"
+                          />
+                          <polygon
+                            points="400,108 672,146 634,314 438,236 400,274 362,236 166,314 128,146"
+                            fill="none"
+                            stroke={themeColors.wallInterior}
+                            strokeWidth="2"
+                          />
+                          {/* Central Apex Rotunda Glass Entrance */}
+                          <circle cx="400" cy="274" r="26" fill="none" stroke="#38BDF8" strokeWidth="2" />
+                          <circle cx="400" cy="274" r="14" fill="none" stroke="#7DD3FC" strokeWidth="1" strokeDasharray="3 2" />
+                          <text x="400" y="278" fill="#38BDF8" fontSize="8" fontWeight="bold" textAnchor="middle">
+                            ROTUNDA
+                          </text>
+                          {/* Entrance Plaza & Open Playground */}
+                          <rect x="150" y="380" width="500" height="180" rx="8" fill="#064E3B" fillOpacity="0.25" stroke="#10B981" strokeWidth="1.5" strokeDasharray="5 3" />
+                          <text x="400" y="475" fill="#34D399" fontSize="11" fontWeight="bold" textAnchor="middle">
+                            ENTRANCE PLAZA & OPEN PLAYGROUND
+                          </text>
+                        </g>
+                      ) : (massingForm === "U_SHAPED" || isUShaped) ? (
+                        <g id="cad-ushape-outline">
+                          {/* U-Shaped Three-Wing Exterior Walls */}
+                          <polygon
+                            points="94,94 706,94 706,576 520,576 520,280 280,280 280,576 94,576"
+                            fill="none"
+                            stroke={themeColors.wallExterior}
+                            strokeWidth="12"
+                          />
+                          <polygon
+                            points="94,94 706,94 706,576 520,576 520,280 280,280 280,576 94,576"
+                            fill="none"
+                            stroke="url(#concreteHatch)"
+                            strokeWidth="8"
+                          />
+                          <polygon
+                            points="100,100 700,100 700,570 526,570 526,274 274,274 274,570 100,570"
+                            fill="none"
+                            stroke={themeColors.wallInterior}
+                            strokeWidth="2"
+                          />
+                          {/* Central Landscaped Courtyard with Sports Court */}
+                          <rect x="280" y="280" width="240" height="290" fill="#064E3B" fillOpacity="0.25" stroke="#10B981" strokeWidth="1.5" strokeDasharray="5 3" />
+                          <circle cx="400" cy="425" r="30" fill="none" stroke="#38BDF8" strokeWidth="1.5" />
+                          <text x="400" y="430" fill="#34D399" fontSize="10" fontWeight="bold" textAnchor="middle">
+                            CENTRAL COURTYARD PLAZA
+                          </text>
+                        </g>
+                      ) : (massingForm === "CIRCULAR_DONUT" || isCircularDonut) ? (
+                        <g id="cad-circ-donut-outline">
+                          {/* Outer Circle */}
+                          <circle cx="400" cy="335" r="260" fill="none" stroke={themeColors.wallExterior} strokeWidth="12" />
+                          <circle cx="400" cy="335" r="260" fill="none" stroke="url(#concreteHatch)" strokeWidth="8" />
+                          <circle cx="400" cy="335" r="254" fill="none" stroke={themeColors.wallInterior} strokeWidth="2" />
+                          {/* Inner Courtyard Circle */}
+                          <circle cx="400" cy="335" r="130" fill="#064E3B" fillOpacity="0.3" stroke="#10B981" strokeWidth="3" strokeDasharray="6 3" />
+                          <circle cx="400" cy="335" r="40" fill="none" stroke="#38BDF8" strokeWidth="2" />
+                          <text x="400" y="340" fill="#34D399" fontSize="10" fontWeight="bold" textAnchor="middle">
+                            CIRCULAR ATRIUM COURTYARD
+                          </text>
+                        </g>
+                      ) : (massingForm === "OPEN_SQUARE_DONUT" || isOpenSquare) ? (
+                        <g id="cad-open-square-outline">
+                          {/* Square Open-Center Quadrangle */}
+                          <rect x="94" y="94" width="612" height="482" fill="none" stroke={themeColors.wallExterior} strokeWidth="12" />
+                          <rect x="94" y="94" width="612" height="482" fill="none" stroke="url(#concreteHatch)" strokeWidth="8" />
+                          <rect x="100" y="100" width="600" height="470" fill="none" stroke={themeColors.wallInterior} strokeWidth="2" />
+                          {/* Inner Quadrangle Open Atrium Cutout */}
+                          <rect x="260" y="220" width="280" height="230" fill="#064E3B" fillOpacity="0.3" stroke="#10B981" strokeWidth="2" strokeDasharray="4 2" />
+                          <ellipse cx="400" cy="335" rx="35" ry="20" fill="none" stroke="#38BDF8" strokeWidth="1.5" />
+                          <text x="400" y="340" fill="#34D399" fontSize="10" fontWeight="bold" textAnchor="middle">
+                            OPEN-TO-SKY ATRIUM QUAD
+                          </text>
+                        </g>
+                      ) : (massingForm === "SPHERICAL_BALL" || isSphericalBall) ? (
+                        <g id="cad-sphere-outline">
+                          {/* Spherical Geodesic Circular Outer Shell */}
+                          <ellipse cx="400" cy="335" rx="280" ry="220" fill="none" stroke={themeColors.wallExterior} strokeWidth="12" />
+                          <ellipse cx="400" cy="335" rx="280" ry="220" fill="none" stroke="url(#concreteHatch)" strokeWidth="8" />
+                          <ellipse cx="400" cy="335" rx="274" ry="214" fill="none" stroke={themeColors.wallInterior} strokeWidth="2" />
+                          {/* Concentric Geodesic Latitude Rings */}
+                          <ellipse cx="400" cy="335" rx="200" ry="155" fill="none" stroke="#38BDF8" strokeWidth="1" strokeDasharray="6 3" />
+                          <ellipse cx="400" cy="335" rx="110" ry="85" fill="none" stroke="#38BDF8" strokeWidth="1" strokeDasharray="6 3" />
+                          <circle cx="400" cy="335" r="28" fill="#1E293B" stroke="#F59E0B" strokeWidth="1.5" />
+                          <text x="400" y="339" fill="#F59E0B" fontSize="8" fontWeight="bold" textAnchor="middle">
+                            CORE
+                          </text>
+                        </g>
+                      ) : (massingForm === "L_SHAPED" || isLShaped) ? (
+                        <g id="cad-lshape-outline">
+                          {/* L-shaped Exterior Thick Walls */}
+                          <polygon
+                            points="94,94 716,94 716,334 394,334 394,582 94,582"
+                            fill="none"
+                            stroke={themeColors.wallExterior}
+                            strokeWidth="12"
+                          />
+                          <polygon
+                            points="94,94 716,94 716,334 394,334 394,582 94,582"
+                            fill="none"
+                            stroke="url(#concreteHatch)"
+                            strokeWidth="8"
+                          />
+                          <polygon
+                            points="100,100 710,100 710,328 400,328 400,576 100,576"
+                            fill="none"
+                            stroke={themeColors.wallInterior}
+                            strokeWidth="2"
+                          />
+                          {/* Courtyard Lawn & Fountain in 2D Blueprint */}
+                          <rect x="404" y="334" width="306" height="242" fill="#064E3B" fillOpacity="0.25" stroke="#10B981" strokeWidth="1" strokeDasharray="4 2" />
+                          <circle cx="557" cy="455" r="35" fill="none" stroke="#38BDF8" strokeWidth="1.5" />
+                          <circle cx="557" cy="455" r="15" fill="none" stroke="#7DD3FC" strokeWidth="1" />
+                          <text x="557" y="458" fill="#34D399" fontSize="10" fontWeight="bold" textAnchor="middle">
+                            COURTYARD GARDEN
+                          </text>
+                        </g>
+                      ) : (massingForm === "CURVED_CYLINDRICAL" || isCurvedRounded || isHostel) ? (
                         <g id="cad-curved-hostel-sports-outline">
                           {/* Exterior Building Arc Outline */}
                           <path
@@ -4352,134 +4602,6 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                               VOLLEYBALL COURT (REGULATION)
                             </text>
                           </g>
-                        </g>
-                      ) : (data.building3D?.massingForm === "V_SHAPED" || data.building3D?.isVShaped || data.prompt?.toLowerCase().includes("v shape") || data.prompt?.toLowerCase().includes("v-shape") || data.prompt?.toLowerCase().includes("v shaped")) ? (
-                        <g id="cad-vshape-outline">
-                          {/* V-Shaped Exterior Dual Wing Walls */}
-                          <polygon
-                            points="400,100 680,140 640,320 440,240 400,280 360,240 160,320 120,140"
-                            fill="none"
-                            stroke={themeColors.wallExterior}
-                            strokeWidth="12"
-                          />
-                          <polygon
-                            points="400,100 680,140 640,320 440,240 400,280 360,240 160,320 120,140"
-                            fill="none"
-                            stroke="url(#concreteHatch)"
-                            strokeWidth="8"
-                          />
-                          <polygon
-                            points="400,108 672,146 634,314 438,236 400,274 362,236 166,314 128,146"
-                            fill="none"
-                            stroke={themeColors.wallInterior}
-                            strokeWidth="2"
-                          />
-                          {/* Central Apex Rotunda Glass Entrance */}
-                          <circle cx="400" cy="274" r="26" fill="none" stroke="#38BDF8" strokeWidth="2" />
-                          <circle cx="400" cy="274" r="14" fill="none" stroke="#7DD3FC" strokeWidth="1" strokeDasharray="3 2" />
-                          <text x="400" y="278" fill="#38BDF8" fontSize="8" fontWeight="bold" textAnchor="middle">
-                            ROTUNDA
-                          </text>
-                          {/* Entrance Plaza & Open Playground */}
-                          <rect x="150" y="380" width="500" height="180" rx="8" fill="#064E3B" fillOpacity="0.25" stroke="#10B981" strokeWidth="1.5" strokeDasharray="5 3" />
-                          <text x="400" y="475" fill="#34D399" fontSize="11" fontWeight="bold" textAnchor="middle">
-                            ENTRANCE PLAZA & OPEN PLAYGROUND
-                          </text>
-                        </g>
-                      ) : (data.building3D?.massingForm === "U_SHAPED" || data.building3D?.isUShaped || data.prompt?.toLowerCase().includes("u shape") || data.prompt?.toLowerCase().includes("u-shape") || data.prompt?.toLowerCase().includes("u shaped")) ? (
-                        <g id="cad-ushape-outline">
-                          {/* U-Shaped Three-Wing Exterior Walls */}
-                          <polygon
-                            points="94,94 706,94 706,576 520,576 520,280 280,280 280,576 94,576"
-                            fill="none"
-                            stroke={themeColors.wallExterior}
-                            strokeWidth="12"
-                          />
-                          <polygon
-                            points="94,94 706,94 706,576 520,576 520,280 280,280 280,576 94,576"
-                            fill="none"
-                            stroke="url(#concreteHatch)"
-                            strokeWidth="8"
-                          />
-                          <polygon
-                            points="100,100 700,100 700,570 526,570 526,274 274,274 274,570 100,570"
-                            fill="none"
-                            stroke={themeColors.wallInterior}
-                            strokeWidth="2"
-                          />
-                          {/* Central Landscaped Courtyard with Sports Court */}
-                          <rect x="280" y="280" width="240" height="290" fill="#064E3B" fillOpacity="0.25" stroke="#10B981" strokeWidth="1.5" strokeDasharray="5 3" />
-                          <circle cx="400" cy="425" r="30" fill="none" stroke="#38BDF8" strokeWidth="1.5" />
-                          <text x="400" y="430" fill="#34D399" fontSize="10" fontWeight="bold" textAnchor="middle">
-                            CENTRAL COURTYARD PLAZA
-                          </text>
-                        </g>
-                      ) : (data.building3D?.massingForm === "T_SHAPED" || data.building3D?.isTShaped || data.prompt?.toLowerCase().includes("t shape") || data.prompt?.toLowerCase().includes("t-shape") || data.prompt?.toLowerCase().includes("t shaped")) ? (
-                        <g id="cad-tshape-outline">
-                          {/* T-Shaped Structural Walls */}
-                          <polygon
-                            points="94,94 706,94 706,260 480,260 480,576 320,576 320,260 94,260"
-                            fill="none"
-                            stroke={themeColors.wallExterior}
-                            strokeWidth="12"
-                          />
-                          <polygon
-                            points="94,94 706,94 706,260 480,260 480,576 320,576 320,260 94,260"
-                            fill="none"
-                            stroke="url(#concreteHatch)"
-                            strokeWidth="8"
-                          />
-                          <polygon
-                            points="100,100 700,100 700,254 474,254 474,570 326,570 326,254 100,254"
-                            fill="none"
-                            stroke={themeColors.wallInterior}
-                            strokeWidth="2"
-                          />
-                          {/* West & East Side Courtyards */}
-                          <rect x="94" y="260" width="220" height="310" fill="#064E3B" fillOpacity="0.2" stroke="#10B981" strokeWidth="1" strokeDasharray="4 2" />
-                          <rect x="486" y="260" width="220" height="310" fill="#064E3B" fillOpacity="0.2" stroke="#10B981" strokeWidth="1" strokeDasharray="4 2" />
-                          <text x="204" y="415" fill="#34D399" fontSize="9" fontWeight="bold" textAnchor="middle">WEST COURTYARD</text>
-                          <text x="596" y="415" fill="#34D399" fontSize="9" fontWeight="bold" textAnchor="middle">EAST COURTYARD</text>
-                        </g>
-                      ) : (data.building3D?.massingForm === "CIRCULAR_DONUT" || data.prompt?.toLowerCase().includes("circular donut") || data.prompt?.toLowerCase().includes("cricle") || (data.prompt?.toLowerCase().includes("circle") && !data.prompt?.toLowerCase().includes("semi"))) ? (
-                        <g id="cad-circ-donut-outline">
-                          {/* Outer Circle */}
-                          <circle cx="400" cy="335" r="260" fill="none" stroke={themeColors.wallExterior} strokeWidth="12" />
-                          <circle cx="400" cy="335" r="260" fill="none" stroke="url(#concreteHatch)" strokeWidth="8" />
-                          <circle cx="400" cy="335" r="254" fill="none" stroke={themeColors.wallInterior} strokeWidth="2" />
-                          {/* Inner Courtyard Circle */}
-                          <circle cx="400" cy="335" r="130" fill="#064E3B" fillOpacity="0.3" stroke="#10B981" strokeWidth="3" strokeDasharray="6 3" />
-                          <circle cx="400" cy="335" r="40" fill="none" stroke="#38BDF8" strokeWidth="2" />
-                          <text x="400" y="340" fill="#34D399" fontSize="10" fontWeight="bold" textAnchor="middle">
-                            CIRCULAR ATRIUM COURTYARD
-                          </text>
-                        </g>
-                      ) : (data.building3D?.massingForm === "H_SHAPED" || data.building3D?.isHShaped || data.prompt?.toLowerCase().includes("h shape") || data.prompt?.toLowerCase().includes("h-shape") || data.prompt?.toLowerCase().includes("h shaped")) ? (
-                        <g id="cad-hshape-outline">
-                          {/* H-Shaped Twin-Towers with Central Skybridge */}
-                          <polygon
-                            points="94,94 280,94 280,240 520,240 520,94 706,94 706,576 520,576 520,380 280,380 280,576 94,576"
-                            fill="none"
-                            stroke={themeColors.wallExterior}
-                            strokeWidth="12"
-                          />
-                          <polygon
-                            points="94,94 280,94 280,240 520,240 520,94 706,94 706,576 520,576 520,380 280,380 280,576 94,576"
-                            fill="none"
-                            stroke="url(#concreteHatch)"
-                            strokeWidth="8"
-                          />
-                          <polygon
-                            points="100,100 274,100 274,246 526,246 526,100 700,100 700,570 526,570 526,374 274,374 274,570 100,570"
-                            fill="none"
-                            stroke={themeColors.wallInterior}
-                            strokeWidth="2"
-                          />
-                          {/* Skybridge Linking Corridor */}
-                          <rect x="280" y="246" width="240" height="128" fill="none" stroke="#38BDF8" strokeWidth="1.5" strokeDasharray="4 2" />
-                          <text x="400" y="315" fill="#38BDF8" fontSize="10" fontWeight="bold" textAnchor="middle">
-                            🌉 GLAZED SKYBRIDGE
-                          </text>
                         </g>
                       ) : (data.building3D?.massingForm === "OPEN_SQUARE_DONUT" || data.building3D?.isOpenSquare || data.prompt?.toLowerCase().includes("square open center") || data.prompt?.toLowerCase().includes("open center") || data.prompt?.toLowerCase().includes("donut")) ? (
                         <g id="cad-open-square-outline">
