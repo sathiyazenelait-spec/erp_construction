@@ -546,6 +546,22 @@ export default function ApprovalCenter() {
                     </td>
                     <td className="p-3.5 font-medium text-slate-200 max-w-xs">
                       <div>{ap.details}</div>
+                      {ap.details && ap.details.includes("3D Building Model") && (
+                        <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                          <span className="px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-mono text-[9px] font-bold flex items-center gap-1">
+                            🏢 3D BIM Model Attached
+                          </span>
+                          <a
+                            href="/drawings"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 text-[10px] font-bold underline flex items-center gap-0.5 transition"
+                          >
+                            <span>Inspect 3D</span>
+                            <ArrowUpRight className="w-2.5 h-2.5" />
+                          </a>
+                        </div>
+                      )}
                       {tab !== "pending" && ap.chairmanRemarks && (
                         <div className="mt-1 text-[11px] text-amber-300/90 font-serif italic line-clamp-1">
                           &ldquo;{ap.chairmanRemarks}&rdquo;
@@ -718,6 +734,22 @@ export default function ApprovalCenter() {
             <div className="p-3 bg-[#0B111E] rounded-xl border border-slate-800 text-xs space-y-1">
               <div className="text-slate-400 font-semibold">Request Description:</div>
               <div className="font-bold text-white">{decisionModal.title}</div>
+              {decisionModal.title && decisionModal.title.includes("3D Building Model") && (
+                <div className="p-2.5 mt-2 bg-gradient-to-r from-cyan-950/40 via-slate-800/60 to-slate-800/80 border border-cyan-500/30 rounded-xl text-cyan-300 text-[11px] flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold">🏢 3D Architectural Model & IS 1200 BOQ Attached</span>
+                  </div>
+                  <a
+                    href="/drawings"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold underline flex items-center gap-1 transition shrink-0"
+                  >
+                    <span>Inspect 3D in Studio</span>
+                    <ArrowUpRight className="w-3 h-3" />
+                  </a>
+                </div>
+              )}
               {decisionModal.amount && (
                 <div className="text-emerald-400 font-mono font-bold mt-1">Amount: {decisionModal.amount}</div>
               )}
