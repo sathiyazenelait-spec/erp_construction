@@ -1083,12 +1083,12 @@ def generate_blueprint_data(prompt="3BHK Luxury Residential Floor Plan", project
     has_sky_court = any(w in p_lower for w in ["sky court", "sky-court", "mid-level garden", "void", "cutout", "hollow", "sky bridge"])
     has_sun_louvers = any(w in p_lower for w in ["louver", "louvers", "shading", "brise-soleil", "fins", "slats"])
     
-    # Accurate regex matching for L-shape to avoid false positives with words like 'hostel'
-    is_l_shaped = bool(re.search(r'\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b', p_lower))
-    is_u_shaped = bool(re.search(r'\bu[-_\s]?(shape|shaped|block|layout)\b|\bu\s+building\b|horseshoe', p_lower))
-    is_v_shaped = bool(re.search(r'\bv[-_\s]?(shape|shaped|block|layout)\b|\bv\s+building\b', p_lower))
-    is_t_shaped = bool(re.search(r'\bt[-_\s]?(shape|shaped|block|layout)\b|\bt\s+building\b', p_lower))
-    is_h_shaped = bool(re.search(r'\bh[-_\s]?(shape|shaped|block|layout)\b|\bh\s+building\b', p_lower))
+    # Accurate regex matching for all architectural geometric shapes
+    is_t_shaped = bool(re.search(r'\b(t[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b', p_lower)) or bool(re.search(r'\bt\b.*\b(shape|shaped)\b', p_lower))
+    is_h_shaped = bool(re.search(r'\b(h[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b', p_lower)) or bool(re.search(r'\bh\b.*\b(shape|shaped)\b', p_lower))
+    is_v_shaped = bool(re.search(r'\b(v[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b', p_lower)) or bool(re.search(r'\bv\b.*\b(shape|shaped)\b', p_lower))
+    is_u_shaped = bool(re.search(r'\b(u[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b', p_lower)) or bool(re.search(r'\bu\b.*\b(shape|shaped)\b', p_lower)) or "horseshoe" in p_lower
+    is_l_shaped = bool(re.search(r'\b(l[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b', p_lower)) or bool(re.search(r'\bl\b.*\b(shape|shaped)\b', p_lower))
     is_spherical_ball = any(w in p_lower for w in ["ball shape", "spherical", "sphere", "globe", "orb", "geodesic ball", "ball building", "round company"])
     is_open_square = any(w in p_lower for w in ["square open center", "open center", "hollow square", "courtyard ring", "atrium square", "square courtyard"]) or ("donut" in p_lower and "circular" not in p_lower)
     is_aldar_coin = any(w in p_lower for w in ["aldar", "coin shape", "standing disc", "coin building", "vertical circle"])

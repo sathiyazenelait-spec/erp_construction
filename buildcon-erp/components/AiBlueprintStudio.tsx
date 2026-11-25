@@ -321,11 +321,11 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const hasDiagrid = pLower.includes("diagrid") || pLower.includes("diamond") || pLower.includes("lattice") || pLower.includes("exoskeleton") || pLower.includes("cross brace") || pLower.includes("x-brace");
     const hasSkyCourt = pLower.includes("sky court") || pLower.includes("sky-court") || pLower.includes("mid-level garden") || pLower.includes("void") || pLower.includes("cutout") || pLower.includes("hollow") || pLower.includes("sky bridge");
     const hasSunLouvers = pLower.includes("louver") || pLower.includes("louvers") || pLower.includes("shading") || pLower.includes("brise-soleil") || pLower.includes("fins") || pLower.includes("slats");
-    const isLShaped = /\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b/i.test(pLower);
-    const isUShaped = /\bu[-_\s]?(shape|shaped|block|layout)\b|\bu\s+building\b|horseshoe/i.test(pLower);
-    const isVShaped = /\bv[-_\s]?(shape|shaped|block|layout)\b|\bv\s+building\b/i.test(pLower);
-    const isTShaped = /\bt[-_\s]?(shape|shaped|block|layout)\b|\bt\s+building\b/i.test(pLower);
-    const isHShaped = /\bh[-_\s]?(shape|shaped|block|layout)\b|\bh\s+building\b/i.test(pLower);
+    const isTShaped = (/\b(t[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(pLower)) || (/\bt\b/i.test(pLower) && /\b(shape|shaped)\b/i.test(pLower));
+    const isHShaped = (/\b(h[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(pLower)) || (/\bh\b/i.test(pLower) && /\b(shape|shaped)\b/i.test(pLower));
+    const isVShaped = (/\b(v[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(pLower)) || (/\bv\b/i.test(pLower) && /\b(shape|shaped)\b/i.test(pLower));
+    const isUShaped = (/\b(u[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(pLower)) || (/\bu\b/i.test(pLower) && /\b(shape|shaped)\b/i.test(pLower)) || pLower.includes("horseshoe");
+    const isLShaped = (/\b(l[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(pLower)) || (/\bl\b/i.test(pLower) && /\b(shape|shaped)\b/i.test(pLower));
     const isSphericalBall = pLower.includes("ball shape") || pLower.includes("spherical") || pLower.includes("sphere") || pLower.includes("globe") || pLower.includes("orb") || pLower.includes("geodesic ball") || pLower.includes("ball building");
     const isOpenSquare = pLower.includes("square open center") || pLower.includes("open center") || pLower.includes("hollow square") || pLower.includes("courtyard ring") || pLower.includes("atrium square") || pLower.includes("square courtyard") || (pLower.includes("donut") && !pLower.includes("circular"));
     const isAldarCoin = pLower.includes("aldar") || pLower.includes("coin shape") || pLower.includes("standing disc") || pLower.includes("coin building") || pLower.includes("vertical circle");
@@ -1045,15 +1045,29 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     const hasVolleyball = data?.building3D?.hasVolleyball ?? (promptLower.includes("volleyball") || promptLower.includes("v-ball"));
     const hasSportsCourt = data?.building3D?.hasSportsCourt ?? (hasBasketball || hasVolleyball || promptLower.includes("sports court") || promptLower.includes("court"));
 
-    const isVShaped = data?.building3D?.isVShaped ?? (/\bv[-_\s]?(shape|shaped|block|layout)\b|\bv\s+building\b/i.test(promptLower));
-    const isUShaped = data?.building3D?.isUShaped ?? (/\bu[-_\s]?(shape|shaped|block|layout)\b|\bu\s+building\b|horseshoe/i.test(promptLower));
-    const isTShaped = data?.building3D?.isTShaped ?? (/\bt[-_\s]?(shape|shaped|block|layout)\b|\bt\s+building\b/i.test(promptLower));
-    const isHShaped = data?.building3D?.isHShaped ?? (/\bh[-_\s]?(shape|shaped|block|layout)\b|\bh\s+building\b/i.test(promptLower));
-    const isSphericalBall = data?.building3D?.isSphericalBall ?? (promptLower.includes("ball shape") || promptLower.includes("spherical") || promptLower.includes("sphere") || promptLower.includes("globe") || promptLower.includes("orb"));
-    const isOpenSquare = data?.building3D?.isOpenSquare ?? (promptLower.includes("square open center") || promptLower.includes("open center") || promptLower.includes("hollow square") || promptLower.includes("atrium square") || (promptLower.includes("donut") && !promptLower.includes("circular")));
-    const isAldarCoin = data?.building3D?.isAldarCoin ?? (promptLower.includes("aldar") || promptLower.includes("coin shape") || promptLower.includes("standing disc") || promptLower.includes("coin building") || promptLower.includes("vertical circle"));
-    const isCircularDonut = data?.building3D?.isCircularDonut ?? (promptLower.includes("cricle") || promptLower.includes("circle") || promptLower.includes("circular") || promptLower.includes("ring shape") || promptLower.includes("circular donut") || promptLower.includes("circular courtyard"));
-    const isWideRange = data?.building3D?.isWideRange ?? (promptLower.includes("wide range") || promptLower.includes("wide building") || promptLower.includes("linear campus") || promptLower.includes("wide span"));
+    const isTShaped = (/\b(t[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(promptLower)) ||
+                      (/\bt\b/i.test(promptLower) && /\b(shape|shaped)\b/i.test(promptLower)) ||
+                      Boolean(data?.building3D?.isTShaped);
+    const isHShaped = (/\b(h[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(promptLower)) ||
+                      (/\bh\b/i.test(promptLower) && /\b(shape|shaped)\b/i.test(promptLower)) ||
+                      Boolean(data?.building3D?.isHShaped);
+    const isVShaped = (/\b(v[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(promptLower)) ||
+                      (/\bv\b/i.test(promptLower) && /\b(shape|shaped)\b/i.test(promptLower)) ||
+                      Boolean(data?.building3D?.isVShaped);
+    const isUShaped = (/\b(u[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(promptLower)) ||
+                      (/\bu\b/i.test(promptLower) && /\b(shape|shaped)\b/i.test(promptLower)) ||
+                      promptLower.includes("horseshoe") ||
+                      Boolean(data?.building3D?.isUShaped);
+    const isSphericalBall = promptLower.includes("ball shape") || promptLower.includes("spherical") || promptLower.includes("sphere") || promptLower.includes("globe") || promptLower.includes("orb") || Boolean(data?.building3D?.isSphericalBall);
+    const isOpenSquare = promptLower.includes("square open center") || promptLower.includes("open center") || promptLower.includes("hollow square") || promptLower.includes("atrium square") || (promptLower.includes("donut") && !promptLower.includes("circular")) || Boolean(data?.building3D?.isOpenSquare);
+    const isAldarCoin = promptLower.includes("aldar") || promptLower.includes("coin shape") || promptLower.includes("standing disc") || promptLower.includes("coin building") || promptLower.includes("vertical circle") || Boolean(data?.building3D?.isAldarCoin);
+    const isCircularDonut = promptLower.includes("cricle") || promptLower.includes("circle") || promptLower.includes("circular") || promptLower.includes("ring shape") || promptLower.includes("circular donut") || promptLower.includes("circular courtyard") || Boolean(data?.building3D?.isCircularDonut);
+    const isWideRange = promptLower.includes("wide range") || promptLower.includes("wide building") || promptLower.includes("linear campus") || promptLower.includes("wide span") || Boolean(data?.building3D?.isWideRange);
+    const isLShaped = !isVShaped && !isUShaped && !isTShaped && !isHShaped && !isSphericalBall && !isOpenSquare && !isCircularDonut && !isAldarCoin && (
+      (/\b(l[-_\s]?(shape|shaped|block|layout|plan|frame|framed|design|model|structure|tower|building))\b/i.test(promptLower)) ||
+      (/\bl\b/i.test(promptLower) && /\b(shape|shaped)\b/i.test(promptLower)) ||
+      Boolean(data?.building3D?.isLShaped)
+    );
     const hasPlayground = data?.building3D?.hasPlayground ?? (promptLower.includes("playgroud") || promptLower.includes("playground") || promptLower.includes("play ground") || promptLower.includes("play area") || promptLower.includes("park"));
     const hasAirplaneRoof = data?.building3D?.hasAirplaneRoof ?? (promptLower.includes("aeroplan") || promptLower.includes("airplane") || promptLower.includes("aeroplane") || promptLower.includes("wing design roof") || promptLower.includes("wing roof") || promptLower.includes("aviation roof"));
     const hasSolarPanels = data?.building3D?.hasSolarPanels ?? (promptLower.includes("solar pannel") || promptLower.includes("solar panel") || promptLower.includes("solar rooftop") || promptLower.includes("solar array") || promptLower.includes("solar farm"));
@@ -1065,16 +1079,16 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
       "BALANCED_DUAL_CURTAIN"
     );
 
-    // Active Massing Form
-    const massingForm = data?.building3D?.massingForm || (
-      isVShaped
-        ? "V_SHAPED"
-        : isUShaped
-        ? "U_SHAPED"
-        : isTShaped
+    // Active Massing Form (Prompt explicit shapes take highest priority)
+    const massingForm = (
+      isTShaped
         ? "T_SHAPED"
         : isHShaped
         ? "H_SHAPED"
+        : isVShaped
+        ? "V_SHAPED"
+        : isUShaped
+        ? "U_SHAPED"
         : isSphericalBall
         ? "SPHERICAL_BALL"
         : isOpenSquare
@@ -1085,20 +1099,20 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         ? "CIRCULAR_DONUT"
         : isWideRange
         ? "WIDE_LINEAR_RANGE"
-        : isCurvedRounded || isHostel
-        ? "CURVED_CYLINDRICAL"
-        : (/\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b/i.test(promptLower))
+        : isLShaped
         ? "L_SHAPED"
-        : promptLower.includes("stepped") || promptLower.includes("cascading") || promptLower.includes("terraced tower") || promptLower.includes("ziggurat") || promptLower.includes("setback") || promptLower.includes("pyramid")
-        ? "STEPPED_CASCADING"
-        : promptLower.includes("twist") || promptLower.includes("twisted") || promptLower.includes("spiral") || promptLower.includes("diagrid")
-        ? "TWISTED_DIAGRID"
-        : selectedPreset === "INDUSTRIAL" || promptLower.includes("warehouse") || promptLower.includes("shed")
-        ? "INDUSTRIAL_SHED"
-        : "RECTANGULAR"
+        : data?.building3D?.massingForm || (
+            isCurvedRounded || isHostel
+              ? "CURVED_CYLINDRICAL"
+              : promptLower.includes("stepped") || promptLower.includes("cascading") || promptLower.includes("terraced tower") || promptLower.includes("ziggurat") || promptLower.includes("setback") || promptLower.includes("pyramid")
+              ? "STEPPED_CASCADING"
+              : promptLower.includes("twist") || promptLower.includes("twisted") || promptLower.includes("spiral") || promptLower.includes("diagrid")
+              ? "TWISTED_DIAGRID"
+              : selectedPreset === "INDUSTRIAL" || promptLower.includes("warehouse") || promptLower.includes("shed")
+              ? "INDUSTRIAL_SHED"
+              : "RECTANGULAR"
+          )
     );
-
-    const isLShaped = !isCurvedRounded && !isVShaped && !isUShaped && !isTShaped && !isHShaped && !isSphericalBall && !isOpenSquare && !isCircularDonut && !isAldarCoin && (massingForm === "L_SHAPED" || !!data?.building3D?.isLShaped || (/\bl[-_\s]?(shape|shaped|block|layout)\b|\bl\s+building\b/i.test(promptLower)));
 
     // Active Rooftop Feature
     const rooftopFeature = data?.building3D?.rooftopFeature || (
@@ -1889,7 +1903,36 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               )}
 
               {/* Structural RCC Columns (if X-Ray or Shaded) */}
-              {(isCurvedRounded ? [
+              {(massingForm === "T_SHAPED" ? [
+                // ResearchGate T-Shaped Structural Frame Columns at all corners & bay intersections
+                { bottom: tb8, top: tt8 },
+                { bottom: project(-70 + twistX, 80, baseZ), top: project(-70 + twistX, 80, topZ) },
+                { bottom: project(0 + twistX, 80, baseZ), top: project(0 + twistX, 80, topZ) },
+                { bottom: project(70 + twistX, 80, baseZ), top: project(70 + twistX, 80, topZ) },
+                { bottom: tb7, top: tt7 },
+                { bottom: tb6, top: tt6 },
+                { bottom: tb5, top: tt5 },
+                { bottom: project(45 + twistX, -40, baseZ), top: project(45 + twistX, -40, topZ) },
+                { bottom: tb4, top: tt4 },
+                { bottom: project(0 + twistX, -100, baseZ), top: project(0 + twistX, -100, topZ) },
+                { bottom: tb3, top: tt3 },
+                { bottom: project(-45 + twistX, -40, baseZ), top: project(-45 + twistX, -40, topZ) },
+                { bottom: tb2, top: tt2 },
+                { bottom: tb1, top: tt1 }
+              ] : massingForm === "H_SHAPED" ? [
+                // ResearchGate H-Shaped Structural Frame Columns at all 12 corners
+                { bottom: hb1, top: ht1 }, { bottom: hb2, top: ht2 }, { bottom: hb3, top: ht3 },
+                { bottom: hb4, top: ht4 }, { bottom: hb5, top: ht5 }, { bottom: hb6, top: ht6 },
+                { bottom: hb7, top: ht7 }, { bottom: hb8, top: ht8 }, { bottom: hb9, top: ht9 },
+                { bottom: hb10, top: ht10 }, { bottom: hb11, top: ht11 }, { bottom: hb12, top: ht12 }
+              ] : massingForm === "U_SHAPED" ? [
+                { bottom: ub1, top: ut1 }, { bottom: ub2, top: ut2 }, { bottom: ub3, top: ut3 },
+                { bottom: ub4, top: ut4 }, { bottom: ub5, top: ut5 }, { bottom: ub6, top: ut6 },
+                { bottom: ub7, top: ut7 }, { bottom: ub8, top: ut8 }
+              ] : massingForm === "V_SHAPED" ? [
+                { bottom: vb1, top: vt1 }, { bottom: vb2, top: vt2 }, { bottom: vb3, top: vt3 },
+                { bottom: vb4, top: vt4 }, { bottom: vb5, top: vt5 }, { bottom: vb6, top: vt6 }
+              ] : isCurvedRounded ? [
                 { bottom: cbOut[0], top: ctOut[0] },
                 { bottom: cbIn[0], top: ctIn[0] },
                 { bottom: cbOut[2], top: ctOut[2] },
@@ -2227,91 +2270,54 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                   />
                 </g>
               ) : massingForm === "T_SHAPED" && !isXRay ? (
-                /* T-SHAPED SYMMETRIC STRUCTURAL FRAME FACADE (Matches ResearchGate Structural Model) */
+                /* T-SHAPED SYMMETRIC STRUCTURAL FRAME FACADE (Matches ResearchGate Structural Model with 3D Depth Sorting) */
                 <g id={`tshape-facade-floor-${floorNum}`}>
-                  {/* Front Long Flange Face */}
-                  <polygon
-                    points={`${tb8.x},${tb8.y} ${tb7.x},${tb7.y} ${tt7.x},${tt7.y} ${tt8.x},${tt8.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1.2"
-                    strokeOpacity="0.88"
-                  />
-                  {/* Right Flange End Face */}
-                  <polygon
-                    points={`${tb6.x},${tb6.y} ${tb7.x},${tb7.y} ${tt7.x},${tt7.y} ${tt6.x},${tt6.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.70"
-                  />
-                  {/* Right Notch Return Wall (Inner Courtyard Wall) */}
-                  <polygon
-                    points={`${tb5.x},${tb5.y} ${tb6.x},${tb6.y} ${tt6.x},${tt6.y} ${tt5.x},${tt5.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.75"
-                  />
-                  {/* Stem Right Wall */}
-                  <polygon
-                    points={`${tb4.x},${tb4.y} ${tb5.x},${tb5.y} ${tt5.x},${tt5.y} ${tt4.x},${tt4.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.65"
-                  />
-                  {/* Left Flange End Face */}
-                  <polygon
-                    points={`${tb1.x},${tb1.y} ${tb8.x},${tb8.y} ${tt8.x},${tt8.y} ${tt1.x},${tt1.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.70"
-                  />
-                  {/* Left Notch Return Wall (Inner Courtyard Wall) */}
-                  <polygon
-                    points={`${tb1.x},${tb1.y} ${tb2.x},${tb2.y} ${tt2.x},${tt2.y} ${tt1.x},${tt1.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.75"
-                  />
-                  {/* Stem Left Wall */}
-                  <polygon
-                    points={`${tb3.x},${tb3.y} ${tb2.x},${tb2.y} ${tt2.x},${tt2.y} ${tt3.x},${tt3.y}`}
-                    fill={facadeFill}
-                    stroke={facadeStroke}
-                    strokeWidth="1"
-                    strokeOpacity="0.65"
-                  />
+                  {(() => {
+                    const tFaces = [
+                      { id: 'front', p1: tb8, p2: tb7, t1: tt8, t2: tt7, midX: 0, midY: 80, strokeW: "1.4", op: "0.92" },
+                      { id: 'right_end', p1: tb7, p2: tb6, t1: tt7, t2: tt6, midX: 140, midY: 50, strokeW: "1.2", op: "0.85" },
+                      { id: 'right_notch', p1: tb6, p2: tb5, t1: tt6, t2: tt5, midX: 92.5, midY: 20, strokeW: "1", op: "0.80" },
+                      { id: 'stem_right', p1: tb5, p2: tb4, t1: tt5, t2: tt4, midX: 45, midY: -40, strokeW: "1", op: "0.75" },
+                      { id: 'stem_rear', p1: tb4, p2: tb3, t1: tt4, t2: tt3, midX: 0, midY: -100, strokeW: "1.2", op: "0.80" },
+                      { id: 'stem_left', p1: tb3, p2: tb2, t1: tt3, t2: tt2, midX: -45, midY: -40, strokeW: "1", op: "0.75" },
+                      { id: 'left_notch', p1: tb2, p2: tb1, t1: tt2, t2: tt1, midX: -92.5, midY: 20, strokeW: "1", op: "0.80" },
+                      { id: 'left_end', p1: tb1, p2: tb8, t1: tt1, t2: tt8, midX: -140, midY: 50, strokeW: "1.2", op: "0.85" }
+                    ].map(face => ({
+                      ...face,
+                      depth: face.midX * sinO + face.midY * cosO
+                    })).sort((a, b) => a.depth - b.depth);
 
-                  {/* Structural Columns & Window Mullions on T-Faces */}
-                  {[
-                    { p1: tb8, p2: tb7, t1: tt8, t2: tt7, divs: [0.16, 0.33, 0.5, 0.66, 0.83] },
-                    { p1: tb5, p2: tb6, t1: tt5, t2: tt6, divs: [0.33, 0.66] },
-                    { p1: tb4, p2: tb5, t1: tt4, t2: tt5, divs: [0.33, 0.66] },
-                    { p1: tb1, p2: tb2, t1: tt1, t2: tt2, divs: [0.33, 0.66] }
-                  ].map((face, fIdx) => (
-                    face.divs.map((ratio, mIdx) => {
-                      const mx1 = face.p1.x + (face.p2.x - face.p1.x) * ratio;
-                      const my1 = face.p1.y + (face.p2.y - face.p1.y) * ratio;
-                      const mx2 = face.t1.x + (face.t2.x - face.t1.x) * ratio;
-                      const my2 = face.t1.y + (face.t2.y - face.t1.y) * ratio;
-                      return (
-                        <line
-                          key={`mullion-t-${floorNum}-${fIdx}-${mIdx}`}
-                          x1={mx1}
-                          y1={my1}
-                          x2={mx2}
-                          y2={my2}
-                          stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#38BDF8"))}
-                          strokeWidth="1.2"
-                          strokeOpacity="0.65"
+                    return tFaces.map(face => (
+                      <g key={`t-face-${floorNum}-${face.id}`}>
+                        <polygon
+                          points={`${face.p1.x},${face.p1.y} ${face.p2.x},${face.p2.y} ${face.t2.x},${face.t2.y} ${face.t1.x},${face.t1.y}`}
+                          fill={facadeFill}
+                          stroke={facadeStroke}
+                          strokeWidth={face.strokeW}
+                          strokeOpacity={face.op}
                         />
-                      );
-                    })
-                  ))}
+                        {/* Structural Columns & Window Mullions on T-Faces */}
+                        {(face.id === 'front' ? [0.16, 0.33, 0.5, 0.66, 0.83] : [0.33, 0.66]).map((ratio, mIdx) => {
+                          const mx1 = face.p1.x + (face.p2.x - face.p1.x) * ratio;
+                          const my1 = face.p1.y + (face.p2.y - face.p1.y) * ratio;
+                          const mx2 = face.t1.x + (face.t2.x - face.t1.x) * ratio;
+                          const my2 = face.t1.y + (face.t2.y - face.t1.y) * ratio;
+                          return (
+                            <line
+                              key={`t-mull-${floorNum}-${face.id}-${mIdx}`}
+                              x1={mx1}
+                              y1={my1}
+                              x2={mx2}
+                              y2={my2}
+                              stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#38BDF8"))}
+                              strokeWidth="1.2"
+                              strokeOpacity="0.65"
+                            />
+                          );
+                        })}
+                      </g>
+                    ));
+                  })()}
                 </g>
               ) : massingForm === "H_SHAPED" && !isXRay ? (
                 /* H-SHAPED SYMMETRIC STRUCTURAL FRAME FACADE (Matches ResearchGate 3D Model) */
@@ -3906,7 +3912,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
         {/* Prompt Input & Building Height Slider */}
         <div className="mt-4 grid grid-cols-1 lg:grid-cols-12 gap-3 items-center relative z-10">
-          <div className="lg:col-span-5 relative">
+          <div className="lg:col-span-5 relative flex items-center gap-1.5">
             <input
               type="text"
               value={promptText}
@@ -3916,9 +3922,18 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                   generateBlueprint(selectedPreset, promptText, builtupSqft, floors);
                 }
               }}
-              placeholder="e.g. 7-Floor L-Shaped Building with central courtyard, or Helipad Tower..."
-              className="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 font-mono shadow-inner"
+              placeholder="e.g. 8-Floor T-Shape Building, V-Shaped Tower, or H-Shape..."
+              className="flex-1 bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 font-mono shadow-inner"
             />
+            <button
+              onClick={() => generateBlueprint(selectedPreset, promptText, builtupSqft, floors)}
+              disabled={generating}
+              className="px-3 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl text-xs font-bold shadow-md shadow-cyan-500/20 flex items-center gap-1.5 transition whitespace-nowrap active:scale-95 disabled:opacity-50"
+              title="Generate 3D Architectural Blueprint Model from Prompt"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-200" />
+              <span>Generate 3D</span>
+            </button>
           </div>
 
           {/* Number of Floors Slider (1 to 12) */}
