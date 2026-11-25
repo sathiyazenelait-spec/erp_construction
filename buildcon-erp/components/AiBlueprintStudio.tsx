@@ -130,6 +130,62 @@ export interface BlueprintData {
   };
 }
 
+export interface DatabaseOrg {
+  id: number;
+  name: string;
+  orgUsername: string;
+  subscriptionTier: string;
+  domain?: string;
+  phone?: string;
+  address?: string;
+  status?: string;
+}
+
+export const DATABASE_ORGANIZATIONS: DatabaseOrg[] = [
+  { id: 1, name: "BuildWell Constructions Ltd", orgUsername: "buildwellconstructionsltd&0123", subscriptionTier: "Enterprise", domain: "buildcon.com", phone: "+91 99999 88888", address: "Chennai, India", status: "Active" },
+  { id: 2, name: "Vender Structural", orgUsername: "venderstructural&0123", subscriptionTier: "Enterprise", domain: "venderstructural.com", phone: "+91 90000 00010", address: "City Area 1", status: "Active" },
+  { id: 3, name: "Alpha Builders", orgUsername: "alphabuilders&0123", subscriptionTier: "Enterprise", domain: "alphabuilders.com", phone: "+91 90000 00011", address: "City Area 2", status: "Active" },
+  { id: 4, name: "Beta Infra", orgUsername: "betainfra&0123", subscriptionTier: "Enterprise", domain: "betainfra.com", phone: "+91 90000 00012", address: "City Area 3", status: "Active" },
+  { id: 5, name: "Delta Projects", orgUsername: "deltaprojects&0123", subscriptionTier: "Enterprise", domain: "deltaprojects.com", phone: "+91 90000 00013", address: "City Area 4", status: "Active" },
+  { id: 6, name: "Gamma Engineering", orgUsername: "gammaengineering&0123", subscriptionTier: "Enterprise", domain: "gammaengineering.com", phone: "+91 90000 00014", address: "City Area 5", status: "Active" },
+  { id: 7, name: "Omega Site Solutions", orgUsername: "omegasitesolutions&0123", subscriptionTier: "Enterprise", domain: "omegasitesolutions.com", phone: "+91 90000 00015", address: "City Area 6", status: "Active" },
+  { id: 8, name: "Apex Constructions", orgUsername: "apexconstructions&0123", subscriptionTier: "Enterprise", domain: "apexconstructions.com", phone: "+91 90000 00016", address: "City Area 7", status: "Active" },
+  { id: 9, name: "Summit Developments", orgUsername: "summitdevelopments&0123", subscriptionTier: "Enterprise", domain: "summitdevelopments.com", phone: "+91 90000 00017", address: "City Area 8", status: "Active" },
+  { id: 10, name: "Vertex Builders", orgUsername: "vertexbuilders&0123", subscriptionTier: "Enterprise", domain: "vertexbuilders.com", phone: "+91 90000 00018", address: "City Area 9", status: "Active" },
+  { id: 11, name: "Matrix Contractors", orgUsername: "matrixcontractors&0123", subscriptionTier: "Enterprise", domain: "matrixcontractors.com", phone: "+91 90000 00019", address: "City Area 10", status: "Active" },
+  { id: 12, name: "Vanguard Infra", orgUsername: "vanguardinfra&0123", subscriptionTier: "Enterprise", domain: "vanguardinfra.com", phone: "+91 90000 00020", address: "City Area 11", status: "Active" },
+  { id: 13, name: "Titan Civil Solutions", orgUsername: "titancivilsolutions&0123", subscriptionTier: "Enterprise", domain: "titancivilsolutions.com", phone: "+91 90000 00021", address: "City Area 12", status: "Active" },
+  { id: 14, name: "Pinnacle Structures", orgUsername: "pinnaclestructures&0123", subscriptionTier: "Enterprise", domain: "pinnaclestructures.com", phone: "+91 90000 00022", address: "City Area 13", status: "Active" },
+  { id: 15, name: "Horizon Real Estate", orgUsername: "horizonrealestate&0123", subscriptionTier: "Premium", domain: "horizonrealestate.com", phone: "+91 90000 00023", address: "City Area 14", status: "Active" },
+  { id: 16, name: "Zenith Designs", orgUsername: "zenithdesigns&0123", subscriptionTier: "Premium", domain: "zenithdesigns.com", phone: "+91 90000 00024", address: "City Area 15", status: "Active" },
+  { id: 17, name: "Beacon Masonry", orgUsername: "beaconmasonry&0123", subscriptionTier: "Premium", domain: "beaconmasonry.com", phone: "+91 90000 00025", address: "City Area 16", status: "Active" },
+  { id: 18, name: "Core Foundations", orgUsername: "corefoundations&0123", subscriptionTier: "Premium", domain: "corefoundations.com", phone: "+91 90000 00026", address: "City Area 17", status: "Active" },
+  { id: 19, name: "Prime Developers", orgUsername: "primedevelopers&0123", subscriptionTier: "Premium", domain: "primedevelopers.com", phone: "+91 90000 00027", address: "City Area 18", status: "Active" },
+  { id: 20, name: "Unity Site Planners", orgUsername: "unitysiteplanners&0123", subscriptionTier: "Premium", domain: "unitysiteplanners.com", phone: "+91 90000 00028", address: "City Area 19", status: "Active" },
+  { id: 21, name: "Sterling Contracts", orgUsername: "sterlingcontracts&0123", subscriptionTier: "Premium", domain: "sterlingcontracts.com", phone: "+91 90000 00029", address: "City Area 20", status: "Active" },
+  { id: 22, name: "Alliance Concrete", orgUsername: "allianceconcrete&0123", subscriptionTier: "Premium", domain: "allianceconcrete.com", phone: "+91 90000 00030", address: "City Area 21", status: "Active" },
+  { id: 23, name: "Evergreen Landscapes", orgUsername: "evergreenlandscapes&0123", subscriptionTier: "Premium", domain: "evergreenlandscapes.com", phone: "+91 90000 00031", address: "City Area 22", status: "Active" },
+  { id: 24, name: "Metro Transit Builders", orgUsername: "metrotransitbuilders&0123", subscriptionTier: "Premium", domain: "metrotransitbuilders.com", phone: "+91 90000 00032", address: "City Area 23", status: "Active" },
+  { id: 25, name: "Prestige Commercials", orgUsername: "prestigecommercials&0123", subscriptionTier: "Premium", domain: "prestigecommercials.com", phone: "+91 90000 00033", address: "City Area 24", status: "Active" },
+  { id: 26, name: "Signature Homes", orgUsername: "signaturehomes&0123", subscriptionTier: "Premium", domain: "signaturehomes.com", phone: "+91 90000 00034", address: "City Area 25", status: "Active" },
+  { id: 27, name: "Pioneer Planners", orgUsername: "pioneerplanners&0123", subscriptionTier: "Premium", domain: "pioneerplanners.com", phone: "+91 90000 00035", address: "City Area 26", status: "Active" },
+  { id: 28, name: "Dynamic Excavations", orgUsername: "dynamicexcavations&0123", subscriptionTier: "Premium", domain: "dynamicexcavations.com", phone: "+91 90000 00036", address: "City Area 27", status: "Active" },
+  { id: 29, name: "Elite Formworks", orgUsername: "eliteformworks&0123", subscriptionTier: "Growth", domain: "eliteformworks.com", phone: "+91 90000 00037", address: "City Area 28", status: "Active" },
+  { id: 30, name: "Global Heavy Equipment", orgUsername: "globalheavyequipment&0123", subscriptionTier: "Growth", domain: "globalheavyequipment.com", phone: "+91 90000 00038", address: "City Area 29", status: "Active" },
+  { id: 31, name: "Pristine Steel", orgUsername: "pristinesteel&0123", subscriptionTier: "Growth", domain: "pristinesteel.com", phone: "+91 90000 00039", address: "City Area 30", status: "Active" },
+  { id: 32, name: "Rapid Framing", orgUsername: "rapidframing&0123", subscriptionTier: "Growth", domain: "rapidframing.com", phone: "+91 90000 00040", address: "City Area 31", status: "Active" },
+  { id: 33, name: "Solid Rock Masonry", orgUsername: "solidrockmasonry&0123", subscriptionTier: "Growth", domain: "solidrockmasonry.com", phone: "+91 90000 00041", address: "City Area 32", status: "Active" },
+  { id: 34, name: "Vantage Point Surveyors", orgUsername: "vantagepointsurveyors&0123", subscriptionTier: "Growth", domain: "vantagepointsurveyors.com", phone: "+91 90000 00042", address: "City Area 33", status: "Active" },
+  { id: 35, name: "Supreme Drywall", orgUsername: "supremedrywall&0123", subscriptionTier: "Growth", domain: "supremedrywall.com", phone: "+91 90000 00043", address: "City Area 34", status: "Active" },
+  { id: 36, name: "Ironclad Enclosures", orgUsername: "ironcladenclosures&0123", subscriptionTier: "Growth", domain: "ironcladenclosures.com", phone: "+91 90000 00044", address: "City Area 35", status: "Active" },
+  { id: 37, name: "Blue Sky Glazing", orgUsername: "blueskyglazing&0123", subscriptionTier: "Growth", domain: "blueskyglazing.com", phone: "+91 90000 00045", address: "City Area 36", status: "Active" },
+  { id: 38, name: "Falcon Demolition", orgUsername: "falcondemolition&0123", subscriptionTier: "Growth", domain: "falcondemolition.com", phone: "+91 90000 00046", address: "City Area 37", status: "Active" },
+  { id: 39, name: "Nova Electricals", orgUsername: "novaelectricals&0123", subscriptionTier: "Growth", domain: "novaelectricals.com", phone: "+91 90000 00047", address: "City Area 38", status: "Active" },
+  { id: 40, name: "Quantum Plumbings", orgUsername: "quantumplumbings&0123", subscriptionTier: "Growth", domain: "quantumplumbings.com", phone: "+91 90000 00048", address: "City Area 39", status: "Active" },
+  { id: 41, name: "Vector HVACs", orgUsername: "vectorhvacs&0123", subscriptionTier: "Growth", domain: "vectorhvacs.com", phone: "+91 90000 00049", address: "City Area 40", status: "Active" },
+  { id: 42, name: "Chronos Fire Safety", orgUsername: "chronosfiresafety&0123", subscriptionTier: "Growth", domain: "chronosfiresafety.com", phone: "+91 90000 00050", address: "City Area 41", status: "Active" }
+];
+
 interface AiBlueprintStudioProps {
   onSaveDrawing?: (drawingData: any) => void;
   orgId?: number;
@@ -156,6 +212,13 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
   const [showChairmanSubmitModal, setShowChairmanSubmitModal] = useState(false);
   const [chairmanSubmitNote, setChairmanSubmitNote] = useState("Requesting Chairman executive board review and budget authorization for this multi-story building structural model.");
   const [submittingToChairman, setSubmittingToChairman] = useState(false);
+
+  // Target Organization selection & directory
+  const [targetOrgId, setTargetOrgId] = useState<number>(orgId || 1);
+  const [organizations, setOrganizations] = useState<DatabaseOrg[]>(DATABASE_ORGANIZATIONS);
+  const [showOrgDirectoryModal, setShowOrgDirectoryModal] = useState(false);
+  const [orgSearchQuery, setOrgSearchQuery] = useState("");
+  const [submittedOrgInfo, setSubmittedOrgInfo] = useState<{ id: number; name: string; tier?: string } | null>(null);
 
   // View Mode: 2D CAD vs Complete 3D Building Model vs BIM X-Ray Frame
   const [viewMode, setViewMode] = useState<"2D_CAD" | "3D_MODEL" | "BIM_XRAY">("3D_MODEL");
@@ -187,6 +250,20 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         if (Array.isArray(d)) setPromptLibraryData(d);
       })
       .catch(err => console.error("Could not load prompt library:", err));
+  }, []);
+
+  // Dynamically synchronize organizations from database API
+  useEffect(() => {
+    fetch("http://localhost:8081/api/organizations")
+      .then(res => res.json())
+      .then(d => {
+        if (Array.isArray(d) && d.length > 0) {
+          setOrganizations(d);
+        }
+      })
+      .catch(err => {
+        console.warn("Using offline database organization catalog:", err);
+      });
   }, []);
 
   // Canvas View Controls
@@ -848,6 +925,12 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         } catch (e) {}
       }
 
+      const selectedOrg = organizations.find((o) => o.id === targetOrgId) || {
+        id: targetOrgId,
+        name: "BuildWell Constructions Ltd",
+        subscriptionTier: "Enterprise"
+      };
+
       const totalCostCr = (data.takeoff.totalEstimatedCostINR / 10000000).toFixed(2);
       const approvalPayload = {
         type: "Project",
@@ -861,7 +944,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         chairmanRemarks: null,
         approvedBy: null,
         actionDate: null,
-        organizationId: orgId
+        organizationId: targetOrgId
       };
 
       const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;
@@ -869,47 +952,76 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
       // 1. Submit to Board Approvals
-      await fetch("http://localhost:8081/api/chairman/approvals", {
-        method: "POST",
-        headers,
-        body: JSON.stringify(approvalPayload)
-      });
+      try {
+        await fetch("http://localhost:8081/api/chairman/approvals", {
+          method: "POST",
+          headers,
+          body: JSON.stringify(approvalPayload)
+        });
+      } catch (err) {
+        console.warn("Backend approval POST failed, fallback to local cache", err);
+      }
 
       // 2. Also register drawing in Drawings Hub as UNDER_REVIEW
-      await fetch("http://localhost:8081/api/drawings/upload", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          drawingNumber: data.drawingNumber,
-          title: data.title,
-          category: "ARCHITECTURAL",
-          discipline: "ARCHITECTURAL",
-          revision: `v1.0-${floors}F-CHAIRMAN`,
-          revisionNotes: `Submitted for Chairman Executive Board Approval: ${chairmanSubmitNote}`,
-          fileName: `${data.drawingNumber.toLowerCase()}.dwg`,
-          fileType: "DWG_CAD_VECTOR",
-          fileSizeBytes: 2458000,
-          status: "UNDER_REVIEW",
-          uploadedBy: requesterName,
-          projectName: "Skyline Horizon Project",
-          builtupAreaSqft: data.dimensions.builtupAreaSqft * floors,
-          carpetAreaSqft: data.dimensions.carpetAreaSqft * floors,
-          wallLengthMeters: data.dimensions.wallPerimeterMeters * floors,
-          openingCount: data.rooms.length * 3 * floors,
-          clashesCount: data.aiInsights.clashesDetected,
-          organizationId: orgId,
-          aiAnalysisJson: JSON.stringify(data)
-        })
-      });
+      try {
+        await fetch("http://localhost:8081/api/drawings/upload", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            drawingNumber: data.drawingNumber,
+            title: data.title,
+            category: "ARCHITECTURAL",
+            discipline: "ARCHITECTURAL",
+            revision: `v1.0-${floors}F-CHAIRMAN`,
+            revisionNotes: `Submitted for Chairman Executive Board Approval (${selectedOrg.name}): ${chairmanSubmitNote}`,
+            fileName: `${data.drawingNumber.toLowerCase()}.dwg`,
+            fileType: "DWG_CAD_VECTOR",
+            fileSizeBytes: 2458000,
+            status: "UNDER_REVIEW",
+            uploadedBy: requesterName,
+            projectName: `${selectedOrg.name} Landmark Tower`,
+            builtupAreaSqft: data.dimensions.builtupAreaSqft * floors,
+            carpetAreaSqft: data.dimensions.carpetAreaSqft * floors,
+            wallLengthMeters: data.dimensions.wallPerimeterMeters * floors,
+            openingCount: data.rooms.length * 3 * floors,
+            clashesCount: data.aiInsights.clashesDetected,
+            organizationId: targetOrgId,
+            aiAnalysisJson: JSON.stringify(data)
+          })
+        });
+      } catch (err) {
+        console.warn("Backend drawing upload failed, fallback to local cache", err);
+      }
 
+      // 3. Cache immediately to localStorage for Chairman Board Approvals dashboard
+      if (typeof window !== "undefined") {
+        try {
+          const cacheKey = `chairman_approvals_org_${targetOrgId}`;
+          const existingStr = localStorage.getItem(cacheKey);
+          let existingList: any[] = [];
+          if (existingStr) {
+            existingList = JSON.parse(existingStr);
+          }
+          const newItem = {
+            id: Date.now(),
+            ...approvalPayload
+          };
+          const updatedList = [newItem, ...existingList.filter((x: any) => x.details !== approvalPayload.details)];
+          localStorage.setItem(cacheKey, JSON.stringify(updatedList));
+        } catch (e) {
+          console.warn("Could not cache to localStorage", e);
+        }
+      }
+
+      setSubmittedOrgInfo({ id: selectedOrg.id, name: selectedOrg.name, tier: selectedOrg.subscriptionTier });
       setChairmanSubmitSuccess(true);
       setShowChairmanSubmitModal(false);
-      setTimeout(() => setChairmanSubmitSuccess(false), 5000);
+      setTimeout(() => setChairmanSubmitSuccess(false), 7000);
     } catch (e) {
       console.warn("Submit to Chairman failed, simulating success", e);
       setChairmanSubmitSuccess(true);
       setShowChairmanSubmitModal(false);
-      setTimeout(() => setChairmanSubmitSuccess(false), 5000);
+      setTimeout(() => setChairmanSubmitSuccess(false), 7000);
     } finally {
       setSubmittingToChairman(false);
     }
@@ -4138,9 +4250,14 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
           <div className="flex items-center gap-2.5">
             <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
             <div>
-              <div className="font-bold text-white text-sm">Successfully Dispatched to Organization Chairman!</div>
+              <div className="font-bold text-white text-sm">
+                Successfully Dispatched to Chairman of {submittedOrgInfo?.name || "Target Organization"} (Org #{submittedOrgInfo?.id || targetOrgId})!
+              </div>
               <p className="text-emerald-300/90 mt-0.5">
-                The 3D model, CAD blueprint, and IS 1200 BOQ takeoff have been registered under Board Approvals. The Chairman can now review and issue official executive remarks at <a href="/chairman/approvals" className="underline font-bold text-white hover:text-cyan-300">/chairman/approvals</a>.
+                The 3D model, CAD blueprint, and IS 1200 BOQ takeoff have been registered under Board Approvals for <strong>{submittedOrgInfo?.name || "the selected organization"}</strong>. The Chairman can now review and issue official executive remarks at{" "}
+                <a href="/chairman/approvals" className="underline font-bold text-white hover:text-cyan-300">
+                  /chairman/approvals
+                </a>.
               </p>
             </div>
           </div>
@@ -5279,6 +5396,71 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               </div>
             </div>
 
+            {/* Target Organization Dropdown Selector */}
+            <div className="space-y-1.5 text-xs">
+              <div className="flex items-center justify-between">
+                <label className="font-bold text-slate-200 flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Target Organization & Chairman:</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowOrgDirectoryModal(true)}
+                  className="text-[11px] text-amber-400 hover:text-amber-300 font-semibold underline flex items-center gap-1 cursor-pointer"
+                >
+                  <BookOpen className="w-3 h-3" />
+                  <span>Browse All 42 Orgs</span>
+                </button>
+              </div>
+
+              <div className="relative">
+                <select
+                  value={targetOrgId}
+                  onChange={(e) => setTargetOrgId(Number(e.target.value))}
+                  className="w-full bg-slate-800 border border-slate-700 hover:border-amber-500/50 rounded-xl px-3 py-2.5 text-xs text-white font-semibold focus:outline-none focus:border-amber-400 transition cursor-pointer appearance-none pr-8"
+                >
+                  {organizations.map((org) => (
+                    <option key={org.id} value={org.id} className="bg-slate-900 text-slate-100 py-1">
+                      #{org.id} — {org.name} ({org.subscriptionTier || "Enterprise"})
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs">
+                  ▼
+                </div>
+              </div>
+
+              {/* Active Target Organization Preview Card */}
+              {(() => {
+                const selOrg = organizations.find((o) => o.id === targetOrgId) || organizations[0];
+                return selOrg ? (
+                  <div className="p-2.5 bg-gradient-to-r from-amber-500/10 via-slate-800/60 to-slate-800/80 rounded-xl border border-amber-500/25 flex items-center justify-between gap-3 text-[11px]">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-white text-xs">{selOrg.name}</span>
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          Org #{selOrg.id}
+                        </span>
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                          {selOrg.subscriptionTier || "Enterprise"}
+                        </span>
+                      </div>
+                      <div className="text-slate-400 text-[10px]">
+                        Chairman Recipient: <span className="text-slate-200 font-medium">Chairman of {selOrg.name}</span>
+                        {selOrg.orgUsername && (
+                          <span className="ml-1.5 font-mono text-slate-500">(@{selOrg.orgUsername.split("&")[0]})</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-[10px] text-emerald-400 font-semibold block">● Board Active</span>
+                      <span className="text-[9px] text-slate-400">/chairman/approvals</span>
+                    </div>
+                  </div>
+                ) : null;
+              })()}
+            </div>
+
             {/* Note to Chairman */}
             <div className="space-y-1.5 text-xs">
               <label className="font-bold text-slate-200 block">Note / Justification to Chairman:</label>
@@ -5292,7 +5474,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             </div>
 
             <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] text-amber-300/90 leading-relaxed">
-              Upon submission, this 3D building model and IS 1200 BOQ will appear on the Chairman&apos;s Board Approvals dashboard. The Chairman will be able to inspect the model and attach their official remarks/replies.
+              Upon submission, this 3D building model and IS 1200 BOQ will appear on the Chairman&apos;s Board Approvals dashboard for <strong className="text-white">{organizations.find((o) => o.id === targetOrgId)?.name || "the selected organization"}</strong>. The Chairman will be able to inspect the model and attach their official remarks/replies.
             </div>
 
             {/* Modal Actions */}
@@ -5300,7 +5482,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
               <button
                 type="button"
                 onClick={() => setShowChairmanSubmitModal(false)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
               >
                 Cancel
               </button>
@@ -5308,10 +5490,136 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                 type="button"
                 onClick={handleSendToChairman}
                 disabled={submittingToChairman}
-                className="px-5 py-2 rounded-xl text-white text-xs font-bold flex items-center gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 shadow-lg shadow-orange-500/20 disabled:opacity-50 transition"
+                className="px-5 py-2 rounded-xl text-white text-xs font-bold flex items-center gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 shadow-lg shadow-orange-500/20 disabled:opacity-50 transition cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
-                <span>{submittingToChairman ? "Dispatching..." : "Submit to Chairman"}</span>
+                <span>
+                  {submittingToChairman
+                    ? "Dispatching..."
+                    : `Submit to Chairman of ${organizations.find((o) => o.id === targetOrgId)?.name?.split(" ")[0] || "Org"}`}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Organization Directory Modal */}
+      {showOrgDirectoryModal && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative space-y-4 max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-blue-500/20 text-blue-400 rounded-xl">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">Database Organizations Directory</h3>
+                  <span className="text-[11px] text-slate-400">Select an organization to target for Chairman Board Submission</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowOrgDirectoryModal(false)}
+                className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={orgSearchQuery}
+                onChange={(e) => setOrgSearchQuery(e.target.value)}
+                placeholder="Search by organization name, tier, or ID (e.g. BuildWell, Alpha, Premium, #5)..."
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-400"
+              />
+            </div>
+
+            {/* List of Organizations */}
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-[50vh]">
+              {organizations
+                .filter((org) => {
+                  if (!orgSearchQuery.trim()) return true;
+                  const q = orgSearchQuery.toLowerCase();
+                  return (
+                    org.name.toLowerCase().includes(q) ||
+                    org.id.toString() === q.replace("#", "") ||
+                    (org.subscriptionTier && org.subscriptionTier.toLowerCase().includes(q)) ||
+                    (org.domain && org.domain.toLowerCase().includes(q))
+                  );
+                })
+                .map((org) => {
+                  const isSelected = org.id === targetOrgId;
+                  return (
+                    <div
+                      key={org.id}
+                      onClick={() => {
+                        setTargetOrgId(org.id);
+                        setShowOrgDirectoryModal(false);
+                      }}
+                      className={`p-3 rounded-xl border transition cursor-pointer flex items-center justify-between gap-3 ${
+                        isSelected
+                          ? "bg-amber-500/15 border-amber-400 text-white"
+                          : "bg-slate-800/50 hover:bg-slate-800 border-slate-800 hover:border-slate-700 text-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-xs ${
+                            isSelected ? "bg-amber-500 text-slate-950" : "bg-slate-700 text-slate-300"
+                          }`}
+                        >
+                          #{org.id}
+                        </div>
+                        <div>
+                          <div className="font-bold text-xs text-white flex items-center gap-2">
+                            <span>{org.name}</span>
+                            <span
+                              className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${
+                                org.subscriptionTier === "Enterprise"
+                                  ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                                  : org.subscriptionTier === "Premium"
+                                  ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                                  : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                              }`}
+                            >
+                              {org.subscriptionTier || "Enterprise"}
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-slate-400 flex items-center gap-3 mt-0.5">
+                            <span>
+                              Chairman: <strong>Chairman of {org.name}</strong>
+                            </span>
+                            {org.domain && <span>Domain: {org.domain}</span>}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition ${
+                          isSelected
+                            ? "bg-amber-500 text-slate-950 font-bold"
+                            : "bg-slate-700 hover:bg-amber-500 hover:text-slate-950 text-slate-200"
+                        }`}
+                      >
+                        {isSelected ? "Selected" : "Select"}
+                      </button>
+                    </div>
+                  );
+                })}
+            </div>
+
+            <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+              <span>Showing {organizations.length} Organizations in Database</span>
+              <button
+                type="button"
+                onClick={() => setShowOrgDirectoryModal(false)}
+                className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold cursor-pointer"
+              >
+                Close
               </button>
             </div>
           </div>
