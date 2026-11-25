@@ -4,9 +4,10 @@ import {
   Check, X, Shield, Clock, CheckCircle2, AlertTriangle,
   AlertCircle, FileText, MessageSquare, Send, Award,
   Sparkles, User, Calendar, DollarSign, Tag, ArrowUpRight,
-  HelpCircle, Eye, ChevronRight
+  HelpCircle, Eye, ChevronRight, Building2
 } from "lucide-react";
 import AIAssistantBar from "@/components/AIAssistantBar";
+import Chairman3DModelViewer from "@/components/Chairman3DModelViewer";
 
 interface BoardApprovalItem {
   id: number;
@@ -25,6 +26,31 @@ interface BoardApprovalItem {
 }
 
 const INITIAL_BOARD_APPROVALS: BoardApprovalItem[] = [
+  {
+    id: 991,
+    type: "3D_MODEL",
+    details: "8-Floor High-Tech Modern H-Shaped Symmetric Structural Frame Building (8 Stories, 19,200 sqft GFA) - 3D Building Model & CAD Blueprint",
+    requester: "Chief AI Structural Architect",
+    requesterRole: "AI Design Studio Engine",
+    amount: "₹ 2.45 Cr",
+    priority: "High",
+    date: "25 Nov 2026",
+    status: "Pending"
+  },
+  {
+    id: 992,
+    type: "3D_MODEL",
+    details: "6-Floor Modern Luxury U-Shaped Courtyard Complex (6 Stories, 14,400 sqft GFA) - 3D Building Model & CAD Blueprint",
+    requester: "Lead Structural Engineer",
+    requesterRole: "Site Engineering & CAD Team",
+    amount: "₹ 1.84 Cr",
+    priority: "High",
+    date: "24 Nov 2026",
+    status: "Approved",
+    chairmanRemarks: "Executive Board Approved: Architectural massing, cantilevered balconies, and M35 RCC structural framework authorized for site mobilization.",
+    approvedBy: "Chairman (Executive Directive)",
+    actionDate: "24 Nov 2026"
+  },
   {
     id: 1,
     type: "PO",
@@ -140,6 +166,10 @@ export default function ApprovalCenter() {
   const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
   const [dbProjects, setDbProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // 3D Model Approvals View State
+  const [active3DTab, setActive3DTab] = useState<"pending" | "approved">("pending");
+  const [selected3DModelId, setSelected3DModelId] = useState<number | null>(null);
 
   // Decision & Remarks Modal State
   const [decisionModal, setDecisionModal] = useState<{
@@ -316,13 +346,38 @@ export default function ApprovalCenter() {
     setDecisionModal(null);
   };
 
-  // Filtered lists
-  const pendingApprovals = approvals.filter((a) => a.status === "Pending");
-  const approvedApprovals = approvals.filter((a) => a.status === "Approved");
-  const rejectedApprovals = approvals.filter((a) => a.status === "Rejected");
+  // Identification & Separation of 3D Model Approvals vs Standard Financial Board Approvals
+  const is3DModelApproval = (ap: BoardApprovalItem) =>
+    ap.type === "3D_MODEL" ||
+    (ap.details && (ap.details.toLowerCase().includes("3d building model") || ap.details.toLowerCase().includes("cad blueprint")));
 
-  const currentList =
-    tab === "pending" ? pendingApprovals : tab === "approved" ? approvedApprovals : rejectedApprovals;
+  const threeDModelApprovals = approvals.filter(is3DModelApproval);
+  const standardApprovals = approvals.filter((ap) => !is3DModelApproval(ap));
+
+  const pending3DApprovals = threeDModelApprovals.filter((a) => a.status === "Pending");
+  const approved3DApprovals = threeDModelApprovals.filter((a) => a.status === "Approved");
+
+  const pendingStandard = standardApprovals.filter((a) => a.status === "Pending");
+  const approvedStandard = standardApprovals.filter((a) => a.status === "Approved");
+  const rejectedStandard = standardApprovals.filter((a) => a.status === "Rejected");
+
+  const currentStandardList =
+    tab === "pending"
+      ? pendingStandard
+      : tab === "approved"
+      ? approvedStandard
+      : rejectedStandard;
+
+  const extractFloors = (details: string): number => {
+    const match = details.match(/(\d+)\s*(?:Stories|Floors|Story|Floor)/i);
+    return match ? parseInt(match[1], 10) : 7;
+  };
+
+  const extractTitle = (details: string): string => {
+    if (!details) return "Multi-Story Architectural Building";
+    const parts = details.split("(");
+    return parts[0].trim() || "Multi-Story Architectural Building";
+  };
 
   // Preset quick remark chips
   const quickRemarksTemplates = decisionModal?.isApprove
@@ -361,9 +416,148 @@ export default function ApprovalCenter() {
         <div className="flex items-center gap-2">
           <div className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 flex items-center gap-2 font-mono">
             <Clock className="w-3.5 h-3.5 text-amber-400" />
-            <span>{pendingApprovals.length + dbProjects.length} Total Pending</span>
+            <span>{pendingStandard.length + pending3DApprovals.length + dbProjects.length} Total Pending</span>
           </div>
         </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 🏛️ SEPARATED SECTION 1: EXTERNAL 3D ARCHITECTURAL MODEL & BLUEPRINT APPROVALS */}
+      {/* ========================================================================= */}
+      <div className="bg-[#0C1322] border border-cyan-500/40 rounded-2xl p-5 space-y-4 shadow-2xl relative overflow-hidden">
+        {/* Glow accent */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 via-blue-600/30 to-amber-500/20 border border-cyan-500/40 text-cyan-300 rounded-xl shadow-lg shadow-cyan-500/10">
+              <Building2 className="w-6 h-6 text-cyan-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-white tracking-wide uppercase">
+                  External 3D Architectural Model & Blueprint Approvals
+                </h3>
+                <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-bold">
+                  {pending3DApprovals.length} Awaiting Sign-off
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Separated executive stream for CAD blueprints, 3D structural massing models, and IS 1200 BOQ cost authorizations.
+              </p>
+            </div>
+          </div>
+
+          {/* Mini Tab Switcher: Pending vs Approved Models */}
+          <div className="flex items-center bg-slate-900/90 border border-slate-800 p-1 rounded-xl gap-1">
+            <button
+              onClick={() => setActive3DTab("pending")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                active3DTab === "pending"
+                  ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Pending 3D Models ({pending3DApprovals.length})</span>
+            </button>
+            <button
+              onClick={() => setActive3DTab("approved")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                active3DTab === "approved"
+                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Approved Models ({approved3DApprovals.length})</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 3D Model Content View */}
+        {(active3DTab === "pending" ? pending3DApprovals : approved3DApprovals).length > 0 ? (
+          <div className="space-y-4">
+            {/* If multiple models exist, show selector pills */}
+            {(active3DTab === "pending" ? pending3DApprovals : approved3DApprovals).length > 1 && (
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {(active3DTab === "pending" ? pending3DApprovals : approved3DApprovals).map((m, idx) => (
+                  <button
+                    key={m.id}
+                    onClick={() => setSelected3DModelId(m.id)}
+                    className={`px-3 py-1.5 rounded-xl border text-xs font-semibold whitespace-nowrap transition cursor-pointer flex items-center gap-2 ${
+                      (selected3DModelId === m.id || (!selected3DModelId && idx === 0))
+                        ? "bg-cyan-500/20 text-white border-cyan-400 font-bold"
+                        : "bg-slate-900/60 text-slate-400 border-slate-800 hover:text-slate-200"
+                    }`}
+                  >
+                    <span>#{idx + 1}</span>
+                    <span>{extractTitle(m.details)}</span>
+                    <span className="text-[10px] text-emerald-400 font-mono">{m.amount}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Render the Active 3D Model in Chairman3DModelViewer */}
+            {(() => {
+              const list = active3DTab === "pending" ? pending3DApprovals : approved3DApprovals;
+              const activeModel = list.find((m) => m.id === selected3DModelId) || list[0];
+              if (!activeModel) return null;
+
+              return (
+                <div key={activeModel.id} className="space-y-3">
+                  <Chairman3DModelViewer
+                    id={activeModel.id}
+                    title={extractTitle(activeModel.details)}
+                    floors={extractFloors(activeModel.details)}
+                    details={activeModel.details}
+                    requester={activeModel.requester}
+                    requesterRole={activeModel.requesterRole}
+                    amount={activeModel.amount}
+                    date={activeModel.date}
+                    status={activeModel.status}
+                    onApprove={
+                      activeModel.status === "Pending"
+                        ? () => handleOpenDecisionModal("BOARD_APPROVAL", activeModel.id, activeModel.details, activeModel.requester, activeModel.amount, true)
+                        : undefined
+                    }
+                    onReject={
+                      activeModel.status === "Pending"
+                        ? () => handleOpenDecisionModal("BOARD_APPROVAL", activeModel.id, activeModel.details, activeModel.requester, activeModel.amount, false)
+                        : undefined
+                    }
+                  />
+
+                  {/* If Approved, show the signed executive directive */}
+                  {activeModel.status === "Approved" && (
+                    <div className="p-3 bg-emerald-950/30 border border-emerald-500/40 rounded-xl text-xs text-emerald-300 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Award className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <div>
+                          <span className="font-bold">Official Chairman Directive ({activeModel.actionDate || activeModel.date}):</span>
+                          <span className="italic ml-1 text-slate-200">&ldquo;{activeModel.chairmanRemarks || "Approved without remarks."}&rdquo;</span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider shrink-0">
+                        Authorized by {activeModel.approvedBy || "Chairman"}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        ) : (
+          <div className="text-center py-8 bg-slate-900/40 rounded-xl border border-slate-800">
+            <Building2 className="w-10 h-10 text-slate-600 mx-auto mb-2" />
+            <div className="text-sm font-bold text-white">No {active3DTab} 3D architectural models found</div>
+            <div className="text-xs text-slate-400 mt-1">
+              When site architects submit 3D models from the Blueprint Studio, they appear here for your interactive review and authorization.
+            </div>
+          </div>
+        )}
       </div>
 
       {/* AI-Powered Project Launch Approvals Section */}
@@ -480,64 +674,87 @@ export default function ApprovalCenter() {
         </div>
       )}
 
-      {/* Tabs Row */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-px">
-        <button
-          onClick={() => setTab("pending")}
-          className={`pb-3 px-4 text-xs font-bold transition-all relative flex items-center gap-2 ${
-            tab === "pending"
-              ? "text-cyan-400 border-b-2 border-cyan-400"
-              : "text-slate-400 hover:text-white"
-          }`}
-        >
-          <Clock className="w-3.5 h-3.5" />
-          <span>Pending Approvals ({pendingApprovals.length})</span>
-        </button>
+      {/* ========================================================================= */}
+      {/* 📋 SEPARATED SECTION 2: STANDARD CORPORATE BOARD APPROVALS (PO/CAPEX/OPEX) */}
+      {/* ========================================================================= */}
+      <div className="space-y-4 pt-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 bg-blue-500/15 text-blue-400 rounded-xl border border-blue-500/30">
+              <FileText className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                Standard Corporate Board Approvals & Purchase Orders
+              </h3>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Procurement orders (PO), CapEx equipment, OpEx allocations, and contractor progress bills.
+              </p>
+            </div>
+          </div>
+          <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs font-mono">
+            {pendingStandard.length} Orders Pending
+          </span>
+        </div>
 
-        <button
-          onClick={() => setTab("approved")}
-          className={`pb-3 px-4 text-xs font-bold transition-all relative flex items-center gap-2 ${
-            tab === "approved"
-              ? "text-emerald-400 border-b-2 border-emerald-400"
-              : "text-slate-400 hover:text-white"
-          }`}
-        >
-          <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>Approved with Chairman Remarks ({approvedApprovals.length})</span>
-        </button>
+        {/* Tabs Row */}
+        <div className="flex items-center gap-2 border-b border-slate-800 pb-px">
+          <button
+            onClick={() => setTab("pending")}
+            className={`pb-3 px-4 text-xs font-bold transition-all relative flex items-center gap-2 cursor-pointer ${
+              tab === "pending"
+                ? "text-cyan-400 border-b-2 border-cyan-400"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>Pending Approvals ({pendingStandard.length})</span>
+          </button>
 
-        <button
-          onClick={() => setTab("rejected")}
-          className={`pb-3 px-4 text-xs font-bold transition-all relative flex items-center gap-2 ${
-            tab === "rejected"
-              ? "text-rose-400 border-b-2 border-rose-400"
-              : "text-slate-400 hover:text-white"
-          }`}
-        >
-          <X className="w-3.5 h-3.5" />
-          <span>Rejected ({rejectedApprovals.length})</span>
-        </button>
-      </div>
+          <button
+            onClick={() => setTab("approved")}
+            className={`pb-3 px-4 text-xs font-bold transition-all relative flex items-center gap-2 cursor-pointer ${
+              tab === "approved"
+                ? "text-emerald-400 border-b-2 border-emerald-400"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Approved with Remarks ({approvedStandard.length})</span>
+          </button>
 
-      {/* Main Approvals Table */}
-      <div className="bg-[#111A2E] border border-slate-800 rounded-2xl p-5 shadow-xl">
-        {currentList.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left text-slate-300">
-              <thead className="bg-[#0E1726]/90 text-slate-400 uppercase tracking-wider text-[10px]">
-                <tr>
-                  <th className="p-3.5 font-bold rounded-l-xl">Type</th>
-                  <th className="p-3.5 font-bold">Details & Proposal</th>
-                  <th className="p-3.5 font-bold">Requester</th>
-                  <th className="p-3.5 font-bold">Date</th>
-                  <th className="p-3.5 font-bold">Amount</th>
-                  <th className="p-3.5 font-bold">Priority</th>
-                  {tab !== "pending" && <th className="p-3.5 font-bold">Chairman Reply / Directive</th>}
-                  <th className="p-3.5 font-bold rounded-r-xl text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800">
-                {currentList.map((ap) => (
+          <button
+            onClick={() => setTab("rejected")}
+            className={`pb-3 px-4 text-xs font-bold transition-all relative flex items-center gap-2 cursor-pointer ${
+              tab === "rejected"
+                ? "text-rose-400 border-b-2 border-rose-400"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            <X className="w-3.5 h-3.5" />
+            <span>Rejected ({rejectedStandard.length})</span>
+          </button>
+        </div>
+
+        {/* Main Approvals Table */}
+        <div className="bg-[#111A2E] border border-slate-800 rounded-2xl p-5 shadow-xl">
+          {currentStandardList.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs text-left text-slate-300">
+                <thead className="bg-[#0E1726]/90 text-slate-400 uppercase tracking-wider text-[10px]">
+                  <tr>
+                    <th className="p-3.5 font-bold rounded-l-xl">Type</th>
+                    <th className="p-3.5 font-bold">Details & Proposal</th>
+                    <th className="p-3.5 font-bold">Requester</th>
+                    <th className="p-3.5 font-bold">Date</th>
+                    <th className="p-3.5 font-bold">Amount</th>
+                    <th className="p-3.5 font-bold">Priority</th>
+                    {tab !== "pending" && <th className="p-3.5 font-bold">Chairman Reply / Directive</th>}
+                    <th className="p-3.5 font-bold rounded-r-xl text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800">
+                  {currentStandardList.map((ap) => (
                   <tr key={ap.id} className="hover:bg-slate-800/40 transition">
                     <td className="p-3.5 font-bold text-white whitespace-nowrap">
                       <span className="px-2.5 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold uppercase">
@@ -673,30 +890,31 @@ export default function ApprovalCenter() {
           </div>
         )}
       </div>
+      </div>
 
       {/* Executive Overview Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-[#111A2E] border border-slate-800 rounded-2xl p-4 shadow-lg">
           <div className="text-xs text-slate-400">Total Pending</div>
-          <div className="text-2xl font-bold text-white mt-1">{pendingApprovals.length + dbProjects.length} Requests</div>
+          <div className="text-2xl font-bold text-white mt-1">{pendingStandard.length + pending3DApprovals.length + dbProjects.length} Requests</div>
         </div>
         <div className="bg-[#111A2E] border border-slate-800 rounded-2xl p-4 shadow-lg">
-          <div className="text-xs text-slate-400">High Priority POs</div>
-          <div className="text-2xl font-bold text-red-400 mt-1">
-            {pendingApprovals.filter((p) => p.priority === "High").length} Requests
+          <div className="text-xs text-slate-400">3D Models Pending</div>
+          <div className="text-2xl font-bold text-cyan-400 mt-1">
+            {pending3DApprovals.length} Models
           </div>
         </div>
         <div className="bg-[#111A2E] border border-slate-800 rounded-2xl p-4 shadow-lg">
-          <div className="text-xs text-slate-400">Approved Total</div>
-          <div className="text-2xl font-bold text-emerald-400 mt-1">{approvedApprovals.length} Orders</div>
+          <div className="text-xs text-slate-400">Standard POs Approved</div>
+          <div className="text-2xl font-bold text-emerald-400 mt-1">{approvedStandard.length + approved3DApprovals.length} Orders</div>
         </div>
         <div className="bg-[#111A2E] border border-slate-800 rounded-2xl p-4 shadow-lg">
           <div className="text-xs text-slate-400">Rejected Total</div>
-          <div className="text-2xl font-bold text-slate-300 mt-1">{rejectedApprovals.length} Orders</div>
+          <div className="text-2xl font-bold text-slate-300 mt-1">{rejectedStandard.length} Orders</div>
         </div>
         <div className="bg-[#111A2E] border border-slate-800 rounded-2xl p-4 shadow-lg">
           <div className="text-xs text-slate-400">Chairman Remark Audit</div>
-          <div className="text-2xl font-bold text-cyan-400 mt-1">100% Signed</div>
+          <div className="text-2xl font-bold text-amber-400 mt-1">100% Signed</div>
         </div>
       </div>
 

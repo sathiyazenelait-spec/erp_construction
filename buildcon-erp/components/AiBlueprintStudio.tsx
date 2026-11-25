@@ -933,7 +933,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
 
       const totalCostCr = (data.takeoff.totalEstimatedCostINR / 10000000).toFixed(2);
       const approvalPayload = {
-        type: "Project",
+        type: "3D_MODEL",
         details: `${data.title} (${floors} Stories, ${(data.dimensions.builtupAreaSqft * floors).toLocaleString()} sqft GFA) - 3D Building Model & CAD Blueprint`,
         requester: requesterName,
         requesterRole: requesterRole,
