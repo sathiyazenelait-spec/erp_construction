@@ -23,6 +23,8 @@ interface BoardApprovalItem {
   approvedBy?: string;
   actionDate?: string;
   organizationId?: number;
+  aiAnalysisJson?: string;
+  blueprintData?: any;
 }
 
 const INITIAL_BOARD_APPROVALS: BoardApprovalItem[] = [
@@ -518,6 +520,8 @@ export default function ApprovalCenter() {
                     amount={activeModel.amount}
                     date={activeModel.date}
                     status={activeModel.status}
+                    blueprintData={activeModel.blueprintData}
+                    aiAnalysisJson={activeModel.aiAnalysisJson}
                     onApprove={
                       activeModel.status === "Pending"
                         ? () => handleOpenDecisionModal("BOARD_APPROVAL", activeModel.id, activeModel.details, activeModel.requester, activeModel.amount, true)

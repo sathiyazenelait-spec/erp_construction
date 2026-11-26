@@ -965,7 +965,9 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
         chairmanRemarks: null,
         approvedBy: null,
         actionDate: null,
-        organizationId: targetOrgId
+        organizationId: targetOrgId,
+        aiAnalysisJson: JSON.stringify(data),
+        blueprintData: data
       };
 
       const token = typeof window !== "undefined" ? localStorage.getItem("buildcon_token") : null;

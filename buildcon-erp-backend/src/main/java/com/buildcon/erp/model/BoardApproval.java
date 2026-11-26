@@ -52,6 +52,9 @@ public class BoardApproval {
     @Column(name = "organization_id", nullable = false)
     private Long organizationId;
 
+    @Column(name = "ai_analysis_json", columnDefinition = "LONGTEXT")
+    private String aiAnalysisJson;
+
     public BoardApproval(String type, String details, String requester, String requesterRole, String amount, String priority, String date, String status, String chairmanRemarks, String approvedBy, String actionDate, Long organizationId) {
         this.type = type;
         this.details = details;

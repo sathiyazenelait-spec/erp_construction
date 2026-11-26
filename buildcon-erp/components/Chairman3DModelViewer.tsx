@@ -18,6 +18,8 @@ export interface Chairman3DModelProps {
   date?: string;
   status?: string;
   compact?: boolean;
+  blueprintData?: any;
+  aiAnalysisJson?: string;
   onApprove?: () => void;
   onReject?: () => void;
   onClose?: () => void;
@@ -34,6 +36,8 @@ export default function Chairman3DModelViewer({
   date = "Today",
   status = "Pending",
   compact = false,
+  blueprintData,
+  aiAnalysisJson,
   onApprove,
   onReject,
   onClose
@@ -83,24 +87,55 @@ export default function Chairman3DModelViewer({
     isDraggingRef.current = false;
   };
 
-  // Determine architectural shape from text/props
-  const allText = `${title} ${details || ""} ${shape || ""}`.toLowerCase();
-  const isHShaped = shape === "H_SHAPED" || (/\bh[-_\s]?(shape|shaped|block|frame|layout)\b/i.test(allText)) || (/\bh\b/i.test(allText) && /\bshape\b/i.test(allText));
+  // Parse blueprintData or fallback to aiAnalysisJson
+  let bp: any = blueprintData;
+  if (!bp && aiAnalysisJson) {
+    try {
+      bp = typeof aiAnalysisJson === "string" ? JSON.parse(aiAnalysisJson) : aiAnalysisJson;
+    } catch (e) {}
+  }
+
+  // Determine architectural shape & facade styling from text/props/blueprint
+  const promptLower = `${title} ${details || ""} ${shape || ""} ${bp?.prompt || ""} ${bp?.title || ""}`.toLowerCase();
+  const isHShaped = bp?.building3D?.massingForm === "H_SHAPED" || shape === "H_SHAPED" || (/\bh[-_\s]?(shape|shaped|block|frame|layout)\b/i.test(promptLower)) || (/\bh\b/i.test(promptLower) && /\bshape\b/i.test(promptLower));
   const isTShaped = !isHShaped && (
+    bp?.building3D?.massingForm === "T_SHAPED" ||
     shape === "T_SHAPED" ||
-    (/\b(t|tee)[-_\s]?(shape|shaped|block|frame|layout|plan|building|tower|structure|type|model)\b/i.test(allText)) ||
-    (/\b(t|tee)\b/i.test(allText) && /\b(shape|shaped)\b/i.test(allText)) ||
-    allText.includes("t-shape") || allText.includes("t shape") || allText.includes("t shaped") || allText.includes("t-shaped") || allText.includes("t frame") || allText.includes("t-frame") || allText.includes("tee shape")
+    (/\b(t|tee)[-_\s]?(shape|shaped|block|frame|layout|plan|building|tower|structure|type|model)\b/i.test(promptLower)) ||
+    (/\b(t|tee)\b/i.test(promptLower) && /\b(shape|shaped)\b/i.test(promptLower)) ||
+    promptLower.includes("t-shape") || promptLower.includes("t shape") || promptLower.includes("t shaped") || promptLower.includes("t-shaped") || promptLower.includes("t frame") || promptLower.includes("t-frame") || promptLower.includes("tee shape")
   );
-  const isVShaped = !isHShaped && !isTShaped && (shape === "V_SHAPED" || (/\bv[-_\s]?(shape|shaped|block|frame|layout)\b/i.test(allText)) || (/\bv\b/i.test(allText) && /\bshape\b/i.test(allText)));
-  const isUShaped = !isHShaped && !isTShaped && !isVShaped && (shape === "U_SHAPED" || (/\bu[-_\s]?(shape|shaped|block|frame|courtyard)\b/i.test(allText)) || (/\bu\b/i.test(allText) && /\bshape\b/i.test(allText)));
-  const isCircular = !isHShaped && !isTShaped && !isVShaped && !isUShaped && (shape === "CIRCULAR_DONUT" || allText.includes("circle") || allText.includes("circular") || allText.includes("cylind"));
+  const isVShaped = !isHShaped && !isTShaped && (bp?.building3D?.massingForm === "V_SHAPED" || shape === "V_SHAPED" || (/\bv[-_\s]?(shape|shaped|block|frame|layout)\b/i.test(promptLower)) || (/\bv\b/i.test(promptLower) && /\bshape\b/i.test(promptLower)));
+  const isUShaped = !isHShaped && !isTShaped && !isVShaped && (bp?.building3D?.massingForm === "U_SHAPED" || shape === "U_SHAPED" || (/\bu[-_\s]?(shape|shaped|block|frame|courtyard)\b/i.test(promptLower)) || (/\bu\b/i.test(promptLower) && /\bshape\b/i.test(promptLower)));
+  const isCircular = !isHShaped && !isTShaped && !isVShaped && !isUShaped && (bp?.building3D?.massingForm === "CIRCULAR_DONUT" || shape === "CIRCULAR_DONUT" || promptLower.includes("circle") || promptLower.includes("circular") || promptLower.includes("cylind"));
+  const isLShaped = !isHShaped && !isTShaped && !isVShaped && !isUShaped && !isCircular && (bp?.building3D?.massingForm === "L_SHAPED" || shape === "L_SHAPED" || (/\bl[-_\s]?(shape|shaped|block|frame)\b/i.test(promptLower)));
+
+  const isLuxuryGold = bp?.building3D?.facadePalette === "GOLD_LUXURY" || promptLower.includes("sky-mansion") || promptLower.includes("ultra-luxury") || promptLower.includes("luxury") || promptLower.includes("gold") || promptLower.includes("champagne");
+  const isCyberObsidian = bp?.building3D?.facadePalette === "CYBER_OBSIDIAN" || promptLower.includes("black") || promptLower.includes("obsidian") || promptLower.includes("dark") || promptLower.includes("smoke") || promptLower.includes("carbon") || promptLower.includes("cyber");
+  const isBiophilic = bp?.building3D?.facadePalette === "EMERALD_BIOPHILIC" || promptLower.includes("biophilic") || promptLower.includes("vertical forest") || promptLower.includes("green");
+
+  const massingForm = isHShaped ? "H_SHAPED"
+    : isTShaped ? "T_SHAPED"
+    : isVShaped ? "V_SHAPED"
+    : isUShaped ? "U_SHAPED"
+    : isCircular ? "CIRCULAR_DONUT"
+    : isLShaped ? "L_SHAPED"
+    : "RECTANGULAR";
+
+  const balconyType = bp?.building3D?.balconyType || (
+    promptLower.includes("wave") ? "CURVED_WAVE"
+    : promptLower.includes("wrap") ? "WRAPAROUND_RIBBON"
+    : promptLower.includes("terrace") || promptLower.includes("garden") ? "TERRACED_CASCADE"
+    : (isLuxuryGold || promptLower.includes("sky-mansion") || promptLower.includes("floating") || promptLower.includes("cantilever")) ? "CANTILEVERED_FLOATING"
+    : "CANTILEVERED_FLOATING"
+  );
 
   const detectedShapeLabel = isHShaped ? "H-Shaped Dual-Tower"
     : isTShaped ? "T-Shaped Modern Frame"
     : isVShaped ? "V-Shaped Converging Tower"
     : isUShaped ? "U-Shaped Courtyard Complex"
     : isCircular ? "Circular Atrium Complex"
+    : isLuxuryGold ? "Ultra-Luxury Sky-Mansion"
     : "Modern High-Rise Tower";
 
   // Projection math
@@ -113,222 +148,544 @@ export default function Chairman3DModelViewer({
     const rotX = x * cosO - y * sinO;
     const rotY = x * sinO + y * cosO;
     const screenX = 350 + rotX;
-    const screenY = 320 + rotY * 0.55 * tiltFactor - z;
+    const screenY = 410 + rotY * 0.55 * tiltFactor - z;
     return { x: screenX, y: screenY, depth: rotY };
   };
 
   const isNight = lightingMode === "NIGHT";
   const totalFlrs = Math.max(3, Math.min(25, floors || 7));
-  const floorHeight = Math.max(22, Math.min(38, Math.round(230 / totalFlrs)));
+  const floorHeight = 34; // px per floor matching CAD Studio
+  const buildingWidth = 240;
+  const buildingDepth = 175;
 
   // Estimated structural takeoffs
-  const totalGFA = totalFlrs * 2400;
-  const concreteCuM = (totalFlrs * 91.2).toFixed(1);
-  const steelRebarMT = (totalFlrs * 8.65).toFixed(1);
-  const cementBags = (totalFlrs * 710).toLocaleString();
+  const totalGFA = bp?.takeoff?.grossFloorAreaSqft || (totalFlrs * 2400);
+  const concreteCuM = bp?.takeoff?.concreteVolumeCuM ? bp.takeoff.concreteVolumeCuM.toFixed(1) : (totalFlrs * 91.2).toFixed(1);
+  const steelRebarMT = bp?.takeoff?.steelRebarWeightMT ? bp.takeoff.steelRebarWeightMT.toFixed(1) : (totalFlrs * 8.65).toFixed(1);
+  const cementBags = bp?.takeoff?.cementBags ? bp.takeoff.cementBags.toLocaleString() : (totalFlrs * 710).toLocaleString();
 
-  // Render 3D SVG building geometry
+  // Render complete 3D SVG building matching CAD Studio AiBlueprintStudio
   const renderBuildingSVG = () => {
-    const elements: React.ReactNode[] = [];
+    const halfW = buildingWidth / 2;
+    const halfD = buildingDepth / 2;
 
-    // Ground Plaza Shadow & Pedestrian Base
-    const shadowP1 = project(-200, -160, 0);
-    const shadowP2 = project(200, -160, 0);
-    const shadowP3 = project(200, 160, 0);
-    const shadowP4 = project(-200, 160, 0);
+    // Facade fill & stroke styling matching CAD Studio exactly
+    let facadeFill = isNight ? "url(#glassFacadeNight)" : "url(#glassFacadeDay)";
+    let facadeStroke = isNight ? "#F59E0B" : "#38BDF8";
 
-    elements.push(
-      <polygon
-        key="ground-shadow"
-        points={`${shadowP1.x},${shadowP1.y} ${shadowP2.x},${shadowP2.y} ${shadowP3.x},${shadowP3.y} ${shadowP4.x},${shadowP4.y}`}
-        fill={isNight ? "#020617" : "#090d16"}
-        opacity={0.8}
-        stroke={isNight ? "#1e293b" : "#1e293b"}
-        strokeWidth={1}
-      />
-    );
-
-    // Landscaped perimeter walkway
-    const walk1 = project(-180, -140, 2);
-    const walk2 = project(180, -140, 2);
-    const walk3 = project(180, 140, 2);
-    const walk4 = project(-180, 140, 2);
-    elements.push(
-      <polygon
-        key="perimeter-walkway"
-        points={`${walk1.x},${walk1.y} ${walk2.x},${walk2.y} ${walk3.x},${walk3.y} ${walk4.x},${walk4.y}`}
-        fill={isNight ? "#0f172a" : "#1e293b"}
-        opacity={0.4}
-        stroke="#38bdf8"
-        strokeWidth={0.7}
-        strokeDasharray="4 3"
-      />
-    );
-
-    // Multi-floor structure based on shape
-    if (isHShaped) {
-      // H-SHAPE: Left Wing, Right Wing, and Central Skybridge Core
-      for (let f = 0; f < totalFlrs; f++) {
-        if (activeFloorTab !== "ALL" && activeFloorTab !== f + 1) continue;
-        const z0 = f * floorHeight;
-        const z1 = z0 + floorHeight - 3;
-
-        // Left Tower Wing (-140 to -50)
-        elements.push(renderBox(`h-left-${f}`, -140, -120, -50, 120, z0, z1, f));
-        // Right Tower Wing (50 to 140)
-        elements.push(renderBox(`h-right-${f}`, 50, -120, 140, 120, z0, z1, f));
-        // Connecting Skybridge Core (-50 to 50, narrow -30 to 30)
-        elements.push(renderBox(`h-bridge-${f}`, -50, -32, 50, 32, z0, z1, f, true));
-      }
-
-      // Rooftop Elevator Machine Rooms & Solar PV on Twin Towers
-      const topZ = totalFlrs * floorHeight;
-      elements.push(renderBox("h-mr-left", -110, -35, -75, 35, topZ, topZ + 26, totalFlrs, false, "#334155"));
-      elements.push(renderBox("h-mr-right", 75, -35, 110, 35, topZ, topZ + 26, totalFlrs, false, "#334155"));
-    } else if (isTShaped) {
-      // T-SHAPE: Front Transverse Wing Bar and Rear Central Perpendicular Stem (Matches ResearchGate Structural Model)
-      for (let f = 0; f < totalFlrs; f++) {
-        if (activeFloorTab !== "ALL" && activeFloorTab !== f + 1) continue;
-        const z0 = f * floorHeight;
-        const z1 = z0 + floorHeight - 3;
-
-        // Front horizontal bar (-140 to 140, 20 to 80, center y = 50)
-        const barBox = { key: `t-bar-${f}`, x1: -140, y1: 20, x2: 140, y2: 80, z0, z1, f, isCore: false, midX: 0, midY: 50 };
-        // Central perpendicular stem (-45 to 45, -100 to 20, center y = -40)
-        const stemBox = { key: `t-stem-${f}`, x1: -45, y1: -100, x2: 45, y2: 20, z0, z1, f, isCore: true, midX: 0, midY: -40 };
-
-        // 3D Depth Sorting: Draw further box first so front box never clips improperly
-        const boxes = [barBox, stemBox].map(b => ({
-          ...b,
-          depth: b.midX * sinO + b.midY * cosO
-        })).sort((a, b) => a.depth - b.depth);
-
-        boxes.forEach(b => {
-          elements.push(renderBox(b.key, b.x1, b.y1, b.x2, b.y2, b.z0, b.z1, b.f, b.isCore));
-        });
-      }
-      const topZ = totalFlrs * floorHeight;
-      elements.push(renderBox("t-mr", -25, -20, 25, 20, topZ, topZ + 25, totalFlrs, false, "#334155"));
-    } else if (isVShaped) {
-      // V-SHAPE: Left angled wing, Right angled wing, Central apex rotunda
-      for (let f = 0; f < totalFlrs; f++) {
-        if (activeFloorTab !== "ALL" && activeFloorTab !== f + 1) continue;
-        const z0 = f * floorHeight;
-        const z1 = z0 + floorHeight - 3;
-
-        // Central Apex Rotunda (-40 to 40, -100 to -30)
-        elements.push(renderBox(`v-apex-${f}`, -40, -100, 40, -30, z0, z1, f));
-        // Left Wing radiating backwards (-125 to -35, -40 to 105)
-        elements.push(renderBox(`v-left-${f}`, -125, -40, -35, 105, z0, z1, f));
-        // Right Wing radiating backwards (35 to 125, -40 to 105)
-        elements.push(renderBox(`v-right-${f}`, 35, -40, 125, 105, z0, z1, f));
-      }
-      const topZ = totalFlrs * floorHeight;
-      elements.push(renderBox("v-crown", -28, -85, 28, -45, topZ, topZ + 28, totalFlrs, false, "#38bdf8"));
-    } else if (isUShaped) {
-      // U-SHAPE: Left wing, Rear connecting wing, Right wing enclosing courtyard
-      for (let f = 0; f < totalFlrs; f++) {
-        if (activeFloorTab !== "ALL" && activeFloorTab !== f + 1) continue;
-        const z0 = f * floorHeight;
-        const z1 = z0 + floorHeight - 3;
-
-        // Rear Cross Wing (-120 to 120, -110 to -50)
-        elements.push(renderBox(`u-rear-${f}`, -120, -110, 120, -50, z0, z1, f));
-        // Left Forward Wing (-120 to -60, -50 to 95)
-        elements.push(renderBox(`u-left-${f}`, -120, -50, -60, 95, z0, z1, f));
-        // Right Forward Wing (60 to 120, -50 to 95)
-        elements.push(renderBox(`u-right-${f}`, 60, -50, 120, 95, z0, z1, f));
-      }
-      const topZ = totalFlrs * floorHeight;
-      elements.push(renderBox("u-mr", -35, -95, 35, -60, topZ, topZ + 25, totalFlrs, false, "#334155"));
-    } else {
-      // STANDARD RECTILINEAR TOWER WITH RECESSED CORE
-      for (let f = 0; f < totalFlrs; f++) {
-        if (activeFloorTab !== "ALL" && activeFloorTab !== f + 1) continue;
-        const z0 = f * floorHeight;
-        const z1 = z0 + floorHeight - 3;
-
-        elements.push(renderBox(`std-${f}`, -110, -85, 110, 85, z0, z1, f));
-      }
-      const topZ = totalFlrs * floorHeight;
-      elements.push(renderBox("std-mr", -40, -35, 40, 35, topZ, topZ + 28, totalFlrs, false, "#334155"));
+    if (isLuxuryGold) {
+      facadeFill = isNight ? "url(#goldFacadeNight)" : "url(#goldFacadeDay)";
+      facadeStroke = isNight ? "#FEF08A" : "#F59E0B";
+    } else if (isCyberObsidian) {
+      facadeFill = isNight ? "url(#cyberFacadeNight)" : "url(#cyberFacadeDay)";
+      facadeStroke = isNight ? "#06B6D4" : "#38BDF8";
+    } else if (isBiophilic) {
+      facadeFill = isNight ? "url(#emeraldFacadeNight)" : "url(#emeraldFacadeDay)";
+      facadeStroke = isNight ? "#6EE7B7" : "#10B981";
     }
 
-    return elements;
-  };
-
-  // Helper to render an isometric 3D extruded prism box
-  const renderBox = (
-    key: string,
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    z0: number,
-    z1: number,
-    floorIndex: number,
-    isCore: boolean = false,
-    customRoofColor?: string
-  ) => {
-    // 8 vertices of cuboid
-    const p1 = project(x1, y1, z0); // bottom left front
-    const p2 = project(x2, y1, z0); // bottom right front
-    const p3 = project(x2, y2, z0); // bottom right back
-    const p4 = project(x1, y2, z0); // bottom left back
-    const p5 = project(x1, y1, z1); // top left front
-    const p6 = project(x2, y1, z1); // top right front
-    const p7 = project(x2, y2, z1); // top right back
-    const p8 = project(x1, y2, z1); // top left back
-
-    const isTopFloor = floorIndex === totalFlrs - 1;
-    const wallColorDay = isCore ? "#0284c7" : "#0ea5e9";
-    const wallColorNight = isCore ? "#1e293b" : "#0f172a";
-    const slabStroke = isNight ? "#f59e0b" : "#38bdf8";
+    const floorsArray: number[] = [];
+    for (let f = 1; f <= totalFlrs; f++) {
+      floorsArray.push(f);
+    }
 
     return (
-      <g key={key}>
-        {/* Front Wall Face (p1, p2, p6, p5) */}
-        <polygon
-          points={`${p1.x},${p1.y} ${p2.x},${p2.y} ${p6.x},${p6.y} ${p5.x},${p5.y}`}
-          fill={isNight ? wallColorNight : wallColorDay}
-          opacity={0.85}
-          stroke={slabStroke}
-          strokeWidth={0.8}
-        />
-        {/* Window grid dividers */}
-        <line x1={(p1.x + p2.x) / 2} y1={(p1.y + p2.y) / 2} x2={(p5.x + p6.x) / 2} y2={(p5.y + p6.y) / 2} stroke={isNight ? "#fef08a" : "#bae6fd"} strokeWidth={0.6} opacity={0.7} />
+      <>
+        <defs>
+          {/* Azure Glass reflection gradient */}
+          <linearGradient id="glassFacadeDay" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.85" />
+            <stop offset="40%" stopColor="#0284C7" stopOpacity="0.75" />
+            <stop offset="70%" stopColor="#0369A1" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#bae6fd" stopOpacity="0.9" />
+          </linearGradient>
 
-        {/* Right Wall Face (p2, p3, p7, p6) */}
-        <polygon
-          points={`${p2.x},${p2.y} ${p3.x},${p3.y} ${p7.x},${p7.y} ${p6.x},${p6.y}`}
-          fill={isNight ? "#090d16" : "#0369a1"}
-          opacity={0.9}
-          stroke={slabStroke}
-          strokeWidth={0.8}
-        />
-        <line x1={(p2.x + p3.x) / 2} y1={(p2.y + p3.y) / 2} x2={(p6.x + p7.x) / 2} y2={(p6.y + p7.y) / 2} stroke={isNight ? "#fef08a" : "#7dd3fc"} strokeWidth={0.6} opacity={0.6} />
+          <linearGradient id="glassFacadeNight" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#1E293B" stopOpacity="0.9" />
+            <stop offset="35%" stopColor="#F59E0B" stopOpacity="0.55" />
+            <stop offset="70%" stopColor="#0F172A" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#FEF08A" stopOpacity="0.6" />
+          </linearGradient>
 
-        {/* Top Roof Slab Face (p5, p6, p7, p8) */}
-        <polygon
-          points={`${p5.x},${p5.y} ${p6.x},${p6.y} ${p7.x},${p7.y} ${p8.x},${p8.y}`}
-          fill={customRoofColor || (isTopFloor ? (isNight ? "#1e293b" : "#cbd5e1") : (isNight ? "#0f172a" : "#94a3b8"))}
-          opacity={0.95}
-          stroke={isTopFloor ? (isNight ? "#f59e0b" : "#0284c7") : "#475569"}
-          strokeWidth={isTopFloor ? 1.5 : 0.7}
-        />
+          {/* Champagne Gold Luxury Glazing Gradient */}
+          <linearGradient id="goldFacadeDay" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.88" />
+            <stop offset="35%" stopColor="#D97706" stopOpacity="0.80" />
+            <stop offset="70%" stopColor="#B45309" stopOpacity="0.75" />
+            <stop offset="100%" stopColor="#FEF08A" stopOpacity="0.95" />
+          </linearGradient>
 
-        {/* Rooftop FEM Bay Grid Lines on Top Floor */}
-        {isTopFloor && !customRoofColor && (
-          <>
-            <line x1={(p5.x + p8.x) / 2} y1={(p5.y + p8.y) / 2} x2={(p6.x + p7.x) / 2} y2={(p6.y + p7.y) / 2} stroke="#38bdf8" strokeWidth={0.7} strokeDasharray="3 2" />
-            <line x1={(p5.x + p6.x) / 2} y1={(p5.y + p6.y) / 2} x2={(p8.x + p7.x) / 2} y2={(p8.y + p7.y) / 2} stroke="#38bdf8" strokeWidth={0.7} strokeDasharray="3 2" />
-          </>
-        )}
+          <linearGradient id="goldFacadeNight" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#78350F" stopOpacity="0.95" />
+            <stop offset="35%" stopColor="#F59E0B" stopOpacity="0.80" />
+            <stop offset="70%" stopColor="#451A03" stopOpacity="0.90" />
+            <stop offset="100%" stopColor="#FDE047" stopOpacity="0.90" />
+          </linearGradient>
 
-        {/* Structural Perimeter Columns at Bay Intersections */}
-        <circle cx={p5.x} cy={p5.y} r={1.8} fill={isNight ? "#fbbf24" : "#ffffff"} />
-        <circle cx={p6.x} cy={p6.y} r={1.8} fill={isNight ? "#fbbf24" : "#ffffff"} />
-      </g>
+          {/* Cyber Obsidian Smoke Black Gradient */}
+          <linearGradient id="cyberFacadeDay" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#0F172A" stopOpacity="0.95" />
+            <stop offset="40%" stopColor="#1E293B" stopOpacity="0.90" />
+            <stop offset="75%" stopColor="#090D16" stopOpacity="0.95" />
+            <stop offset="100%" stopColor="#334155" stopOpacity="0.85" />
+          </linearGradient>
+
+          <linearGradient id="cyberFacadeNight" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#030712" stopOpacity="0.98" />
+            <stop offset="30%" stopColor="#06B6D4" stopOpacity="0.45" />
+            <stop offset="70%" stopColor="#0F172A" stopOpacity="0.95" />
+            <stop offset="100%" stopColor="#EC4899" stopOpacity="0.55" />
+          </linearGradient>
+
+          {/* Biophilic Emerald Jade Glazing Gradient */}
+          <linearGradient id="emeraldFacadeDay" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#10B981" stopOpacity="0.85" />
+            <stop offset="40%" stopColor="#059669" stopOpacity="0.80" />
+            <stop offset="80%" stopColor="#047857" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#A7F3D0" stopOpacity="0.90" />
+          </linearGradient>
+
+          <linearGradient id="emeraldFacadeNight" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#064E3B" stopOpacity="0.95" />
+            <stop offset="35%" stopColor="#10B981" stopOpacity="0.75" />
+            <stop offset="70%" stopColor="#022C22" stopOpacity="0.90" />
+            <stop offset="100%" stopColor="#6EE7B7" stopOpacity="0.80" />
+          </linearGradient>
+
+          <linearGradient id="slabGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#CBD5E1" />
+            <stop offset="100%" stopColor="#64748B" />
+          </linearGradient>
+
+          <linearGradient id="groundShadow" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="rgba(0,0,0,0.6)" />
+            <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+          </linearGradient>
+        </defs>
+
+        {/* 1. Ground Plaza & Foundations */}
+        <g id="ground-plinth">
+          <ellipse cx="350" cy="440" rx="260" ry="110" fill="url(#groundShadow)" />
+
+          {/* Plaza Slab (Footprint) */}
+          {(() => {
+            const p1 = project(-180, -140, 0);
+            const p2 = project(180, -140, 0);
+            const p3 = project(180, 140, 0);
+            const p4 = project(-180, 140, 0);
+            return (
+              <polygon
+                points={`${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`}
+                fill={isNight ? "#0F172A" : (isCyberObsidian ? "#090D16" : "#1E293B")}
+                stroke={isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#B45309" : "#334155")}
+                strokeWidth="1.5"
+              />
+            );
+          })()}
+
+          {/* Plaza Landscaping & Entrance Canopy */}
+          {(() => {
+            const ep1 = project(-60, 140, 0);
+            const ep2 = project(60, 140, 0);
+            const ep3 = project(80, 180, 0);
+            const ep4 = project(-80, 180, 0);
+            return (
+              <polygon
+                points={`${ep1.x},${ep1.y} ${ep2.x},${ep2.y} ${ep3.x},${ep3.y} ${ep4.x},${ep4.y}`}
+                fill={isLuxuryGold ? "#D97706" : (isCyberObsidian ? "#06B6D4" : (isBiophilic ? "#059669" : "#0284C7"))}
+                fillOpacity="0.4"
+                stroke={isLuxuryGold ? "#F59E0B" : (isCyberObsidian ? "#22D3EE" : "#38BDF8")}
+                strokeWidth="1"
+              />
+            );
+          })()}
+        </g>
+
+        {/* 2. Multi-Story Floors Extrusion */}
+        {floorsArray.map((floorNum) => {
+          if (activeFloorTab !== "ALL" && activeFloorTab !== floorNum) return null;
+
+          const baseZ = (floorNum - 1) * floorHeight + 10;
+          const topZ = baseZ + floorHeight - 4;
+
+          // 4 Vertices of bottom slab (Rectangular default)
+          const b1 = project(-halfW, -halfD, baseZ);
+          const b2 = project(halfW, -halfD, baseZ);
+          const b3 = project(halfW, halfD, baseZ);
+          const b4 = project(-halfW, halfD, baseZ);
+
+          // 4 Vertices of top slab
+          const t1 = project(-halfW, -halfD, topZ);
+          const t2 = project(halfW, -halfD, topZ);
+          const t3 = project(halfW, halfD, topZ);
+          const t4 = project(-halfW, halfD, topZ);
+
+          // T-Shaped Symmetric Structural Frame Vertices
+          const tb1 = project(-140, 20, baseZ);
+          const tb2 = project(-45, 20, baseZ);
+          const tb3 = project(-45, -100, baseZ);
+          const tb4 = project(45, -100, baseZ);
+          const tb5 = project(45, 20, baseZ);
+          const tb6 = project(140, 20, baseZ);
+          const tb7 = project(140, 80, baseZ);
+          const tb8 = project(-140, 80, baseZ);
+
+          const tt1 = project(-140, 20, topZ);
+          const tt2 = project(-45, 20, topZ);
+          const tt3 = project(-45, -100, topZ);
+          const tt4 = project(45, -100, topZ);
+          const tt5 = project(45, 20, topZ);
+          const tt6 = project(140, 20, topZ);
+          const tt7 = project(140, 80, topZ);
+          const tt8 = project(-140, 80, topZ);
+
+          // H-Shaped Symmetric Structural Frame Vertices
+          const hb1 = project(-140, -85, baseZ);
+          const hb2 = project(-50, -85, baseZ);
+          const hb3 = project(-50, -28, baseZ);
+          const hb4 = project(50, -28, baseZ);
+          const hb5 = project(50, -85, baseZ);
+          const hb6 = project(140, -85, baseZ);
+          const hb7 = project(140, 85, baseZ);
+          const hb8 = project(50, 85, baseZ);
+          const hb9 = project(50, 28, baseZ);
+          const hb10 = project(-50, 28, baseZ);
+          const hb11 = project(-50, 85, baseZ);
+          const hb12 = project(-140, 85, baseZ);
+
+          const ht1 = project(-140, -85, topZ);
+          const ht2 = project(-50, -85, topZ);
+          const ht3 = project(-50, -28, topZ);
+          const ht4 = project(50, -28, topZ);
+          const ht5 = project(50, -85, topZ);
+          const ht6 = project(140, -85, topZ);
+          const ht7 = project(140, 85, topZ);
+          const ht8 = project(50, 85, topZ);
+          const ht9 = project(50, 28, topZ);
+          const ht10 = project(-50, 28, topZ);
+          const ht11 = project(-50, 85, topZ);
+          const ht12 = project(-140, 85, topZ);
+
+          return (
+            <g key={`floor-${floorNum}`} className="transition-all duration-300">
+              {/* Floor Slab Foundation Base */}
+              <polygon
+                points={
+                  massingForm === "T_SHAPED"
+                    ? `${tb1.x},${tb1.y} ${tb2.x},${tb2.y} ${tb3.x},${tb3.y} ${tb4.x},${tb4.y} ${tb5.x},${tb5.y} ${tb6.x},${tb6.y} ${tb7.x},${tb7.y} ${tb8.x},${tb8.y}`
+                    : massingForm === "H_SHAPED"
+                    ? `${hb1.x},${hb1.y} ${hb2.x},${hb2.y} ${hb3.x},${hb3.y} ${hb4.x},${hb4.y} ${hb5.x},${hb5.y} ${hb6.x},${hb6.y} ${hb7.x},${hb7.y} ${hb8.x},${hb8.y} ${hb9.x},${hb9.y} ${hb10.x},${hb10.y} ${hb11.x},${hb11.y} ${hb12.x},${hb12.y}`
+                    : `${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y} ${b4.x},${b4.y}`
+                }
+                fill={isNight ? "#334155" : "url(#slabGradient)"}
+                stroke={isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#B45309" : "#475569")}
+                strokeWidth={1.5}
+              />
+
+              {/* Vertical Structural Columns */}
+              {(massingForm === "T_SHAPED" ? [
+                { bottom: tb8, top: tt8 }, { bottom: tb7, top: tt7 }, { bottom: tb6, top: tt6 },
+                { bottom: tb5, top: tt5 }, { bottom: tb4, top: tt4 }, { bottom: tb3, top: tt3 },
+                { bottom: tb2, top: tt2 }, { bottom: tb1, top: tt1 }
+              ] : massingForm === "H_SHAPED" ? [
+                { bottom: hb1, top: ht1 }, { bottom: hb6, top: ht6 }, { bottom: hb7, top: ht7 },
+                { bottom: hb12, top: ht12 }, { bottom: hb3, top: ht3 }, { bottom: hb4, top: ht4 },
+                { bottom: hb9, top: ht9 }, { bottom: hb10, top: ht10 }
+              ] : [
+                { bottom: project(-halfW + 8, -halfD + 8, baseZ), top: project(-halfW + 8, -halfD + 8, topZ) },
+                { bottom: project(halfW - 8, -halfD + 8, baseZ), top: project(halfW - 8, -halfD + 8, topZ) },
+                { bottom: project(halfW - 8, halfD - 8, baseZ), top: project(halfW - 8, halfD - 8, topZ) },
+                { bottom: project(-halfW + 8, halfD - 8, baseZ), top: project(-halfW + 8, halfD - 8, topZ) }
+              ]).map((col, idx) => (
+                <line
+                  key={`col-${floorNum}-${idx}`}
+                  x1={col.bottom.x}
+                  y1={col.bottom.y}
+                  x2={col.top.x}
+                  y2={col.top.y}
+                  stroke={isLuxuryGold ? "#F59E0B" : (isCyberObsidian ? "#06B6D4" : "#38BDF8")}
+                  strokeWidth={3}
+                  strokeLinecap="square"
+                />
+              ))}
+
+              {/* Curtain Wall Glazed Facade Panels */}
+              {massingForm === "T_SHAPED" ? (
+                /* T-SHAPED FACADE WITH 3D DEPTH SORTING */
+                (() => {
+                  const tFaces = [
+                    { id: 'front', p1: tb8, p2: tb7, t1: tt8, t2: tt7, midX: 0, midY: 80 },
+                    { id: 'right_end', p1: tb7, p2: tb6, t1: tt7, t2: tt6, midX: 140, midY: 50 },
+                    { id: 'right_notch', p1: tb6, p2: tb5, t1: tt6, t2: tt5, midX: 92.5, midY: 20 },
+                    { id: 'stem_right', p1: tb5, p2: tb4, t1: tt5, t2: tt4, midX: 45, midY: -40 },
+                    { id: 'stem_rear', p1: tb4, p2: tb3, t1: tt4, t2: tt3, midX: 0, midY: -100 },
+                    { id: 'stem_left', p1: tb3, p2: tb2, t1: tt3, t2: tt2, midX: -45, midY: -40 },
+                    { id: 'left_notch', p1: tb2, p2: tb1, t1: tt2, t2: tt1, midX: -92.5, midY: 20 },
+                    { id: 'left_end', p1: tb1, p2: tb8, t1: tt1, t2: tt8, midX: -140, midY: 50 }
+                  ].map(face => ({
+                    ...face,
+                    depth: face.midX * sinO + face.midY * cosO
+                  })).sort((a, b) => a.depth - b.depth);
+
+                  return tFaces.map(face => (
+                    <polygon
+                      key={`t-face-${floorNum}-${face.id}`}
+                      points={`${face.p1.x},${face.p1.y} ${face.p2.x},${face.p2.y} ${face.t2.x},${face.t2.y} ${face.t1.x},${face.t1.y}`}
+                      fill={facadeFill}
+                      stroke={facadeStroke}
+                      strokeWidth="1.2"
+                      strokeOpacity="0.88"
+                    />
+                  ));
+                })()
+              ) : massingForm === "H_SHAPED" ? (
+                /* H-SHAPED FACADE WITH 3D DEPTH SORTING */
+                (() => {
+                  const hFaces = [
+                    { id: 'left_front', p1: hb12, p2: hb11, t1: ht12, t2: ht11, midX: -95, midY: 85 },
+                    { id: 'bridge_front', p1: hb10, p2: hb9, t1: ht10, t2: ht9, midX: 0, midY: 28 },
+                    { id: 'right_front', p1: hb8, p2: hb7, t1: ht8, t2: ht7, midX: 95, midY: 85 },
+                    { id: 'right_flank', p1: hb7, p2: hb6, t1: ht7, t2: ht6, midX: 140, midY: 0 },
+                    { id: 'left_flank', p1: hb1, p2: hb12, t1: ht1, t2: ht12, midX: -140, midY: 0 }
+                  ].map(face => ({
+                    ...face,
+                    depth: face.midX * sinO + face.midY * cosO
+                  })).sort((a, b) => a.depth - b.depth);
+
+                  return hFaces.map(face => (
+                    <polygon
+                      key={`h-face-${floorNum}-${face.id}`}
+                      points={`${face.p1.x},${face.p1.y} ${face.p2.x},${face.p2.y} ${face.t2.x},${face.t2.y} ${face.t1.x},${face.t1.y}`}
+                      fill={facadeFill}
+                      stroke={facadeStroke}
+                      strokeWidth="1.2"
+                      strokeOpacity="0.88"
+                    />
+                  ));
+                })()
+              ) : (
+                /* Standard Rectilinear Glazed Curtain Wall (Front & Side) */
+                <>
+                  {/* Facade Face 1 (Front) */}
+                  <polygon
+                    points={`${b3.x},${b3.y} ${b4.x},${b4.y} ${t4.x},${t4.y} ${t3.x},${t3.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.85"
+                  />
+                  {/* Facade Face 2 (Right Side) */}
+                  <polygon
+                    points={`${b2.x},${b2.y} ${b3.x},${b3.y} ${t3.x},${t3.y} ${t2.x},${t2.y}`}
+                    fill={facadeFill}
+                    stroke={facadeStroke}
+                    strokeWidth="1"
+                    strokeOpacity="0.65"
+                  />
+
+                  {/* Window Mullions Grid Lines */}
+                  {[0.25, 0.5, 0.75].map((ratio, mIdx) => {
+                    const mx1 = b3.x + (b4.x - b3.x) * ratio;
+                    const my1 = b3.y + (b4.y - b3.y) * ratio;
+                    const mx2 = t3.x + (t4.x - t3.x) * ratio;
+                    const my2 = t3.y + (t4.y - t3.y) * ratio;
+                    return (
+                      <line
+                        key={`mullion-${floorNum}-${mIdx}`}
+                        x1={mx1}
+                        y1={my1}
+                        x2={mx2}
+                        y2={my2}
+                        stroke={isLuxuryGold ? "#FDE047" : (isCyberObsidian ? "#06B6D4" : (isNight ? "#FEF08A" : "#E0F2FE"))}
+                        strokeWidth="1"
+                        strokeOpacity="0.65"
+                      />
+                    );
+                  })}
+                </>
+              )}
+
+              {/* DYNAMIC ARCHITECTURAL BALCONIES (1:1 with CAD Studio) */}
+              {(() => {
+                if (massingForm === "T_SHAPED") {
+                  const tbF1 = project(-140, 80 + 16, baseZ);
+                  const tbF2 = project(140, 80 + 16, baseZ);
+                  const tbrF1 = project(-140, 80 + 16, baseZ + 12);
+                  const tbrF2 = project(140, 80 + 16, baseZ + 12);
+                  return (
+                    <g key={`tshape-balc-${floorNum}`}>
+                      <polygon points={`${tb8.x},${tb8.y} ${tbF1.x},${tbF1.y} ${tbF2.x},${tbF2.y} ${tb7.x},${tb7.y}`} fill="#1E293B" stroke="#38BDF8" strokeWidth="1" />
+                      <polygon points={`${tbF1.x},${tbF1.y} ${tbF2.x},${tbF2.y} ${tbrF2.x},${tbrF2.y} ${tbrF1.x},${tbrF1.y}`} fill="rgba(56, 189, 248, 0.45)" stroke="#38BDF8" strokeWidth="1" />
+                      <line x1={tbrF1.x} y1={tbrF1.y} x2={tbrF2.x} y2={tbrF2.y} stroke="#FFFFFF" strokeWidth="2" />
+                    </g>
+                  );
+                } else if (massingForm === "H_SHAPED") {
+                  const hbL1 = project(-140, 85 + 16, baseZ);
+                  const hbL2 = project(-50, 85 + 16, baseZ);
+                  const hbrL1 = project(-140, 85 + 16, baseZ + 12);
+                  const hbrL2 = project(-50, 85 + 16, baseZ + 12);
+
+                  const hbR1 = project(50, 85 + 16, baseZ);
+                  const hbR2 = project(140, 85 + 16, baseZ);
+                  const hbrR1 = project(50, 85 + 16, baseZ + 12);
+                  const hbrR2 = project(140, 85 + 16, baseZ + 12);
+                  return (
+                    <g key={`hshape-balc-${floorNum}`}>
+                      <polygon points={`${hb12.x},${hb12.y} ${hbL1.x},${hbL1.y} ${hbL2.x},${hbL2.y} ${hb11.x},${hb11.y}`} fill="#1E293B" stroke="#38BDF8" strokeWidth="1" />
+                      <polygon points={`${hbL1.x},${hbL1.y} ${hbL2.x},${hbL2.y} ${hbrL2.x},${hbrL2.y} ${hbrL1.x},${hbrL1.y}`} fill="rgba(56, 189, 248, 0.45)" stroke="#38BDF8" strokeWidth="1" />
+                      <line x1={hbrL1.x} y1={hbrL1.y} x2={hbrL2.x} y2={hbrL2.y} stroke="#FFFFFF" strokeWidth="2" />
+
+                      <polygon points={`${hb8.x},${hb8.y} ${hbR1.x},${hbR1.y} ${hbR2.x},${hbR2.y} ${hb7.x},${hb7.y}`} fill="#1E293B" stroke="#38BDF8" strokeWidth="1" />
+                      <polygon points={`${hbR1.x},${hbR1.y} ${hbR2.x},${hbR2.y} ${hbrR2.x},${hbrR2.y} ${hbrR1.x},${hbrR1.y}`} fill="rgba(56, 189, 248, 0.45)" stroke="#38BDF8" strokeWidth="1" />
+                      <line x1={hbrR1.x} y1={hbrR1.y} x2={hbrR2.x} y2={hbrR2.y} stroke="#FFFFFF" strokeWidth="2" />
+                    </g>
+                  );
+                } else if (balconyType === "CANTILEVERED_FLOATING") {
+                  // Alternating cantilevered floating pods (Ultra-Luxury Sky-Mansion signature)
+                  const isOdd = floorNum % 2 !== 0;
+                  const bLeft = isOdd ? -halfW - 25 : -20;
+                  const bRight = isOdd ? 20 : halfW + 25;
+                  const bDepth = halfD + 26;
+                  const bHeight = 14;
+
+                  const c1 = project(bLeft, halfD, baseZ);
+                  const c2 = project(bRight, halfD, baseZ);
+                  const c3 = project(bRight, bDepth, baseZ);
+                  const c4 = project(bLeft, bDepth, baseZ);
+
+                  const r1 = project(bLeft, halfD, baseZ + bHeight);
+                  const r2 = project(bRight, halfD, baseZ + bHeight);
+                  const r3 = project(bRight, bDepth, baseZ + bHeight);
+                  const r4 = project(bLeft, bDepth, baseZ + bHeight);
+
+                  return (
+                    <g key={`balcony-floating-${floorNum}`}>
+                      <polygon points={`${c1.x},${c1.y} ${c2.x},${c2.y} ${c3.x},${c3.y} ${c4.x},${c4.y}`} fill={isLuxuryGold ? "#451A03" : "#1E293B"} stroke={isLuxuryGold ? "#F59E0B" : "#38BDF8"} strokeWidth="1.2" />
+                      <polygon points={`${c4.x},${c4.y} ${c3.x},${c3.y} ${r3.x},${r3.y} ${r4.x},${r4.y}`} fill={isLuxuryGold ? "rgba(245, 158, 11, 0.35)" : "rgba(56, 189, 248, 0.45)"} stroke={isLuxuryGold ? "#FEF08A" : "#38BDF8"} strokeWidth="1" />
+                      {isOdd ? (
+                        <polygon points={`${c1.x},${c1.y} ${c4.x},${c4.y} ${r4.x},${r4.y} ${r1.x},${r1.y}`} fill={isLuxuryGold ? "rgba(245, 158, 11, 0.3)" : "rgba(56, 189, 248, 0.4)"} stroke={isLuxuryGold ? "#FEF08A" : "#0284C7"} strokeWidth="1" />
+                      ) : (
+                        <polygon points={`${c2.x},${c2.y} ${c3.x},${c3.y} ${r3.x},${r3.y} ${r2.x},${r2.y}`} fill={isLuxuryGold ? "rgba(245, 158, 11, 0.3)" : "rgba(56, 189, 248, 0.4)"} stroke={isLuxuryGold ? "#FEF08A" : "#0284C7"} strokeWidth="1" />
+                      )}
+                      <line x1={r4.x} y1={r4.y} x2={r3.x} y2={r3.y} stroke="#F8FAFC" strokeWidth="2" strokeLinecap="round" />
+                      {isOdd ? (
+                        <line x1={r1.x} y1={r1.y} x2={r4.x} y2={r4.y} stroke="#F8FAFC" strokeWidth="2" strokeLinecap="round" />
+                      ) : (
+                        <line x1={r2.x} y1={r2.y} x2={r3.x} y2={r3.y} stroke="#F8FAFC" strokeWidth="2" strokeLinecap="round" />
+                      )}
+                    </g>
+                  );
+                }
+                return null;
+              })()}
+
+              {/* Top Slab Chamfer Edge */}
+              <polygon
+                points={
+                  massingForm === "T_SHAPED"
+                    ? `${tt1.x},${tt1.y} ${tt2.x},${tt2.y} ${tt3.x},${tt3.y} ${tt4.x},${tt4.y} ${tt5.x},${tt5.y} ${tt6.x},${tt6.y} ${tt7.x},${tt7.y} ${tt8.x},${tt8.y}`
+                    : massingForm === "H_SHAPED"
+                    ? `${ht1.x},${ht1.y} ${ht2.x},${ht2.y} ${ht3.x},${ht3.y} ${ht4.x},${ht4.y} ${ht5.x},${ht5.y} ${ht6.x},${ht6.y} ${ht7.x},${ht7.y} ${ht8.x},${ht8.y} ${ht9.x},${ht9.y} ${ht10.x},${ht10.y} ${ht11.x},${ht11.y} ${ht12.x},${ht12.y}`
+                    : `${t1.x},${t1.y} ${t2.x},${t2.y} ${t3.x},${t3.y} ${t4.x},${t4.y}`
+                }
+                fill={isNight ? "#1E293B" : "url(#slabGradient)"}
+                stroke={isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#D97706" : "#94A3B8")}
+                strokeWidth={1.5}
+              />
+
+              {/* Structural FEM Grid Lines on Roof Slab (if top floor) */}
+              {floorNum === totalFlrs && massingForm === "T_SHAPED" && (
+                <g id="t-roof-fem-grid" opacity="0.85">
+                  {[-95, -50, 0, 50, 95].map((gx, gIdx) => {
+                    const pA = project(gx, 20, topZ);
+                    const pB = project(gx, 80, topZ);
+                    return <line key={`t-fem-f-x-${gIdx}`} x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })}
+                  {[-15, -45, -75].map((gy, gIdx) => {
+                    const pA = project(-45, gy, topZ);
+                    const pB = project(45, gy, topZ);
+                    return <line key={`t-fem-s-y-${gIdx}`} x1={pA.x} y1={pA.y} x2={pB.x} y2={pB.y} stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" />;
+                  })}
+                </g>
+              )}
+
+              {/* Floor Level Label Pill (Left floating) */}
+              <g transform={`translate(${b1.x - 70}, ${b1.y})`}>
+                <rect x="0" y="-9" width="55" height="18" rx="4" fill="rgba(15, 23, 42, 0.85)" stroke={isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#F59E0B" : "#38BDF8")} strokeWidth="0.8" />
+                <text x="27" y="3" fill="#E2E8F0" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                  {floorNum === 1 ? "G (LOBBY)" : `LEVEL ${floorNum}`}
+                </text>
+              </g>
+            </g>
+          );
+        })}
+
+        {/* 3. Rooftop Architecture & Elevator Penthouse */}
+        {(() => {
+          const topZ = totalFlrs * floorHeight + 10;
+          const p1 = project(-halfW, -halfD, topZ + 8);
+          const p2 = project(halfW, -halfD, topZ + 8);
+          const p3 = project(halfW, halfD, topZ + 8);
+          const p4 = project(-halfW, halfD, topZ + 8);
+
+          // Central core lift machine room
+          let coreX = 0;
+          let coreY = 0;
+          let coreW = 25;
+          let coreD = 20;
+
+          if (massingForm === "T_SHAPED") {
+            coreX = 0;
+            coreY = 50;
+            coreW = 24;
+            coreD = 16;
+          } else if (massingForm === "H_SHAPED") {
+            coreX = 0;
+            coreY = 0;
+            coreW = 22;
+            coreD = 14;
+          }
+
+          const l1 = project(coreX - coreW, coreY - coreD, topZ);
+          const l2 = project(coreX + coreW, coreY - coreD, topZ);
+          const l3 = project(coreX + coreW, coreY + coreD, topZ);
+          const l4 = project(coreX - coreW, coreY + coreD, topZ);
+
+          const lt1 = project(coreX - coreW, coreY - coreD, topZ + 26);
+          const lt2 = project(coreX + coreW, coreY - coreD, topZ + 26);
+          const lt3 = project(coreX + coreW, coreY + coreD, topZ + 26);
+          const lt4 = project(coreX - coreW, coreY + coreD, topZ + 26);
+
+          const spireBase = project(coreX, coreY, topZ + 26);
+          const spireTip = project(coreX, coreY, topZ + 55);
+
+          return (
+            <g id="rooftop-feature-group">
+              {/* Parapet Outline */}
+              <polygon
+                points={`${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`}
+                fill="none"
+                stroke={isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#F59E0B" : "#38BDF8")}
+                strokeWidth="1.5"
+                strokeDasharray="4 2"
+              />
+
+              {/* Central Lift Core Box */}
+              <polygon points={`${l1.x},${l1.y} ${l2.x},${l2.y} ${l3.x},${l3.y} ${l4.x},${l4.y}`} fill="#334155" />
+              <polygon points={`${l3.x},${l3.y} ${l4.x},${l4.y} ${lt4.x},${lt4.y} ${lt3.x},${lt3.y}`} fill="#1E293B" stroke="#475569" />
+              <polygon points={`${l2.x},${l2.y} ${l3.x},${l3.y} ${lt3.x},${lt3.y} ${lt2.x},${lt2.y}`} fill="#0F172A" stroke="#475569" />
+              <polygon points={`${lt1.x},${lt1.y} ${lt2.x},${lt2.y} ${lt3.x},${lt3.y} ${lt4.x},${lt4.y}`} fill="#475569" stroke="#64748B" />
+
+              {/* Communication Mast / Obstruction Beacon Light */}
+              <g id="rooftop-antenna">
+                <line x1={spireBase.x} y1={spireBase.y} x2={spireTip.x} y2={spireTip.y} stroke="#EF4444" strokeWidth="2.5" />
+                <circle cx={spireTip.x} cy={spireTip.y} r="3" fill="#EF4444" className="animate-ping" />
+                <circle cx={spireTip.x} cy={spireTip.y} r="2.5" fill="#EF4444" />
+              </g>
+            </g>
+          );
+        })()}
+      </>
     );
   };
 
