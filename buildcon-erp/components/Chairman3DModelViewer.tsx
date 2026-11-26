@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   Rotate3d, Sun, Moon, Maximize2, Minimize2, Check, X,
   Building2, Layers, ShieldCheck, Box, HardHat, Cpu,
-  Award, Move, Eye, Info, Sparkles
+  Award, Move, Eye, Info, Sparkles, Lock, ShieldAlert, AlertOctagon
 } from "lucide-react";
 
 export interface Chairman3DModelProps {
@@ -22,6 +22,7 @@ export interface Chairman3DModelProps {
   aiAnalysisJson?: string;
   onApprove?: () => void;
   onReject?: () => void;
+  onRevoke?: () => void;
   onClose?: () => void;
 }
 
@@ -40,6 +41,7 @@ export default function Chairman3DModelViewer({
   aiAnalysisJson,
   onApprove,
   onReject,
+  onRevoke,
   onClose
 }: Chairman3DModelProps) {
   const [orbitAngle, setOrbitAngle] = useState(38);
@@ -153,10 +155,11 @@ export default function Chairman3DModelViewer({
   };
 
   const isNight = lightingMode === "NIGHT";
+  const isRevoked = status === "Revoked" || status === "REVOKED" || status === "ACCESS_REVOKED" || status === "REVOKE";
   const totalFlrs = Math.max(3, Math.min(25, floors || 7));
-  const floorHeight = 34; // px per floor matching CAD Studio
-  const buildingWidth = 240;
-  const buildingDepth = 175;
+  const floorHeight = 36; // px per floor matching CAD Studio AiBlueprintStudio
+  const buildingWidth = 260;
+  const buildingDepth = 190;
 
   // Estimated structural takeoffs
   const totalGFA = bp?.takeoff?.grossFloorAreaSqft || (totalFlrs * 2400);
@@ -661,14 +664,22 @@ export default function Chairman3DModelViewer({
 
           return (
             <g id="rooftop-feature-group">
-              {/* Parapet Outline */}
+              {/* Parapet Outline with Green Signature Box matching Studio */}
               <polygon
                 points={`${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`}
                 fill="none"
-                stroke={isCyberObsidian ? "#06B6D4" : (isLuxuryGold ? "#F59E0B" : "#38BDF8")}
+                stroke="#10B981"
                 strokeWidth="1.5"
                 strokeDasharray="4 2"
               />
+
+              {/* Rooftop Level Badge matching Studio */}
+              <g transform={`translate(${p4.x - 20}, ${p4.y - 14})`}>
+                <rect x="0" y="-7" width="55" height="15" rx="3" fill="rgba(15, 23, 42, 0.9)" stroke="#10B981" strokeWidth="0.8" />
+                <text x="27.5" y="3.5" fill="#34D399" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                  LEVEL {totalFlrs}
+                </text>
+              </g>
 
               {/* Central Lift Core Box */}
               <polygon points={`${l1.x},${l1.y} ${l2.x},${l2.y} ${l3.x},${l3.y} ${l4.x},${l4.y}`} fill="#334155" />
@@ -681,6 +692,39 @@ export default function Chairman3DModelViewer({
                 <line x1={spireBase.x} y1={spireBase.y} x2={spireTip.x} y2={spireTip.y} stroke="#EF4444" strokeWidth="2.5" />
                 <circle cx={spireTip.x} cy={spireTip.y} r="3" fill="#EF4444" className="animate-ping" />
                 <circle cx={spireTip.x} cy={spireTip.y} r="2.5" fill="#EF4444" />
+              </g>
+            </g>
+          );
+        })()}
+
+        {/* 4. Height Scale Dimension Line matching CAD Studio AiBlueprintStudio */}
+        {(() => {
+          const totalHtM = (totalFlrs * 3.2).toFixed(1);
+          const totalHtFt = (totalFlrs * 3.2 * 3.28084).toFixed(0);
+          const topPoint = project(buildingWidth / 2 + 45, 0, totalFlrs * floorHeight + 10);
+          const bottomPoint = project(buildingWidth / 2 + 45, 0, 10);
+
+          return (
+            <g id="height-scale">
+              <line
+                x1={bottomPoint.x}
+                y1={bottomPoint.y}
+                x2={topPoint.x}
+                y2={topPoint.y}
+                stroke="#38BDF8"
+                strokeWidth="1.5"
+                strokeDasharray="3 3"
+              />
+              <line x1={bottomPoint.x - 6} y1={bottomPoint.y} x2={bottomPoint.x + 6} y2={bottomPoint.y} stroke="#38BDF8" strokeWidth="2" />
+              <line x1={topPoint.x - 6} y1={topPoint.y} x2={topPoint.x + 6} y2={topPoint.y} stroke="#38BDF8" strokeWidth="2" />
+              <g transform={`translate(${topPoint.x + 10}, ${(topPoint.y + bottomPoint.y) / 2})`}>
+                <rect x="0" y="-18" width="95" height="36" rx="6" fill="rgba(15, 23, 42, 0.9)" stroke="#38BDF8" strokeWidth="1" />
+                <text x="47" y="-3" fill="#38BDF8" fontSize="11" fontWeight="bold" textAnchor="middle">
+                  {totalHtM}m ({totalHtFt}ft)
+                </text>
+                <text x="47" y="10" fill="#94A3B8" fontSize="8" textAnchor="middle">
+                  {totalFlrs} Stories Extrusion
+                </text>
               </g>
             </g>
           );
@@ -773,28 +817,60 @@ export default function Chairman3DModelViewer({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 flex-1 overflow-hidden">
         {/* Left: 3D Building Canvas */}
         <div className="lg:col-span-8 relative bg-gradient-to-b from-[#070b14] via-[#091122] to-[#050811] flex items-center justify-center min-h-[380px] p-2 select-none">
-          <svg
-            viewBox="0 0 700 640"
-            className="w-full h-full max-h-[500px] cursor-grab active:cursor-grabbing"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-          >
-            {renderBuildingSVG()}
-          </svg>
+          {isRevoked ? (
+            <div className="w-full h-full min-h-[420px] flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-red-950/40 via-[#0d070b] to-slate-950 relative overflow-hidden rounded-xl border border-red-500/30">
+              <div className="p-4 bg-red-500/15 border-2 border-red-500/60 rounded-2xl text-red-400 mb-4 shadow-2xl shadow-red-950/50 animate-pulse">
+                <Lock className="w-12 h-12" />
+              </div>
+              <div className="px-3.5 py-1 rounded-full bg-red-500/20 text-red-300 border border-red-500/40 text-xs font-mono font-bold tracking-wider mb-2">
+                🔒 ACCESS REVOKED BY CHAIRMAN DIRECTIVE
+              </div>
+              <h3 className="text-xl font-bold text-white max-w-md">
+                3D Model & CAD Viewing Terminated
+              </h3>
+              <p className="text-xs text-red-200/80 mt-2 max-w-md leading-relaxed">
+                The Executive Chairman has exercised executive board powers to terminate access to this 3D structural building model. Viewing privileges across all organization and public users are immediately revoked.
+              </p>
+              <div className="mt-5 p-3.5 bg-red-900/30 border border-red-700/50 rounded-xl text-left max-w-md w-full text-xs">
+                <div className="flex items-center justify-between text-[11px] text-red-300 font-bold mb-1">
+                  <span>EXECUTIVE STOP DIRECTIVE</span>
+                  <span className="text-red-400">Order by Chairman</span>
+                </div>
+                <p className="text-slate-300 text-[11px] italic">
+                  &ldquo;{details || "Structural audit revision or safety moratorium directive in effect."}&rdquo;
+                </p>
+                <div className="mt-2 pt-2 border-t border-red-800/40 flex items-center justify-between text-[10px] text-red-400">
+                  <span>Revocation State: ACTIVE KILL</span>
+                  <span>Date: {date}</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <svg
+                viewBox="0 0 700 640"
+                className="w-full h-full max-h-[500px] cursor-grab active:cursor-grabbing"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+              >
+                {renderBuildingSVG()}
+              </svg>
 
-          {/* Floating Orbit Instructions */}
-          <div className="absolute bottom-3 left-3 bg-slate-900/85 backdrop-blur-md border border-slate-800 rounded-xl px-3 py-1.5 flex items-center gap-2 text-[10px] text-slate-300 pointer-events-none">
-            <Move className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Drag horizontally or vertically to rotate in 3D ({orbitAngle}°, tilt: {tiltAngle}°)</span>
-          </div>
+              {/* Floating Orbit Instructions */}
+              <div className="absolute bottom-3 left-3 bg-slate-900/85 backdrop-blur-md border border-slate-800 rounded-xl px-3 py-1.5 flex items-center gap-2 text-[10px] text-slate-300 pointer-events-none">
+                <Move className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Drag horizontally or vertically to rotate in 3D ({orbitAngle}°, tilt: {tiltAngle}°)</span>
+              </div>
 
-          {/* Floating Elevation Indicator */}
-          <div className="absolute top-3 right-3 bg-slate-900/85 backdrop-blur-md border border-slate-800 rounded-xl px-3 py-1.5 text-right text-[11px] font-mono">
-            <span className="text-slate-400 block text-[9px] uppercase font-bold">Total Elevation</span>
-            <span className="text-cyan-300 font-bold">{(totalFlrs * 3.2).toFixed(1)}m ({(totalFlrs * 3.2 * 3.28084).toFixed(0)}ft)</span>
-          </div>
+              {/* Floating Elevation Indicator */}
+              <div className="absolute top-3 right-3 bg-slate-900/85 backdrop-blur-md border border-slate-800 rounded-xl px-3 py-1.5 text-right text-[11px] font-mono">
+                <span className="text-slate-400 block text-[9px] uppercase font-bold">Total Elevation</span>
+                <span className="text-cyan-300 font-bold">{(totalFlrs * 3.2).toFixed(1)}m ({(totalFlrs * 3.2 * 3.28084).toFixed(0)}ft)</span>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Right: Architectural Takeoff & Executive Inspection Panel */}
@@ -861,7 +937,7 @@ export default function Chairman3DModelViewer({
             </div>
 
             <div className="flex items-center gap-2">
-              {onApprove && (
+              {onApprove && !isRevoked && (
                 <button
                   type="button"
                   onClick={onApprove}
@@ -871,7 +947,18 @@ export default function Chairman3DModelViewer({
                   <span>Approve 3D Model</span>
                 </button>
               )}
-              {onReject && (
+              {onRevoke && !isRevoked && (
+                <button
+                  type="button"
+                  onClick={onRevoke}
+                  className="py-2.5 px-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-red-600/30 transition cursor-pointer"
+                  title="Kill and Revoke Access across all Organization & Public Users"
+                >
+                  <Lock className="w-4 h-4" />
+                  <span>Revoke 3D Access</span>
+                </button>
+              )}
+              {onReject && !isRevoked && (
                 <button
                   type="button"
                   onClick={onReject}
@@ -880,6 +967,12 @@ export default function Chairman3DModelViewer({
                   <X className="w-4 h-4" />
                   <span>Reject</span>
                 </button>
+              )}
+              {isRevoked && (
+                <div className="w-full p-2.5 rounded-xl bg-red-950/40 border border-red-500/40 text-center text-xs font-bold text-red-300 flex items-center justify-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-red-400" />
+                  <span>ACCESS TERMINATED BY CHAIRMAN</span>
+                </div>
               )}
             </div>
           </div>

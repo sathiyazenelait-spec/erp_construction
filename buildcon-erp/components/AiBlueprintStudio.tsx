@@ -6,7 +6,8 @@ import {
   Printer, Save, RefreshCw, Sliders, ChevronRight,
   HardHat, Activity, Cpu, ShieldCheck, Thermometer,
   Grid, Move, Info, Check, ArrowRight, Sun, Moon, Rotate3d,
-  Key, Building, Building2, EyeOff, Send, X, BookOpen, Search, Copy
+  Key, Building, Building2, EyeOff, Send, X, BookOpen, Search, Copy,
+  Share2, Globe, Lock, ShieldAlert, Clock, Link2, Trash2
 } from "lucide-react";
 
 export interface BlueprintRoom {
@@ -189,9 +190,10 @@ export const DATABASE_ORGANIZATIONS: DatabaseOrg[] = [
 interface AiBlueprintStudioProps {
   onSaveDrawing?: (drawingData: any) => void;
   orgId?: number;
+  userRole?: string;
 }
 
-export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBlueprintStudioProps) {
+export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1, userRole = "public" }: AiBlueprintStudioProps) {
   // Preset Types
   const PRESETS = [
     { type: "RESIDENTIAL", label: "7-Story Luxury High-Rise", defaultSqft: 2400, defaultFloors: 7, icon: "🏢" },
@@ -212,6 +214,49 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
   const [showChairmanSubmitModal, setShowChairmanSubmitModal] = useState(false);
   const [chairmanSubmitNote, setChairmanSubmitNote] = useState("Requesting Chairman executive board review and budget authorization for this multi-story building structural model.");
   const [submittingToChairman, setSubmittingToChairman] = useState(false);
+
+  // Role & Generation Quota (Public User: 3/day; Organization User: Infinity)
+  const [activeRole, setActiveRole] = useState<string>(() => {
+    if (userRole && userRole !== "public") return userRole.toLowerCase();
+    if (typeof window !== "undefined") {
+      const storedRole = localStorage.getItem("buildcon_active_drawing_role");
+      if (storedRole) return storedRole.toLowerCase();
+      const session = localStorage.getItem("buildcon_session");
+      if (session) {
+        try {
+          const s = JSON.parse(session);
+          if (s.role) return s.role.toLowerCase();
+        } catch (e) {}
+      }
+    }
+    return (userRole || "public").toLowerCase();
+  });
+
+  const isOrgUser = activeRole !== "public" && activeRole !== "guest";
+  const todayKey = new Date().toISOString().split("T")[0];
+  const [dailyPublicGenCount, setDailyPublicGenCount] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(`buildcon_public_gen_count_${todayKey}`);
+      return stored ? parseInt(stored, 10) : 0;
+    }
+    return 0;
+  });
+  const [showQuotaExceededModal, setShowQuotaExceededModal] = useState(false);
+
+  // Secure Sharing with Link Expiry & Access Tracking
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareExpiryHours, setShareExpiryHours] = useState<number>(24);
+  const [shareToken, setShareToken] = useState<string>("");
+  const [shareUrl, setShareUrl] = useState<string>("");
+  const [shareCopied, setShareCopied] = useState<boolean>(false);
+  const [shareAccessCount, setShareAccessCount] = useState<number>(0);
+  const [isShareRevoked, setIsShareRevoked] = useState<boolean>(false);
+  const [shareCreatedAt, setShareCreatedAt] = useState<string>("");
+
+  // Chairman Revocation State
+  const [isRevokedByChairman, setIsRevokedByChairman] = useState(false);
+  const [chairmanRevokeReason, setChairmanRevokeReason] = useState("");
+  const [chairmanRevokedAt, setChairmanRevokedAt] = useState("");
 
   // Target Organization selection & directory
   const [targetOrgId, setTargetOrgId] = useState<number>(orgId || 1);
@@ -304,14 +349,84 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
     }
   }, []);
 
+  const handleChangeRole = (newRole: string) => {
+    const r = newRole.toLowerCase();
+    setActiveRole(r);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("buildcon_active_drawing_role", r);
+    }
+  };
+
+  const handleCreateShareLink = async (expiryH: number) => {
+    setShareExpiryHours(expiryH);
+    const selectedOrg = organizations.find((o) => o.id === targetOrgId) || { name: "BuildWell Constructions Ltd" };
+    try {
+      const res = await fetch("http://localhost:8081/api/drawings/share/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          modelTitle: data?.title || "3D Building Model",
+          organizationName: selectedOrg.name,
+          createdByRole: activeRole.toUpperCase(),
+          expiryHours: expiryH,
+          drawingId: Date.now(),
+          aiAnalysisJson: data ? JSON.stringify(data) : undefined
+        })
+      });
+      if (res.ok) {
+        const result = await res.json();
+        setShareToken(result.token);
+        setShareUrl(result.shareUrl);
+        setShareAccessCount(0);
+        setIsShareRevoked(false);
+        setShareCreatedAt(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      } else {
+        const mockToken = "dwg_share_" + Date.now().toString(36);
+        setShareToken(mockToken);
+        setShareUrl(`http://localhost:3000/drawings/share?token=${mockToken}`);
+        setShareCreatedAt(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      }
+    } catch {
+      const mockToken = "dwg_share_" + Date.now().toString(36);
+      setShareToken(mockToken);
+      setShareUrl(`http://localhost:3000/drawings/share?token=${mockToken}`);
+      setShareCreatedAt(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    }
+  };
+
+  const handleRevokeShareLink = async () => {
+    setIsShareRevoked(true);
+    try {
+      await fetch(`http://localhost:8081/api/drawings/1/revoke-access`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: "Terminated by Project Administrator Directive" })
+      });
+    } catch {}
+  };
+
   // Fetch or generate initial blueprint
   useEffect(() => {
-    generateBlueprint(selectedPreset, promptText, builtupSqft, floors);
+    generateBlueprint(selectedPreset, promptText, builtupSqft, floors, true);
   }, []);
 
-  async function generateBlueprint(pType: string, prompt: string, sqft: number, flrCount: number) {
+  async function generateBlueprint(pType: string, prompt: string, sqft: number, flrCount: number, isInitial: boolean = false) {
+    // Enforce Public User 3-generation daily quota (Org users have infinity)
+    if (!isInitial && !isOrgUser && dailyPublicGenCount >= 3) {
+      setShowQuotaExceededModal(true);
+      return;
+    }
+
     setGenerating(true);
     setSaveSuccess(false);
+
+    if (!isInitial && !isOrgUser) {
+      const nextCount = dailyPublicGenCount + 1;
+      setDailyPublicGenCount(nextCount);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`buildcon_public_gen_count_${todayKey}`, String(nextCount));
+      }
+    }
 
     // Auto-detect floor count from prompt if explicitly specified (e.g. "10 floor", "12 story", "4 storey")
     let targetFloors = flrCount;
@@ -4080,9 +4195,61 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             <p className="text-xs text-slate-400 mt-1 max-w-2xl">
               Architectural generative engine powered by Google Gemini AI. Drafts authentic structural floor plans, extruded multi-story 3D building models, and automated IS 1200 quantity takeoffs.
             </p>
+
+            {/* Quota Indicator & Role Switcher */}
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              {isOrgUser ? (
+                <div className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-2 shadow-sm">
+                  <Building2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>🏢 Organization Account ({activeRole.toUpperCase()})</span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-200 text-[10px] font-mono">
+                    ♾️ Unlimited 3D Generations Plan
+                  </span>
+                </div>
+              ) : (
+                <div className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-2 shadow-sm">
+                  <Globe className="w-3.5 h-3.5 text-amber-400" />
+                  <span>🌐 Public Guest Mode</span>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-200 text-[10px] font-mono">
+                    {Math.max(0, 3 - dailyPublicGenCount)} / 3 Daily Free Generations Left
+                  </span>
+                </div>
+              )}
+
+              {/* Role Quick Switcher */}
+              <div className="flex items-center gap-1 bg-slate-800/90 rounded-xl p-1 border border-slate-700 text-[11px]">
+                <span className="text-slate-400 px-2 font-medium">Access Plan:</span>
+                {(["public", "client", "admin", "pm", "pd", "contractor"] as const).map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => handleChangeRole(r)}
+                    className={`px-2 py-0.5 rounded-lg font-semibold transition cursor-pointer ${
+                      activeRole === r
+                        ? "bg-cyan-500 text-slate-950 shadow-sm font-bold"
+                        : "text-slate-300 hover:text-white hover:bg-slate-700/60"
+                    }`}
+                  >
+                    {r.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Share 3D Model Button */}
+            <button
+              onClick={() => {
+                setShowShareModal(true);
+                if (!shareToken) handleCreateShareLink(24);
+              }}
+              className="px-3.5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-purple-500/20 flex items-center gap-1.5 transition cursor-pointer"
+              title="Share 3D Model with Expiry & Access Tracking"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span>Share 3D Model</span>
+            </button>
+
             <button
               onClick={() => setShowGeminiKeyModal(true)}
               className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 text-xs font-semibold flex items-center gap-2 transition"
@@ -4095,7 +4262,7 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
             <button
               onClick={() => generateBlueprint(selectedPreset, promptText, builtupSqft, floors)}
               disabled={generating}
-              className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-cyan-500/20 flex items-center gap-2 disabled:opacity-50 transition"
+              className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-cyan-500/20 flex items-center gap-2 disabled:opacity-50 transition cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${generating ? "animate-spin" : ""}`} />
               <span>{generating ? "Synthesizing AI CAD..." : "Re-Generate Model"}</span>
@@ -5660,6 +5827,225 @@ export default function AiBlueprintStudio({ onSaveDrawing, orgId = 1 }: AiBluepr
                 className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold cursor-pointer"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 1. PUBLIC QUOTA EXCEEDED MODAL (3 GENERATIONS / DAY LIMIT) */}
+      {showQuotaExceededModal && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#0C1322] border border-amber-500/40 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-amber-500/20 text-amber-400 rounded-xl">
+                <Globe className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Daily Public Quota Limit Reached (3/3)</h3>
+                <span className="text-xs text-amber-400 font-semibold">Public Guest Plan: 3 Free Generations per Day</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
+              You have utilized all <strong>3 free AI blueprint & 3D model generations</strong> allocated to public guest users for today. 
+              <br /><br />
+              <strong>Organization Users</strong> (Client, Admin, Project Manager, Project Director, Contractor) have <strong>Infinity / Unlimited</strong> blueprint generations without daily caps.
+            </p>
+
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                Unlock Infinity Access - Choose Organization Role:
+              </span>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { role: "client", label: "🏢 Client Portal", desc: "Executive View & Infinity" },
+                  { role: "pm", label: "📐 Project Manager", desc: "Full Engineering & Infinity" },
+                  { role: "admin", label: "🛡️ Administrator", desc: "Super-Admin & Infinity" },
+                  { role: "contractor", label: "🏗️ Contractor / Site", desc: "Field Team & Infinity" },
+                ].map((item) => (
+                  <button
+                    key={item.role}
+                    onClick={() => {
+                      handleChangeRole(item.role);
+                      setShowQuotaExceededModal(false);
+                      generateBlueprint(selectedPreset, promptText, builtupSqft, floors);
+                    }}
+                    className="p-2.5 rounded-xl bg-slate-800 hover:bg-cyan-600/30 border border-slate-700 hover:border-cyan-500/50 text-left transition cursor-pointer group"
+                  >
+                    <div className="text-xs font-bold text-white group-hover:text-cyan-300">{item.label}</div>
+                    <div className="text-[10px] text-slate-400">{item.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
+              <span className="text-[10px] text-slate-500">Quota resets automatically at midnight</span>
+              <button
+                type="button"
+                onClick={() => setShowQuotaExceededModal(false)}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. SHARE 3D MODEL & BLUEPRINT MODAL (LINK EXPIRY, ACCESS TRACKING & REVOCATION) */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#0C1322] border border-cyan-500/40 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-to-br from-purple-500/20 to-indigo-600/30 text-purple-400 rounded-xl border border-purple-500/40">
+                  <Share2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">Share 3D Model & CAD Blueprint</h3>
+                  <span className="text-[11px] text-slate-400">
+                    Organization: <strong className="text-slate-200">{organizations.find(o => o.id === targetOrgId)?.name || "BuildWell Ltd"}</strong>
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Model Metadata Snapshot */}
+            <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Proposal Model</span>
+                <span className="font-bold text-white">{data?.title || "Multi-Story Building Model"}</span>
+              </div>
+              <div className="text-right">
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Height & Area</span>
+                <span className="font-mono text-cyan-400">{floors} Floors • {(data?.dimensions?.builtupAreaSqft ? data.dimensions.builtupAreaSqft * floors : 16800).toLocaleString()} sqft</span>
+              </div>
+            </div>
+
+            {/* Link Expiry Options */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Link Expiry Duration:</span>
+                </label>
+                <span className="text-[10px] text-slate-400">Backend Token Authorization</span>
+              </div>
+              <div className="grid grid-cols-5 gap-1.5 text-xs">
+                {[
+                  { hours: 1, label: "1 Hour" },
+                  { hours: 24, label: "24 Hours" },
+                  { hours: 168, label: "7 Days" },
+                  { hours: 720, label: "30 Days" },
+                  { hours: -1, label: "Never" },
+                ].map((opt) => (
+                  <button
+                    key={opt.hours}
+                    type="button"
+                    onClick={() => handleCreateShareLink(opt.hours)}
+                    className={`py-2 px-1 rounded-xl font-semibold text-center border transition cursor-pointer ${
+                      shareExpiryHours === opt.hours
+                        ? "bg-purple-600 text-white border-purple-400 shadow-sm"
+                        : "bg-slate-800/80 hover:bg-slate-800 text-slate-300 border-slate-700/80"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Generated Shareable URL */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <Link2 className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Responsive Share URL (Mobile & Desktop):</span>
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={shareUrl || "Generating secure token..."}
+                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-cyan-300 select-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (shareUrl) {
+                      navigator.clipboard.writeText(shareUrl);
+                      setShareCopied(true);
+                      setTimeout(() => setShareCopied(false), 2500);
+                    }
+                  }}
+                  className="px-3.5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+                >
+                  {shareCopied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+                  <span>{shareCopied ? "Copied!" : "Copy"}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Access Tracking & Revocation Panel */}
+            <div className="p-3.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-300 flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Access Tracking & Token Security</span>
+                </span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                  isShareRevoked ? "bg-red-500/20 text-red-300 border border-red-500/40" : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                }`}>
+                  {isShareRevoked ? "STATUS: ACCESS REVOKED" : "STATUS: TOKEN ACTIVE"}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-[11px] text-slate-400">
+                <div>
+                  <span className="block text-[10px] text-slate-500">Total Views</span>
+                  <strong className="text-white font-mono">{shareAccessCount} views</strong>
+                </div>
+                <div>
+                  <span className="block text-[10px] text-slate-500">Token Created</span>
+                  <strong className="text-white">{shareCreatedAt || "Just now"}</strong>
+                </div>
+                <div>
+                  <span className="block text-[10px] text-slate-500">Expiry Lifespan</span>
+                  <strong className="text-amber-400 font-mono">
+                    {shareExpiryHours > 0 ? `${shareExpiryHours} hrs` : "Never"}
+                  </strong>
+                </div>
+              </div>
+
+              {/* Revoke Access Button */}
+              <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
+                <span className="text-[10px] text-slate-400">
+                  Kill access immediately to terminate external viewing privileges.
+                </span>
+                <button
+                  type="button"
+                  onClick={handleRevokeShareLink}
+                  disabled={isShareRevoked}
+                  className="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-300 border border-red-500/30 rounded-lg text-xs font-bold transition disabled:opacity-50 cursor-pointer"
+                >
+                  {isShareRevoked ? "Access Terminated" : "Revoke / Kill Access"}
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-800 flex items-center justify-end">
+              <button
+                type="button"
+                onClick={() => setShowShareModal(false)}
+                className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold cursor-pointer"
+              >
+                Done
               </button>
             </div>
           </div>

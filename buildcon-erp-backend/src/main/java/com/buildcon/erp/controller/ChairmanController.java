@@ -585,6 +585,8 @@ public class ChairmanController {
 
         if ("APPROVED".equalsIgnoreCase(action) || "APPROVE".equalsIgnoreCase(action)) {
             approval.setStatus("Approved");
+        } else if ("REVOKED".equalsIgnoreCase(action) || "REVOKE".equalsIgnoreCase(action) || "KILL".equalsIgnoreCase(action)) {
+            approval.setStatus("Revoked");
         } else {
             approval.setStatus("Rejected");
         }

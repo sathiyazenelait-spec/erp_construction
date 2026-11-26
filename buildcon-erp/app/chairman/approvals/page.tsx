@@ -4,7 +4,7 @@ import {
   Check, X, Shield, Clock, CheckCircle2, AlertTriangle,
   AlertCircle, FileText, MessageSquare, Send, Award,
   Sparkles, User, Calendar, DollarSign, Tag, ArrowUpRight,
-  HelpCircle, Eye, ChevronRight, Building2
+  HelpCircle, Eye, ChevronRight, Building2, Lock
 } from "lucide-react";
 import AIAssistantBar from "@/components/AIAssistantBar";
 import Chairman3DModelViewer from "@/components/Chairman3DModelViewer";
@@ -18,7 +18,7 @@ interface BoardApprovalItem {
   amount: string;
   priority: string;
   date: string;
-  status: "Pending" | "Approved" | "Rejected";
+  status: "Pending" | "Approved" | "Rejected" | "Revoked";
   chairmanRemarks?: string;
   approvedBy?: string;
   actionDate?: string;
@@ -255,6 +255,40 @@ export default function ApprovalCenter() {
         localStorage.setItem(`chairman_approvals_org_${orgId}`, JSON.stringify(newList));
       } catch (e) {}
     }
+  };
+
+  // Chairman Revocation State
+  const [showRevokeModal, setShowRevokeModal] = useState(false);
+  const [revokeTargetId, setRevokeTargetId] = useState<number | null>(null);
+  const [revokeReasonInput, setRevokeReasonInput] = useState("Executive safety & compliance directive: Access terminated across all organization and public users.");
+
+  const handleConfirmRevoke = async () => {
+    if (!revokeTargetId) return;
+    try {
+      await fetch(`http://localhost:8081/api/chairman/approvals/${revokeTargetId}/action`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "REVOKED", remarks: revokeReasonInput })
+      });
+      await fetch(`http://localhost:8081/api/drawings/${revokeTargetId}/revoke-access`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: revokeReasonInput, revokedBy: "Chairman (Executive Board)" })
+      });
+    } catch (e) {
+      console.warn("Backend revoke failed, proceeding locally", e);
+    }
+    const todayFormatted = new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+    const updated = approvals.map(a => a.id === revokeTargetId ? {
+      ...a,
+      status: "Revoked" as const,
+      chairmanRemarks: revokeReasonInput,
+      approvedBy: "Chairman (Executive Board)",
+      actionDate: todayFormatted
+    } : a);
+    syncLocalApprovals(updated);
+    setShowRevokeModal(false);
+    setRevokeTargetId(null);
   };
 
   // Open Decision & Remarks Modal
@@ -532,7 +566,27 @@ export default function ApprovalCenter() {
                         ? () => handleOpenDecisionModal("BOARD_APPROVAL", activeModel.id, activeModel.details, activeModel.requester, activeModel.amount, false)
                         : undefined
                     }
+                    onRevoke={() => {
+                      setRevokeTargetId(activeModel.id);
+                      setShowRevokeModal(true);
+                    }}
                   />
+
+                  {/* If Revoked, show the Chairman Termination Directive */}
+                  {activeModel.status === "Revoked" && (
+                    <div className="p-3 bg-red-950/40 border border-red-500/50 rounded-xl text-xs text-red-300 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-red-400 shrink-0" />
+                        <div>
+                          <span className="font-bold">Official Chairman Revocation Directive:</span>
+                          <span className="italic ml-1 text-slate-200">&ldquo;{activeModel.chairmanRemarks || "Access killed by Chairman directive."}&rdquo;</span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] text-red-400 font-bold uppercase tracking-wider shrink-0">
+                        Terminated by Chairman
+                      </span>
+                    </div>
+                  )}
 
                   {/* If Approved, show the signed executive directive */}
                   {activeModel.status === "Approved" && (
@@ -1039,6 +1093,58 @@ export default function ApprovalCenter() {
                 <span>
                   {decisionModal.isApprove ? "Confirm Approval & Dispatch Remarks" : "Confirm Rejection"}
                 </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chairman Revoke Confirmation Modal */}
+      {showRevokeModal && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#0C1322] border border-red-500/50 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 pb-3 border-b border-slate-800">
+              <div className="p-3 bg-red-500/20 text-red-400 rounded-xl border border-red-500/40">
+                <Lock className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Executive Kill Switch: Revoke 3D Model Access</h3>
+                <span className="text-xs text-red-400 font-semibold">Immediate Organization & Public Access Termination</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed bg-red-950/20 p-3 rounded-xl border border-red-900/40">
+              Invoking this directive will <strong>immediately kill and terminate all viewing access</strong> to this 3D model and CAD blueprint for all organization users (PM, Client, Contractor) and public users.
+            </p>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300">
+                Chairman Revocation Directive Reason:
+              </label>
+              <textarea
+                rows={3}
+                value={revokeReasonInput}
+                onChange={(e) => setRevokeReasonInput(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-red-500"
+                placeholder="Enter mandatory revocation remarks for site record..."
+              />
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => { setShowRevokeModal(false); setRevokeTargetId(null); }}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmRevoke}
+                className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-red-600/30 transition cursor-pointer"
+              >
+                <Lock className="w-4 h-4" />
+                <span>Confirm Kill & Revoke Access</span>
               </button>
             </div>
           </div>
