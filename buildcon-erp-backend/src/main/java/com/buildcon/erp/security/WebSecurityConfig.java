@@ -85,6 +85,7 @@ public class WebSecurityConfig {
                                 .requestMatchers("/api/drawings", "/api/drawings/**").permitAll()
                                 .requestMatchers("/api/chairman/approvals", "/api/chairman/approvals/**").permitAll()
                                 .requestMatchers("/api/projects", "/api/projects/**").permitAll()
+                            .requestMatchers("/api/business-director", "/api/business-director/**").permitAll()
                                 .requestMatchers("/api/md/signup").permitAll()
                                 .requestMatchers("/api/project-director/signup").permitAll()
                                 .requestMatchers("/api/business-director/signup").permitAll()
